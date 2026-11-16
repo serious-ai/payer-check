@@ -1,0 +1,4 @@
+# Only for the tests. The CLI and the page need nothing beyond Python 3.9+ and a browser.
+pytest==9.2.0
+playwright==1.65.2
+pyx12==4.1.0

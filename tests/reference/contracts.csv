@@ -1,0 +1,6 @@
+payer,stated_basis,effective,term_end,on_file
+SAMPLE PLAN A,145% of Medicare,2025-01-01,2027-12-31,yes
+SAMPLE PLAN B,138% of Medicare,2025-04-01,evergreen,yes
+SAMPLE PLAN C,"140% of Medicare, 5% escalator June 1, 2026",2025-06-01,2028-05-31,yes
+SAMPLE PLAN D,130% of Medicare (Medicare Advantage),2026-01-01,2027-12-31,yes
+SAMPLE PLAN E,Unknown,,,no

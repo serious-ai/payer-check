@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The browser blocks every fetch, upload and outside file. It doesn't govern navigating the tab, so the page has no links or code that do, and tests/test_page.py checks it. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Payer check</title>
+<style>
+:root{--bg:#fbfaf7;--panel:#fff;--ink:#16202c;--muted:#4b5563;--line:#d9dde3;--accent:#1d3a5f;--accent-ink:#fff;--warn-bg:#fff4d6;--warn-ink:#5a4100;--ok:#14532d;--bad:#8a1c1c}
+@media (prefers-color-scheme:dark){:root{--bg:#10151c;--panel:#18202a;--ink:#e8ecf1;--muted:#a9b3bf;--line:#2c3744;--accent:#8fb4e3;--accent-ink:#0d1520;--warn-bg:#3a2f0f;--warn-ink:#ffe2a0;--ok:#86efac;--bad:#fca5a5}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:28px;margin:0 0 4px}h2{font-size:19px;margin:0 0 8px}
+p{margin:0 0 10px}.muted{color:var(--muted)}small{color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin:16px 0}
+.promise{border-left:4px solid var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button,.btn{font:inherit;border:1px solid var(--accent);background:var(--panel);color:var(--accent);border-radius:8px;padding:8px 14px;cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink)}
+button:disabled{opacity:.5;cursor:default}
+input[type=file]{position:absolute;width:1px;height:1px;opacity:0}
+label.pick{display:inline-block}
+input[type=number]{font:inherit;width:7em;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.grid label{display:flex;flex-direction:column;gap:4px}
+.banner{background:var(--warn-bg);color:var(--warn-ink);border-radius:8px;padding:10px 14px;font-weight:600;margin:0 0 12px}
+.err{color:var(--bad);font-weight:600}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;color:var(--muted);vertical-align:bottom;white-space:normal}
+details summary{cursor:pointer;color:var(--accent)}
+footer{color:var(--muted);font-size:14px;margin-top:24px}
+</style>
+</head>
+<body>
+<main>
+<h1>Payer check</h1>
+<p>See what each payer costs your practice, from your own 835 remits and your fee schedule.</p>
+
+<div class="card promise">
+<h2>Your files never leave this computer</h2>
+<p>Everything runs in this browser tab. The page has no code that talks to the internet and no links to other sites, and its security policy tells the browser to block every fetch, upload and outside file the page could ask for.</p>
+<p class="muted">How your IT person can check: save this page, turn off Wi-Fi, open the saved copy and run it. It works the same. They can also watch the browser's Network panel during a run (it stays empty) or read the source, which is one file with nothing loaded from anywhere.</p>
+</div>
+
+<div class="card">
+<h2>1. Your 835 files</h2>
+<p class="muted">Choose the folder your clearinghouse saves remits to. Every file in it that starts with an ISA segment gets read.</p>
+<div class="row">
+<label class="pick btn" for="remit-folder">Choose a folder</label><input id="remit-folder" type="file" webkitdirectory multiple>
+<label class="pick btn" for="remit-files">Or choose files</label><input id="remit-files" type="file" multiple>
+<span id="remit-status" class="muted">Nothing chosen yet</span>
+</div>
+</div>
+
+<div class="card">
+<h2>2. Your fee schedule</h2>
+<p class="muted">A CSV with the columns payer, cpt and contracted_allowed, plus an optional effective date (YYYY-MM-DD) for rates that change. Payer names need to match the payer name in the 835s.</p>
+<div class="row">
+<label class="pick btn" for="fee-file">Choose the CSV</label><input id="fee-file" type="file" accept=".csv,text/csv">
+<span id="fee-status" class="muted">Nothing chosen yet</span>
+</div>
+<details style="margin-top:10px"><summary>Assumptions (change them to match your office)</summary>
+<div class="grid" style="margin-top:10px" id="inputs">
+<label>Staff cost an hour, in dollars<input id="i-hourly" type="number" min="0" step="0.01" value="30.00"></label>
+<label>Denied dollars never recovered, in percent<input id="i-wo" type="number" min="0" max="100" step="0.1" value="46.0"></label>
+<label>A claim counts as slow after this many days<input id="i-slow" type="number" min="1" max="365" step="1" value="30"></label>
+</div>
+<p class="muted" style="margin-top:10px">Staff minutes for each time a claim needs handling again: 20 to work a denial, 15 to review a visit paid at a lower code, 5 for a short pay, 10 to re-post a reversal, 6 for a status check on a slow claim. These and the hourly cost are illustrative. The 46% is the rest of Premier's figure from hospitals and health systems on 2022 claims (March 21, 2024: 54.3% of claims private payers first denied were eventually paid), so put in your own rate if you track it.</p>
+</details>
+</div>
+
+<div class="row"><button id="run" class="primary" type="button" disabled>Run the check</button><span id="run-status" class="muted"></span></div>
+
+<div id="results" class="card" hidden>
+<div id="sample-banner" class="banner" hidden>Sample data: made-up remits from a made-up practice. These numbers are not results.</div>
+<h2>What each payer costs</h2>
+<p id="period" class="muted"></p>
+<div class="table-wrap"><table id="by-payer"><thead><tr>
+<th>Payer</th><th>Claims</th><th>Paid</th><th>Denied claims</th><th>Paid at a lower code</th><th>Paid short of contract</th><th>Reversed claims</th><th>Median days to pay</th><th>Cost per $100 paid</th>
+</tr></thead><tbody></tbody></table></div>
+<p id="unpriced" class="muted"></p>
+<p class="muted">Cost per $100 paid adds the dollars paid short (lower codes and short pays, priced at your contract), denied dollars never recovered, and staff time, then sets it against what the payer paid.</p>
+<h2 style="margin-top:16px">Save the results</h2>
+<div class="row">
+<button type="button" data-out="summary-by-payer.csv">Summary by payer</button>
+<button type="button" data-out="summary-by-payer-and-code.csv">Summary by payer and code</button>
+<button type="button" data-out="chart-pull-list.csv">Chart-pull list</button>
+</div>
+<p class="muted" style="margin-top:10px">The two summaries hold totals only, with no patient-level fields. The chart-pull list has a row for every flagged line with its patient account number, so keep it on this computer.</p>
+</div>
+
+<div class="card">
+<h2>What it reads</h2>
+<p class="muted">From each 835: the payer, each claim's account number, status and received date, the rendering provider, and each service line's codes, dates, amounts and adjustment codes. It never reads the patient's name. No AI model runs here, only plain code you can read in this file.</p>
+</div>
+
+<footer>Payer check v0.1 from Serious AI Partners. Code under the Apache License 2.0, text under Creative Commons Attribution 4.0.</footer>
+</main>
+
+<script>
+/* Payer check v0.1. Line for line with payer_check.py. tests/test_page.py runs both on the same files and
+   requires byte-identical CSVs, and fails the build on any network request from this page. */
+(function () {
+  'use strict';
+  var VERSION = '0.1.0';
+  var EM = { '9920': 'New patient', '9921': 'Established', '9924': 'Office consult' };
+  var TOUCHES = ['denial', 'downcode', 'short_pay', 'reversal', 'slow'];
+  var DEFAULTS = { minutes: { denial: 20, downcode: 15, short_pay: 5, reversal: 10, slow: 6 }, hourly: '30.00', writeoff_pct: '46.0', slow_days: 30, tolerance: '0.50' };
+  var EXTENSIONS = ['.835', '.txt', '.edi', '.x12', '.era', '.rmt'];
+
+  /* ---------- money and dates, all in integers ---------- */
+  function dhe(n, d) {
+    var q = Math.floor(n / d), r = n - q * d;
+    if (r < 0) { q--; r += d; } else if (r >= d) { q++; r -= d; }
+    if (2 * r > d || (2 * r === d && q % 2 === 1)) q++;
+    return q;
+  }
+  function toCents(s) {
+    s = (s == null ? '' : String(s)).trim().replace(/\$/g, '').replace(/,/g, '');
+    if (!s) return 0;
+    var neg = s.charAt(0) === '-';
+    s = s.replace(/^[+-]+/, '');
+    var dot = s.indexOf('.'), whole = dot < 0 ? s : s.slice(0, dot), frac = dot < 0 ? '' : s.slice(dot + 1);
+    if (!(whole || frac) || !/^[0-9]+$/.test(whole + frac)) throw new Error('not an amount: ' + s);
+    var n = parseInt(whole || '0', 10) * 100 + parseInt((frac + '00').slice(0, 2), 10), rest = frac.slice(2);
+    if (rest && (rest[0] > '5' || (rest[0] === '5' && (rest.slice(1).replace(/0/g, '') || n % 2 === 1)))) n++;
+    return neg ? -n : n;
+  }
+  function money(c) { var sign = c < 0 ? '-' : ''; c = Math.abs(c); return sign + Math.floor(c / 100) + '.' + String(c % 100).padStart(2, '0'); }
+  function utc(s) { return Date.UTC(+s.slice(0, 4), +s.slice(4, 6) - 1, +s.slice(6, 8)); }
+  function daysBetween(a, b) { return Math.round((utc(b) - utc(a)) / 864e5); }
+  function half(m2) { return m2 % 2 ? Math.floor(m2 / 2) + '.5' : String(m2 / 2); }
+  function emLevel(code) { return code && code.length === 5 && EM[code.slice(0, 4)] && '12345'.indexOf(code[4]) >= 0 ? +code[4] : null; }
+  function cmp(a, b) { return a < b ? -1 : a > b ? 1 : 0; }
+
+  /* ---------- 835 reader ---------- */
+  function segments(text) {
+    text = text.replace(/^[﻿ \t\r\n]+/, '');
+    if (text.slice(0, 3) !== 'ISA' || text.length < 106) return [];
+    var el = text[3], cm = text[104], term = text[105], out = [];
+    text.split(term).forEach(function (raw) {
+      raw = raw.replace(/^[\r\n\t ]+|[\r\n\t ]+$/g, '');
+      if (raw) out.push(raw.split(el).map(function (e) { return e.indexOf(cm) >= 0 ? e.split(cm) : e; }));
+    });
+    return out;
+  }
+  function val(seg, i) { if (i >= seg.length) return ''; var v = seg[i]; return Array.isArray(v) ? v[0] : v; }
+  function comp(seg, i, j) {
+    if (i >= seg.length) return '';
+    var v = seg[i];
+    if (!Array.isArray(v)) return j === 1 ? v : '';
+    return j - 1 < v.length ? v[j - 1] : '';
+  }
+  function read835(name, text) {
+    var lines = [], payer = '', check = '', payDate = '', prodDate = '', claim = null, line = null;
+    function close() { if (line) { lines.push(line); line = null; } }
+    segments(text).forEach(function (seg) {
+      var sid = seg[0], i, key;
+      if (sid === 'ST') { close(); payer = check = payDate = prodDate = ''; claim = null; }
+      else if (sid === 'N1' && val(seg, 1) === 'PR') payer = val(seg, 2).trim().toUpperCase();
+      else if (sid === 'TRN') check = val(seg, 2);
+      else if (sid === 'BPR') payDate = val(seg, 16);
+      else if (sid === 'DTM' && claim === null && val(seg, 1) === '405') prodDate = val(seg, 2);
+      else if (sid === 'CLP') { close(); claim = { acct: val(seg, 1), status: val(seg, 2), provider: '', received: '', claim_dos: '', n: 0 }; }
+      else if (sid === 'NM1' && claim !== null && val(seg, 1) === '82') claim.provider = (val(seg, 4) + ' ' + val(seg, 3)).trim();
+      else if (sid === 'SVC' && claim !== null) {
+        close(); claim.n++;
+        var paidCode = comp(seg, 1, 2);
+        line = { file: name, payer: payer, check: check, pay_date: payDate || prodDate, acct: claim.acct, status: claim.status, provider: claim.provider,
+          received: claim.received, paid_code: paidCode, billed_code: comp(seg, 6, 2) || paidCode, charge: toCents(val(seg, 2)), paid: toCents(val(seg, 3)),
+          dos: claim.claim_dos, co: [], coAmt: {}, pr: 0, allowed: null, rarc: [], ref: '', n: claim.n };
+      }
+      else if (sid === 'DTM' && claim !== null && line === null) {
+        if (val(seg, 1) === '050') claim.received = val(seg, 2);
+        else if (val(seg, 1) === '232') claim.claim_dos = val(seg, 2);
+      }
+      else if (line === null) return;
+      else if (sid === 'DTM' && (val(seg, 1) === '472' || val(seg, 1) === '150')) line.dos = val(seg, 2) || val(seg, 6).slice(0, 8);
+      else if (sid === 'REF' && val(seg, 1) === '6R') line.ref = val(seg, 2);
+      else if (sid === 'CAS') {
+        var grp = val(seg, 1);
+        for (i = 2; i < 19; i += 3) {
+          var reason = val(seg, i), amt = val(seg, i + 1);
+          if (!reason) break;
+          if (grp === 'PR') line.pr += toCents(amt);
+          else { key = grp + '-' + reason; if (!(key in line.coAmt)) { line.co.push(key); line.coAmt[key] = 0; } line.coAmt[key] += toCents(amt); }
+        }
+      }
+      else if (sid === 'AMT' && val(seg, 1) === 'B6') line.allowed = toCents(val(seg, 2));
+      else if (sid === 'LQ' && val(seg, 1) === 'HE') line.rarc.push(val(seg, 2));
+      else if (sid === 'LX' || sid === 'SE' || sid === 'PLB') close();
+    });
+    close();
+    return lines;
+  }
+
+  /* ---------- fee schedule ---------- */
+  function parseCsv(text) {
+    var rows = [], row = [], f = '', q = false, i, c;
+    for (i = 0; i < text.length; i++) {
+      c = text[i];
+      if (q) {
+        if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; }
+        else f += c;
+      } else if (c === '"') q = true;
+      else if (c === ',') { row.push(f); f = ''; }
+      else if (c === '\r' || c === '\n') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        row.push(f); f = ''; rows.push(row); row = [];
+      } else f += c;
+    }
+    if (f !== '' || row.length) { row.push(f); rows.push(row); }
+    return rows;
+  }
+  function normDate(s) {
+    s = (s || '').trim();
+    if (!s) return '';
+    var t = s.replace(/-/g, '');
+    if (/^[0-9]{8}$/.test(t)) return t;
+    throw new Error('effective date "' + s + '" is not YYYY-MM-DD');
+  }
+  function readFees(text) {
+    var rows = parseCsv(text.replace(/^﻿/, ''));
+    if (!rows.length) throw new Error('the fee schedule is empty');
+    var head = rows[0].map(function (h) { return h.trim().toLowerCase(); });
+    ['payer', 'cpt', 'contracted_allowed'].forEach(function (need) {
+      if (head.indexOf(need) < 0) throw new Error('the fee schedule needs a ' + need + ' column (it has ' + head.join(', ') + ')');
+    });
+    var ip = head.indexOf('payer'), ic = head.indexOf('cpt'), ia = head.indexOf('contracted_allowed'), ie = head.indexOf('effective');
+    var fees = new Map();
+    rows.slice(1).forEach(function (r, k) {
+      var n = k + 2;
+      if (!r.some(function (x) { return x.trim(); })) return;
+      var cell = function (i) { return i >= 0 && i < r.length ? r[i] : ''; };
+      var key = cell(ip).trim().toUpperCase() + '|' + cell(ic).trim();
+      try {
+        var entry = [normDate(cell(ie)), toCents(cell(ia))];
+        if (!fees.has(key)) fees.set(key, []);
+        fees.get(key).push(entry);
+      } catch (e) { throw new Error('fee schedule row ' + n + ': ' + e.message); }
+    });
+    fees.forEach(function (v) { v.sort(function (a, b) { return cmp(a[0], b[0]) || a[1] - b[1]; }); });
+    return fees;
+  }
+  function rateOn(fees, payer, code, dos) {
+    var hit = null;
+    (fees.get(payer + '|' + code) || []).forEach(function (e) { if (e[0] <= dos) hit = e[1]; });
+    return hit;
+  }
+
+  /* ---------- the check ---------- */
+  function classify(l, fees, tol) {
+    if (l.allowed === null) l.allowed = l.paid + l.pr;
+    var bl = emLevel(l.billed_code), pl = emLevel(l.paid_code);
+    l.contract_billed = rateOn(fees, l.payer, l.billed_code, l.dos);
+    l.gap = null;
+    if (l.paid === 0 && l.allowed === 0) {
+      l.cls = 'denied';
+      var hit = l.co.filter(function (k) { return ['CO-', 'OA-', 'PI-'].indexOf(k.slice(0, 3)) >= 0 && k !== 'CO-45'; })[0];
+      l.carc = hit ? hit.slice(hit.indexOf('-') + 1) : 'other';
+    } else if (bl && pl && pl < bl) {
+      l.cls = 'downcoded';
+      if (l.contract_billed !== null) l.gap = l.contract_billed - l.allowed;
+    } else if (l.billed_code === l.paid_code && l.contract_billed !== null && l.contract_billed - l.allowed > tol) {
+      l.cls = 'short_pay'; l.gap = l.contract_billed - l.allowed;
+    } else l.cls = 'clean';
+  }
+  function settle(raw) {
+    var occ = new Map(), lines = [], rev = {};
+    raw.forEach(function (l) {
+      var key = l.payer + '\u0000' + (l.ref || l.acct + '|' + l.n);
+      if (!occ.has(key)) occ.set(key, []);
+      occ.get(key).push(l);
+    });
+    occ.forEach(function (ls) {
+      ls.sort(function (a, b) { return cmp(a.pay_date, b.pay_date) || ((a.status === '22') - (b.status === '22')); });
+      var keep = ls.filter(function (l) { return l.status !== '22'; });
+      if (ls.some(function (l) { return l.status === '22'; })) { (rev[ls[0].payer] = rev[ls[0].payer] || new Set()).add(ls[0].acct); }
+      if (!keep.length) return;
+      var eff = Object.assign({}, keep[keep.length - 1]);
+      eff.first_pay_date = keep[0].pay_date;
+      lines.push(eff);
+    });
+    return { lines: lines, reversed: rev };
+  }
+  function nsort(v) { return v.slice().sort(function (a, b) { return a - b; }); }
+  function p90(v) { v = nsort(v); return v[Math.min(v.length - 1, dhe(9 * (v.length - 1), 10))]; }
+  function median2(v) { v = nsort(v); var n = v.length; return n % 2 ? 2 * v[(n - 1) / 2] : v[n / 2 - 1] + v[n / 2]; }
+  function sum(ls, f) { return ls.reduce(function (s, l) { return s + f(l); }, 0); }
+  function distinct(ls) { return new Set(ls.map(function (l) { return l.acct; })).size; }
+
+  function run(files, feeText, opts) {
+    opts = opts || {};
+    var o = Object.assign({}, DEFAULTS, opts); o.minutes = Object.assign({}, DEFAULTS.minutes, opts.minutes || {});
+    var tol = toCents(o.tolerance), hourlyC = toCents(o.hourly), woBp = toCents(o.writeoff_pct);
+    var fees = readFees(feeText), onFile = new Set();
+    fees.forEach(function (v, k) { onFile.add(k.slice(0, k.lastIndexOf('|'))); });
+    var raw = [];
+    files.forEach(function (f) { Array.prototype.push.apply(raw, read835(f[0], f[1])); });
+    var st = settle(raw), lines = st.lines, reversed = st.reversed;
+    lines.forEach(function (l) { classify(l, fees, tol); });
+
+    var payerSet = new Set(lines.map(function (l) { return l.payer; }));
+    Object.keys(reversed).forEach(function (p) { payerSet.add(p); });
+    var payers = Array.from(payerSet).sort(cmp);
+    var byPayer = payers.map(function (payer) {
+      var pl = lines.filter(function (l) { return l.payer === payer; }), priced = onFile.has(payer), claims = new Map();
+      pl.forEach(function (l) { if (!claims.has(l.acct)) claims.set(l.acct, []); claims.get(l.acct).push(l); });
+      var days = [];
+      claims.forEach(function (v) {
+        if (v.some(function (x) { return x.paid > 0; }) && v[0].received.length === 8 && v[0].first_pay_date.length === 8) days.push(daysBetween(v[0].received, v[0].first_pay_date));
+      });
+      var of = function (c) { return pl.filter(function (l) { return l.cls === c; }); };
+      var den = of('denied'), down = of('downcoded'), short = of('short_pay');
+      var touches = { denial: distinct(den), downcode: down.length, short_pay: distinct(short), reversal: reversed[payer] ? reversed[payer].size : 0,
+        slow: days.filter(function (d) { return d > o.slow_days; }).length };
+      var minutes = 0; TOUCHES.forEach(function (k) { minutes += touches[k] * o.minutes[k]; });
+      var staff = dhe(minutes * hourlyC, 60), paid = sum(pl, function (l) { return l.paid; });
+      var downGap = sum(down, function (l) { return l.gap || 0; }), shortGap = sum(short, function (l) { return l.gap; });
+      var deniedValue = sum(den, function (l) { return l.contract_billed || 0; }), writeoff = dhe(deniedValue * woBp, 10000);
+      var cost = downGap + shortGap + staff + writeoff;
+      var dos = pl.map(function (l) { return l.dos; }).filter(Boolean).sort(cmp);
+      return { payer: payer, contract_on_file: priced ? 'yes' : 'no', first_date_of_service: dos.length ? dos[0] : '', last_date_of_service: dos.length ? dos[dos.length - 1] : '',
+        claims: claims.size, service_lines: pl.length, paid: money(paid),
+        denied_claims: touches.denial, denied_lines: den.length, denied_value_at_contract: priced ? money(deniedValue) : '',
+        downcoded_lines: down.length, downcoded_gap: priced ? money(downGap) : '',
+        short_pay_lines: short.length, short_pay_claims: touches.short_pay, short_pay_gap: priced ? money(shortGap) : '',
+        reversed_claims: touches.reversal, claims_with_days_to_pay: days.length,
+        days_to_pay_median: days.length ? half(median2(days)) : '', days_to_pay_p90: days.length ? p90(days) : '',
+        slow_claims: touches.slow, staff_minutes: minutes, staff_cost: money(staff),
+        denied_dollars_lost: priced ? money(writeoff) : '', total_cost: priced ? money(cost) : '',
+        cost_per_100_paid: priced && paid > 0 ? money(dhe(cost * 10000, paid)) : '' };
+    });
+
+    var groups = new Map();
+    lines.forEach(function (l) { var k = l.payer + '\u0000' + l.billed_code; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(l); });
+    var byCode = Array.from(groups.keys()).sort(function (a, b) {
+      var x = a.split('\u0000'), y = b.split('\u0000'); return cmp(x[0], y[0]) || cmp(x[1], y[1]);
+    }).map(function (k) {
+      var gl = groups.get(k), payer = gl[0].payer, priced = onFile.has(payer), pick = function (c) { return gl.filter(function (l) { return l.cls === c; }); };
+      return { payer: payer, billed_code: gl[0].billed_code, service_lines: gl.length, charge: money(sum(gl, function (l) { return l.charge; })),
+        allowed: money(sum(gl, function (l) { return l.allowed; })), paid: money(sum(gl, function (l) { return l.paid; })),
+        denied_lines: pick('denied').length,
+        denied_value_at_contract: priced ? money(sum(pick('denied'), function (l) { return l.contract_billed || 0; })) : '',
+        downcoded_lines: pick('downcoded').length,
+        downcoded_gap: priced ? money(sum(pick('downcoded'), function (l) { return l.gap || 0; })) : '',
+        short_pay_lines: pick('short_pay').length, short_pay_gap: priced ? money(sum(pick('short_pay'), function (l) { return l.gap; })) : '' };
+    });
+
+    var order = { downcoded: 0, short_pay: 1, denied: 2 }, opt = function (c) { return c === null ? '' : money(c); };
+    var pull = lines.filter(function (l) { return l.cls in order; }).sort(function (a, b) {
+      return (order[a.cls] - order[b.cls]) || cmp(a.payer, b.payer) || cmp(a.provider, b.provider) || cmp(a.dos, b.dos) || cmp(a.acct, b.acct) || (a.n - b.n);
+    }).map(function (l) {
+      return { flag: l.cls, payer: l.payer, provider: l.provider, patient_account: l.acct, date_of_service: l.dos, billed_code: l.billed_code, paid_code: l.paid_code,
+        charge: money(l.charge), allowed: money(l.allowed), paid: money(l.paid), contract_rate: opt(l.contract_billed), dollar_gap: opt(l.gap),
+        adjustment_codes: l.co.join(' '), remark_codes: l.rarc.join(' '), file: l.file };
+    });
+
+    var allDos = lines.map(function (l) { return l.dos; }).filter(Boolean).sort(cmp);
+    return { files: files.map(function (f) { return f[0]; }), raw_lines: raw.length, lines: lines, by_payer: byPayer, by_code: byCode, pull: pull,
+      sample: payers.length > 0 && payers.every(function (p) { return p.indexOf('SAMPLE ') === 0; }),
+      period: allDos.length ? [allDos[0], allDos[allDos.length - 1]] : ['', ''],
+      payers_without_fees: payers.filter(function (p) { return !onFile.has(p); }) };
+  }
+  function csvField(v) { v = String(v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  function toCsv(rows, sample) {
+    if (!rows.length) return '';
+    var keys = Object.keys(rows[0]), src = sample ? 'Sample data' : "Practice's 835 files";
+    return [['source'].concat(keys)].concat(rows.map(function (r) { return [src].concat(keys.map(function (k) { return r[k]; })); }))
+      .map(function (r) { return r.map(csvField).join(','); }).join('\n') + '\n';
+  }
+
+  /* ---------- the page ---------- */
+  var $ = function (id) { return document.getElementById(id); };
+  var remits = null, feeFile = null, result = null, outputs = {};
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var usd = function (s) { if (s === '') return ''; var p = s.split('.'); return (p[0][0] === '-' ? '-' : '') + '$' + Number(p[0].replace('-', '')).toLocaleString('en-US') + '.' + p[1]; };
+  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var dateText = function (s) { return s ? MONTHS[+s.slice(4, 6) - 1] + ' ' + (+s.slice(6, 8)) + ', ' + s.slice(0, 4) : 'unknown'; };
+
+  function pickRemits(list) {
+    remits = Array.prototype.filter.call(list, function (f) {
+      var n = f.name.toLowerCase(), dot = n.lastIndexOf('.');
+      return dot > 0 && EXTENSIONS.indexOf(n.slice(dot)) >= 0;
+    });
+    $('remit-status').textContent = remits.length + ' remit file' + (remits.length === 1 ? '' : 's') + ' to read (of ' + list.length + ' chosen)';
+    ready();
+  }
+  $('remit-folder').addEventListener('change', function (e) { pickRemits(e.target.files); });
+  $('remit-files').addEventListener('change', function (e) { pickRemits(e.target.files); });
+  $('fee-file').addEventListener('change', function (e) { feeFile = e.target.files[0] || null; $('fee-status').textContent = feeFile ? feeFile.name : 'Nothing chosen yet'; ready(); });
+  function ready() { $('run').disabled = !(remits && remits.length && feeFile); }
+  function relPath(f) { var p = f.webkitRelativePath || f.name, i = p.indexOf('/'); return f.webkitRelativePath && i >= 0 ? p.slice(i + 1) : p; }
+  function num(id, fallback) { var v = $(id).value.trim(); return v === '' ? fallback : v; }
+
+  $('run').addEventListener('click', function () {
+    $('run-status').className = 'muted'; $('run-status').textContent = 'Reading...';
+    var picked = remits.map(function (f) { return [relPath(f), f]; }).sort(function (a, b) { return cmp(a[0], b[0]); });
+    Promise.all(picked.map(function (p) { return p[1].text(); })).then(function (texts) {
+      var files = [];
+      texts.forEach(function (t, i) { if (t.replace(/^[﻿ \t\r\n]+/, '').slice(0, 3) === 'ISA') files.push([picked[i][0], t]); });
+      if (!files.length) throw new Error('none of the chosen files starts with an ISA segment, so none reads as an 835');
+      return feeFile.text().then(function (feeText) {
+        var slow = parseInt(num('i-slow', '30'), 10);
+        result = run(files, feeText, { hourly: num('i-hourly', DEFAULTS.hourly), writeoff_pct: num('i-wo', DEFAULTS.writeoff_pct), slow_days: isFinite(slow) && slow > 0 ? slow : 30 });
+        show(result);
+        $('run-status').textContent = 'Done. Read ' + files.length + ' files on this computer.';
+      });
+    }).catch(function (e) { $('run-status').className = 'err'; $('run-status').textContent = 'Stopped: ' + e.message; });
+  });
+
+  function show(r) {
+    outputs = { 'summary-by-payer.csv': toCsv(r.by_payer, r.sample), 'summary-by-payer-and-code.csv': toCsv(r.by_code, r.sample), 'chart-pull-list.csv': toCsv(r.pull, r.sample) };
+    $('sample-banner').hidden = !r.sample;
+    $('period').textContent = r.files.length + ' files, ' + r.lines.length.toLocaleString('en-US') + ' service lines after reversals, dates of service ' + dateText(r.period[0]) + ' to ' + dateText(r.period[1]) + '.';
+    $('by-payer').tBodies[0].innerHTML = r.by_payer.map(function (p) {
+      var lower = p.downcoded_lines.toLocaleString('en-US') + (p.downcoded_gap ? ' (' + usd(p.downcoded_gap) + ')' : ''), short = p.short_pay_lines.toLocaleString('en-US') + (p.short_pay_gap ? ' (' + usd(p.short_pay_gap) + ')' : '');
+      return '<tr><td>' + esc(p.payer) + '</td><td>' + p.claims.toLocaleString('en-US') + '</td><td>' + usd(p.paid) + '</td><td>' + p.denied_claims + '</td><td>' + lower + '</td><td>' + short +
+        '</td><td>' + p.reversed_claims + '</td><td>' + (p.days_to_pay_median || 'unknown') + '</td><td><b>' + (p.cost_per_100_paid ? '$' + p.cost_per_100_paid : 'not priced') + '</b></td></tr>';
+    }).join('');
+    $('unpriced').textContent = r.payers_without_fees.length ? 'No fee schedule rows for ' + r.payers_without_fees.join(', ') + ', so its dollars are left unpriced. Add its rates to the CSV to price it.' : '';
+    $('results').hidden = false;
+  }
+  [].forEach.call(document.querySelectorAll('[data-out]'), function (b) {
+    b.addEventListener('click', function () {
+      var name = b.getAttribute('data-out'), url = URL.createObjectURL(new Blob([outputs[name]], { type: 'text/csv' })), a = document.createElement('a');
+      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    });
+  });
+  window.payerCheck = { version: VERSION, run: run, toCsv: toCsv };
+})();
+</script>
+</body>
+</html>

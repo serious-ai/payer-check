@@ -1,0 +1,9 @@
+carc,reason,department
+27,Coverage ended before the visit,Front desk and eligibility
+31,Patient not identified as insured,Front desk and eligibility
+197,Authorization or precertification absent,Authorization
+15,Authorization number missing or invalid,Authorization
+11,Diagnosis inconsistent with the procedure,Coding
+97,Bundled into another service,Coding
+16,Claim missing information,Documentation
+50,Not deemed medically necessary,Documentation

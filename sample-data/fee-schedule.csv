@@ -1,0 +1,76 @@
+payer,cpt,description,contracted_allowed,effective
+SAMPLE PLAN A,99202,"New patient visit, level 2",106.00,2025-01-01
+SAMPLE PLAN A,99203,"New patient visit, level 3",163.78,2025-01-01
+SAMPLE PLAN A,99204,"New patient visit, level 4",244.62,2025-01-01
+SAMPLE PLAN A,99205,"New patient visit, level 5",322.77,2025-01-01
+SAMPLE PLAN A,99212,"Established visit, level 2",84.68,2025-01-01
+SAMPLE PLAN A,99213,"Established visit, level 3",133.91,2025-01-01
+SAMPLE PLAN A,99214,"Established visit, level 4",189.73,2025-01-01
+SAMPLE PLAN A,99215,"Established visit, level 5",267.09,2025-01-01
+SAMPLE PLAN A,45378,"Colonoscopy, diagnostic",284.78,2025-01-01
+SAMPLE PLAN A,45380,Colonoscopy with biopsy,336.04,2025-01-01
+SAMPLE PLAN A,45385,Colonoscopy with polyp removal by snare,389.04,2025-01-01
+SAMPLE PLAN A,43235,"Upper endoscopy (EGD), diagnostic",215.47,2025-01-01
+SAMPLE PLAN A,43239,Upper endoscopy (EGD) with biopsy,240.99,2025-01-01
+SAMPLE PLAN A,43249,Upper endoscopy (EGD) with balloon dilation,272.46,2025-01-01
+SAMPLE PLAN A,91200,Liver elastography,40.82,2025-01-01
+SAMPLE PLAN B,99202,"New patient visit, level 2",100.88,2025-01-01
+SAMPLE PLAN B,99203,"New patient visit, level 3",155.87,2025-01-01
+SAMPLE PLAN B,99204,"New patient visit, level 4",232.81,2025-01-01
+SAMPLE PLAN B,99205,"New patient visit, level 5",307.19,2025-01-01
+SAMPLE PLAN B,99212,"Established visit, level 2",80.59,2025-01-01
+SAMPLE PLAN B,99213,"Established visit, level 3",127.44,2025-01-01
+SAMPLE PLAN B,99214,"Established visit, level 4",180.57,2025-01-01
+SAMPLE PLAN B,99215,"Established visit, level 5",254.20,2025-01-01
+SAMPLE PLAN B,45378,"Colonoscopy, diagnostic",271.03,2025-01-01
+SAMPLE PLAN B,45380,Colonoscopy with biopsy,319.82,2025-01-01
+SAMPLE PLAN B,45385,Colonoscopy with polyp removal by snare,370.25,2025-01-01
+SAMPLE PLAN B,43235,"Upper endoscopy (EGD), diagnostic",205.07,2025-01-01
+SAMPLE PLAN B,43239,Upper endoscopy (EGD) with biopsy,229.36,2025-01-01
+SAMPLE PLAN B,43249,Upper endoscopy (EGD) with balloon dilation,259.30,2025-01-01
+SAMPLE PLAN B,91200,Liver elastography,38.85,2025-01-01
+SAMPLE PLAN C,99202,"New patient visit, level 2",102.34,2025-01-01
+SAMPLE PLAN C,99202,"New patient visit, level 2",107.46,2026-06-01
+SAMPLE PLAN C,99203,"New patient visit, level 3",158.13,2025-01-01
+SAMPLE PLAN C,99203,"New patient visit, level 3",166.04,2026-06-01
+SAMPLE PLAN C,99204,"New patient visit, level 4",236.18,2025-01-01
+SAMPLE PLAN C,99204,"New patient visit, level 4",247.99,2026-06-01
+SAMPLE PLAN C,99205,"New patient visit, level 5",311.64,2025-01-01
+SAMPLE PLAN C,99205,"New patient visit, level 5",327.22,2026-06-01
+SAMPLE PLAN C,99212,"Established visit, level 2",81.76,2025-01-01
+SAMPLE PLAN C,99212,"Established visit, level 2",85.85,2026-06-01
+SAMPLE PLAN C,99213,"Established visit, level 3",129.29,2025-01-01
+SAMPLE PLAN C,99213,"Established visit, level 3",135.75,2026-06-01
+SAMPLE PLAN C,99214,"Established visit, level 4",183.19,2025-01-01
+SAMPLE PLAN C,99214,"Established visit, level 4",192.35,2026-06-01
+SAMPLE PLAN C,99215,"Established visit, level 5",257.88,2025-01-01
+SAMPLE PLAN C,99215,"Established visit, level 5",270.77,2026-06-01
+SAMPLE PLAN C,45378,"Colonoscopy, diagnostic",274.96,2025-01-01
+SAMPLE PLAN C,45378,"Colonoscopy, diagnostic",288.71,2026-06-01
+SAMPLE PLAN C,45380,Colonoscopy with biopsy,324.45,2025-01-01
+SAMPLE PLAN C,45380,Colonoscopy with biopsy,340.67,2026-06-01
+SAMPLE PLAN C,45385,Colonoscopy with polyp removal by snare,375.62,2025-01-01
+SAMPLE PLAN C,45385,Colonoscopy with polyp removal by snare,394.40,2026-06-01
+SAMPLE PLAN C,43235,"Upper endoscopy (EGD), diagnostic",208.04,2025-01-01
+SAMPLE PLAN C,43235,"Upper endoscopy (EGD), diagnostic",218.44,2026-06-01
+SAMPLE PLAN C,43239,Upper endoscopy (EGD) with biopsy,232.68,2025-01-01
+SAMPLE PLAN C,43239,Upper endoscopy (EGD) with biopsy,244.31,2026-06-01
+SAMPLE PLAN C,43249,Upper endoscopy (EGD) with balloon dilation,263.06,2025-01-01
+SAMPLE PLAN C,43249,Upper endoscopy (EGD) with balloon dilation,276.21,2026-06-01
+SAMPLE PLAN C,91200,Liver elastography,39.41,2025-01-01
+SAMPLE PLAN C,91200,Liver elastography,41.38,2026-06-01
+SAMPLE PLAN D,99202,"New patient visit, level 2",95.03,2025-01-01
+SAMPLE PLAN D,99203,"New patient visit, level 3",146.84,2025-01-01
+SAMPLE PLAN D,99204,"New patient visit, level 4",219.31,2025-01-01
+SAMPLE PLAN D,99205,"New patient visit, level 5",289.38,2025-01-01
+SAMPLE PLAN D,99212,"Established visit, level 2",75.92,2025-01-01
+SAMPLE PLAN D,99213,"Established visit, level 3",120.06,2025-01-01
+SAMPLE PLAN D,99214,"Established visit, level 4",170.10,2025-01-01
+SAMPLE PLAN D,99215,"Established visit, level 5",239.46,2025-01-01
+SAMPLE PLAN D,45378,"Colonoscopy, diagnostic",255.32,2025-01-01
+SAMPLE PLAN D,45380,Colonoscopy with biopsy,301.28,2025-01-01
+SAMPLE PLAN D,45385,Colonoscopy with polyp removal by snare,348.79,2025-01-01
+SAMPLE PLAN D,43235,"Upper endoscopy (EGD), diagnostic",193.18,2025-01-01
+SAMPLE PLAN D,43239,Upper endoscopy (EGD) with biopsy,216.06,2025-01-01
+SAMPLE PLAN D,43249,Upper endoscopy (EGD) with balloon dilation,244.27,2025-01-01
+SAMPLE PLAN D,91200,Liver elastography,36.60,2025-01-01
