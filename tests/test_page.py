@@ -89,6 +89,36 @@ def test_no_network_requests(browser, tmp_path):
     print('Page CSVs identical to CLI CSVs: ' + ', '.join(f'{n} ({len(saved[n]):,} bytes)' for n in OUTPUTS))
 
 
+DEMOS = sorted((ROOT / 'demos').glob('*.html'))
+
+
+@pytest.mark.parametrize('demo', DEMOS, ids=[d.name for d in DEMOS])
+def test_demo_pages_make_no_network_requests(browser, demo):
+    """The demo pages under demos/ carry the same policy and make no request either, with every visible button pressed."""
+    src = demo.read_text()
+    assert "default-src 'none'" in src and "connect-src 'none'" in src, f'{demo.name} carries the same CSP as the page'
+    url = demo.as_uri()
+    ctx, page, log = open_page(browser, url)
+    pressed = 0
+    for b in page.query_selector_all('button')[:40]:
+        try:
+            if b.is_visible():
+                b.click(timeout=500)
+                pressed += 1
+        except Exception:                      # a button hidden or replaced by an earlier press
+            pass
+    page.wait_for_timeout(SETTLE_MS)
+    windows = len(ctx.pages)
+    ctx.close()
+
+    bad = outside(log, url)
+    print(f'\n{demo.name}: {pressed} buttons pressed, {len(log)} requests recorded (the page itself: {log.count(url)}), '
+          f'network requests: {len(bad)}, windows or tabs open: {windows}')
+    assert pressed > 0, f'{demo.name}: no button was pressed'
+    assert windows == 1, f'{demo.name} opened another window or tab'
+    assert bad == [], f'{demo.name} made network requests: {bad}'
+
+
 def test_recorder_catches_a_request(browser, tmp_path):
     """Control: a copy of the page with its security policy removed and one outside image planted."""
     html = PAGE.read_text()
