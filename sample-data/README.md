@@ -13,3 +13,5 @@ anything about a real payer or practice.
 
 Rebuild it yourself and compare: `python3 tools/make_sample_data.py /some/new/folder` writes identical files
 (a seeded generator, checked by `tests/test_cli.py`).
+
+`anesthesia/` is a second made-up sample for anesthesia mode. See [anesthesia/README.md](anesthesia/README.md).

@@ -153,19 +153,23 @@ footer b{color:var(--ink)}
 <div class="num">2</div>
 <div>
 <h3>Your contracted rates</h3>
-<p>A spreadsheet with one row for each insurance company and billing code: the insurance company's name (as it appears on its payments), the code and your contracted rate. Download the template, fill it in, and save it as a CSV file. Leave the "effective" column blank unless a rate changed partway through, and then type the date as 2026-01-01.</p>
+<p>A spreadsheet with one row for each insurance company and billing code: the insurance company's name (as it appears on its payments), the code and your contracted rate. Download the template, fill it in, and save it as a CSV file. Leave the "effective" column blank unless a rate changed partway through, and then type the date as 2026-01-01. For anesthesia, give each insurance company a row with its conversion factor instead of a rate (the README lists the other columns an anesthesia contract may need).</p>
 <div class="row">
 <button type="button" id="fee-template">Download the template</button>
 <label class="pick btn" for="fee-file">Choose your rates file</label><input id="fee-file" type="file" accept=".csv,text/csv">
 </div>
 <p id="fee-status" class="status" style="margin:10px 0 0">Nothing chosen yet</p>
+<div class="row" style="margin-top:14px">
+<label class="pick btn" for="base-file">Anesthesia base units (optional)</label><input id="base-file" type="file" accept=".csv,text/csv">
+</div>
+<p id="base-status" class="status" style="margin:10px 0 0">Only needed to check anesthesia codes (00100 to 01999)</p>
 <details style="margin-top:14px"><summary>Adjust the assumptions (optional)</summary>
 <div class="grid" style="margin-top:12px" id="inputs">
 <label>Staff cost an hour, in dollars<input id="i-hourly" type="number" min="0" step="0.01" value="30.00"></label>
 <label>Denied dollars never recovered, in percent<input id="i-wo" type="number" min="0" max="100" step="0.1" value="46.0"></label>
 <label>A claim counts as slow after this many days<input id="i-slow" type="number" min="1" max="365" step="1" value="30"></label>
 </div>
-<p class="small" style="margin-top:12px">Staff minutes each time a claim needs handling again: 20 to work a denial, 15 to review a visit paid at a lower code, 5 for a short pay, 10 to re-post a reversal, 6 for a status check on a slow claim. These and the hourly cost are illustrative. The 46% is the rest of Premier's figure from hospitals and health systems on 2022 claims (March 21, 2024: 54.3% of claims private payers first denied were eventually paid), so put in your own rate if you track it.</p>
+<p class="small" style="margin-top:12px">Staff minutes each time a claim needs handling again: 20 to work a denial, 15 to review a visit paid at a lower code, 5 for a short pay (anesthesia included), 10 to re-post a reversal, 6 for a status check on a slow claim. These and the hourly cost are illustrative. The 46% is the rest of Premier's figure from hospitals and health systems on 2022 claims (March 21, 2024: 54.3% of claims private payers first denied were eventually paid), so put in your own rate if you track it.</p>
 </details>
 </div>
 </div>
@@ -188,14 +192,23 @@ footer b{color:var(--ink)}
 </tr></thead><tbody></tbody></table></div>
 <p class="small" style="margin-top:8px">Wide table: scroll sideways to see every column.</p>
 <p id="unpriced" class="small"></p>
-<p class="small">Cost per $100 paid adds the dollars paid short (lower codes and short pays, priced at your contract), denied dollars never recovered, and staff time, then sets it against what the payer paid.</p>
+<div id="anes-results" hidden>
+<h3 style="margin-top:18px">Anesthesia</h3>
+<div class="table-wrap"><table id="anes-by-payer"><thead><tr>
+<th>Payer</th><th>Lines checked</th><th>Contract per unit</th><th>Paid per unit</th><th>Conversion factor short</th><th>Base units short</th><th>Time cut</th><th>Medical direction cut</th><th>Total gap</th>
+</tr></thead><tbody></tbody></table></div>
+<p class="small">Each anesthesia line is priced as (base units + time units + any physical status units) times the payer's conversion factor, times the share its modifier pays. A gap is split into the reason that explains it, in the order of the columns from right to left.</p>
+</div>
+<p class="small">Cost per $100 paid adds the dollars paid short (lower codes and short pays, anesthesia included, priced at your contract), denied dollars never recovered, and staff time, then sets it against what the payer paid.</p>
 <h3 style="margin-top:18px">Save the results to this computer</h3>
 <div class="row">
 <button type="button" data-out="summary-by-payer.csv">Summary by payer</button>
 <button type="button" data-out="summary-by-payer-and-code.csv">Summary by payer and code</button>
 <button type="button" data-out="chart-pull-list.csv">Chart-pull list</button>
+<button type="button" data-out="anesthesia-by-payer.csv" class="anes-save" hidden>Anesthesia by payer</button>
+<button type="button" data-out="anesthesia-pull-list.csv" class="anes-save" hidden>Anesthesia pull list</button>
 </div>
-<p class="small" style="margin-top:12px">The two summaries hold totals only, with no patient-level fields. The chart-pull list has a row for every flagged line with its patient account number, so keep it on this computer.</p>
+<p class="small" style="margin-top:12px">The two summaries hold totals only, with no patient-level fields. The chart-pull list (and the anesthesia pull list) has a row for every flagged line with its patient account number, so keep it on this computer.</p>
 </div>
 </div>
 </section>
@@ -212,20 +225,26 @@ footer b{color:var(--ink)}
 <footer>
 <div class="wrap">
 <p><b>Built by Chris Duff, M.D., at Serious AI Partners.</b> Questions? Reply to the email this link came in, or ask the person who forwarded it.</p>
-<p>Payer check v0.1. Free to use. Code under the Apache License 2.0, text under Creative Commons Attribution 4.0.</p>
+<p>Payer check v0.2. Free to use. Code under the Apache License 2.0, text under Creative Commons Attribution 4.0.</p>
 </div>
 </footer>
 
 <script>
-/* Payer check v0.1. Line for line with payer_check.py. tests/test_page.py runs both on the same files and
+/* Payer check v0.2. Line for line with payer_check.py. tests/test_page.py runs both on the same files and
    requires byte-identical CSVs, and fails the build on any network request from this page. */
 (function () {
   'use strict';
-  var VERSION = '0.1.0';
+  var VERSION = '0.2.0';
   var EM = { '9920': 'New patient', '9921': 'Established', '9924': 'Office consult' };
-  var TOUCHES = ['denial', 'downcode', 'short_pay', 'reversal', 'slow'];
-  var DEFAULTS = { minutes: { denial: 20, downcode: 15, short_pay: 5, reversal: 10, slow: 6 }, hourly: '30.00', writeoff_pct: '46.0', slow_days: 30, tolerance: '0.50' };
+  var TOUCHES = ['denial', 'downcode', 'short_pay', 'anesthesia', 'reversal', 'slow'];
+  var DEFAULTS = { minutes: { denial: 20, downcode: 15, short_pay: 5, anesthesia: 5, reversal: 10, slow: 6 }, hourly: '30.00', writeoff_pct: '46.0', slow_days: 30, tolerance: '0.50' };
   var EXTENSIONS = ['.835', '.txt', '.edi', '.x12', '.era', '.rmt'];
+  var ANES_PCT = { AA: 100, AD: 100, QK: 50, QX: 50, QY: 50, QZ: 100 };
+  var ANES_REASONS = ['md_cut', 'time_cut', 'base_short', 'cf_short'];
+  var ROUNDINGS = ['tenth', 'up', 'down'];
+  var DIRECTED = ['QK', 'QX', 'QY'];
+  var MATCH_CENTS = 2;
+  function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
   /* ---------- money and dates, all in integers ---------- */
   function dhe(n, d) {
@@ -234,18 +253,20 @@ footer b{color:var(--ink)}
     if (2 * r > d || (2 * r === d && q % 2 === 1)) q++;
     return q;
   }
-  function toCents(s) {
+  function toFixed(s, places) {
     s = (s == null ? '' : String(s)).trim().replace(/\$/g, '').replace(/,/g, '');
     if (!s) return 0;
     var neg = s.charAt(0) === '-';
     s = s.replace(/^[+-]+/, '');
     var dot = s.indexOf('.'), whole = dot < 0 ? s : s.slice(0, dot), frac = dot < 0 ? '' : s.slice(dot + 1);
     if (!(whole || frac) || !/^[0-9]+$/.test(whole + frac)) throw new Error('not an amount: ' + s);
-    var n = parseInt(whole || '0', 10) * 100 + parseInt((frac + '00').slice(0, 2), 10), rest = frac.slice(2);
+    var n = parseInt(whole || '0', 10) * Math.pow(10, places) + parseInt((frac + '0'.repeat(places)).slice(0, places) || '0', 10), rest = frac.slice(places);
     if (rest && (rest[0] > '5' || (rest[0] === '5' && (rest.slice(1).replace(/0/g, '') || n % 2 === 1)))) n++;
     return neg ? -n : n;
   }
-  function money(c) { var sign = c < 0 ? '-' : ''; c = Math.abs(c); return sign + Math.floor(c / 100) + '.' + String(c % 100).padStart(2, '0'); }
+  function toCents(s) { return toFixed(s, 2); }
+  function fixed(n, places) { var sign = n < 0 ? '-' : '', d = Math.pow(10, places); n = Math.abs(n); return sign + Math.floor(n / d) + '.' + String(n % d).padStart(places, '0'); }
+  function money(c) { return fixed(c, 2); }
   function utc(s) { return Date.UTC(+s.slice(0, 4), +s.slice(4, 6) - 1, +s.slice(6, 8)); }
   function daysBetween(a, b) { return Math.round((utc(b) - utc(a)) / 864e5); }
   function half(m2) { return m2 % 2 ? Math.floor(m2 / 2) + '.5' : String(m2 / 2); }
@@ -284,10 +305,12 @@ footer b{color:var(--ink)}
       else if (sid === 'NM1' && claim !== null && val(seg, 1) === '82') claim.provider = (val(seg, 4) + ' ' + val(seg, 3)).trim();
       else if (sid === 'SVC' && claim !== null) {
         close(); claim.n++;
-        var paidCode = comp(seg, 1, 2);
+        var paidCode = comp(seg, 1, 2), mods = function (i) { return [3, 4, 5, 6].map(function (j) { return comp(seg, i, j); }).filter(Boolean); };
+        var paidMods = mods(1), billedMods = comp(seg, 6, 2) ? mods(6) : paidMods;
         line = { file: name, payer: payer, check: check, pay_date: payDate || prodDate, acct: claim.acct, status: claim.status, provider: claim.provider,
           received: claim.received, paid_code: paidCode, billed_code: comp(seg, 6, 2) || paidCode, charge: toCents(val(seg, 2)), paid: toCents(val(seg, 3)),
-          dos: claim.claim_dos, co: [], coAmt: {}, pr: 0, allowed: null, rarc: [], ref: '', n: claim.n };
+          dos: claim.claim_dos, co: [], coAmt: {}, pr: 0, allowed: null, rarc: [], ref: '', n: claim.n, paid_mods: paidMods, billed_mods: billedMods,
+          units_paid: val(seg, 5).trim(), units_billed: val(seg, 7).trim() || val(seg, 5).trim() };
       }
       else if (sid === 'DTM' && claim !== null && line === null) {
         if (val(seg, 1) === '050') claim.received = val(seg, 2);
@@ -338,28 +361,76 @@ footer b{color:var(--ink)}
     if (/^[0-9]{8}$/.test(t)) return t;
     throw new Error('effective date "' + s + '" is not YYYY-MM-DD');
   }
+  function pairs(s, what) {
+    var out = {};
+    (s || '').trim().split(/[\s;]+/).forEach(function (part) {
+      if (!part) return;
+      var i = part.indexOf('='), k = i < 0 ? '' : part.slice(0, i).trim(), v = i < 0 ? '' : part.slice(i + 1).trim();
+      if (i < 0 || !k || !/^[0-9]+$/.test(v)) throw new Error(what + ' "' + part + '" is not CODE=NUMBER');
+      out[k.toUpperCase()] = parseInt(v, 10);
+    });
+    return out;
+  }
   function readFees(text) {
     var rows = parseCsv(text.replace(/^﻿/, ''));
     if (!rows.length) throw new Error('the fee schedule is empty');
     var head = rows[0].map(function (h) { return h.trim().toLowerCase(); });
-    ['payer', 'cpt', 'contracted_allowed'].forEach(function (need) {
+    ['payer', 'cpt'].forEach(function (need) {
       if (head.indexOf(need) < 0) throw new Error('the fee schedule needs a ' + need + ' column (it has ' + head.join(', ') + ')');
     });
-    var ip = head.indexOf('payer'), ic = head.indexOf('cpt'), ia = head.indexOf('contracted_allowed'), ie = head.indexOf('effective');
-    var fees = new Map();
+    if (head.indexOf('contracted_allowed') < 0 && head.indexOf('conversion_factor') < 0) throw new Error('the fee schedule needs a contracted_allowed column (it has ' + head.join(', ') + ')');
+    var col = function (h) { return head.indexOf(h); };
+    var ip = col('payer'), ic = col('cpt'), ia = col('contracted_allowed'), ie = col('effective'), icf = col('conversion_factor'), ib = col('base_units'),
+      ium = col('time_unit_minutes'), ir = col('time_rounding'), imp = col('modifier_pct'), ips = col('physical_status_units'), imx = col('max_minutes');
+    var fees = new Map(), anes = { cf: new Map(), base: new Map() };
     rows.slice(1).forEach(function (r, k) {
       var n = k + 2;
       if (!r.some(function (x) { return x.trim(); })) return;
-      var cell = function (i) { return i >= 0 && i < r.length ? r[i] : ''; };
-      var key = cell(ip).trim().toUpperCase() + '|' + cell(ic).trim();
+      var cell = function (i) { return i >= 0 && i < r.length ? r[i].trim() : ''; };
+      var payer = cell(ip).toUpperCase(), cpt = cell(ic), key = payer + '|' + cpt;
       try {
-        var entry = [normDate(cell(ie)), toCents(cell(ia))];
-        if (!fees.has(key)) fees.set(key, []);
-        fees.get(key).push(entry);
+        var eff = normDate(cell(ie)), anesRow = !!(cell(icf) || cell(ib));
+        if (ia >= 0 && (cell(ia) || !anesRow)) {
+          var entry = [eff, toCents(cell(ia))];
+          if (!fees.has(key)) fees.set(key, []);
+          fees.get(key).push(entry);
+        }
+        if (cell(ib)) {
+          if (!/^[0-9]+$/.test(cell(ib)) || !cpt) throw new Error('base_units "' + cell(ib) + '" needs a whole number and a cpt');
+          anes.base.set(key, parseInt(cell(ib), 10));
+        }
+        if (cell(icf)) {
+          var um = cell(ium) || '15', rnd = (cell(ir) || 'tenth').toLowerCase();
+          if (!/^[0-9]+$/.test(um) || parseInt(um, 10) < 1) throw new Error('time_unit_minutes "' + um + '" is not a whole number of minutes');
+          if (ROUNDINGS.indexOf(rnd) < 0) throw new Error('time_rounding "' + rnd + '" is not one of ' + ROUNDINGS.join(', '));
+          var terms = { cf4: toFixed(cell(icf), 4), unit_minutes: parseInt(um, 10), rounding: rnd,
+            pct: Object.assign({}, ANES_PCT, pairs(cell(imp), 'modifier_pct')), ps: pairs(cell(ips), 'physical_status_units'), caps: pairs(cell(imx), 'max_minutes') };
+          if (!anes.cf.has(key)) anes.cf.set(key, []);
+          anes.cf.get(key).push([eff, terms]);
+        }
       } catch (e) { throw new Error('fee schedule row ' + n + ': ' + e.message); }
     });
     fees.forEach(function (v) { v.sort(function (a, b) { return cmp(a[0], b[0]) || a[1] - b[1]; }); });
-    return fees;
+    anes.cf.forEach(function (v) { v.sort(function (a, b) { return cmp(a[0], b[0]); }); });
+    return { fees: fees, anes: anes };
+  }
+  function readBaseUnits(text) {
+    var out = {};
+    if (!text) return out;
+    var rows = parseCsv(text.replace(/^﻿/, '')), head = rows.length ? rows[0].map(function (h) { return h.trim().toLowerCase(); }) : [];
+    var ic = -1, ib = -1;
+    head.forEach(function (h, i) {
+      if (ic < 0 && ['cpt', 'code', 'hcpcs', 'cpt code', 'hcpcs code', 'procedure code'].indexOf(h) >= 0) ic = i;
+      if (ib < 0 && h.indexOf('base') >= 0) ib = i;
+    });
+    if (ic < 0 || ib < 0) throw new Error('the base units file needs a code column and a base units column (it has ' + head.join(', ') + ')');
+    rows.slice(1).forEach(function (r, k) {
+      var code = ic < r.length ? r[ic].trim() : '', units = ib < r.length ? r[ib].trim() : '';
+      if (!code && !units) return;
+      if (!code || !/^[0-9]+$/.test(units)) throw new Error('base units row ' + (k + 2) + ': "' + code + '" "' + units + '" is not a code and a whole number');
+      out[code] = parseInt(units, 10);
+    });
+    return out;
   }
   function rateOn(fees, payer, code, dos) {
     var hit = null;
@@ -367,16 +438,87 @@ footer b{color:var(--ink)}
     return hit;
   }
 
+  /* ---------- anesthesia ---------- */
+  function isAnesthesia(code) { return code.length === 5 && /^[0-9]+$/.test(code) && +code >= 100 && +code <= 1999; }
+  function anesTerms(anes, payer, code, dos) {
+    var keys = [payer + '|' + code, payer + '|'];
+    for (var i = 0; i < keys.length; i++) {
+      var hit = null;
+      (anes.cf.get(keys[i]) || []).forEach(function (e) { if (e[0] <= dos) hit = e[1]; });
+      if (hit) return hit;
+    }
+    return null;
+  }
+  function timeUnits(mt, unitMinutes, rounding) {
+    if (rounding === 'tenth') return Math.floor((2 * mt + unitMinutes) / (2 * unitMinutes));
+    var whole = 10 * unitMinutes;
+    return (rounding === 'up' ? Math.ceil(mt / whole) : Math.floor(mt / whole)) * 10;
+  }
+  function anesCents(units10, cf4, pct) { return dhe(units10 * cf4 * pct, 100000); }
+  function firstHit(mods, table) { for (var i = 0; i < mods.length; i++) if (has(table, mods[i])) return mods[i]; return ''; }
+  function minutesText(mt) { return mt % 10 === 0 ? String(mt / 10) : fixed(mt, 1); }
+  function priceAnesthesia(l, anes, baseTable) {
+    var t = anesTerms(anes, l.payer, l.billed_code, l.dos), gaps = {};
+    ANES_REASONS.forEach(function (r) { gaps[r] = 0; });
+    var a = l.anes = { skip: '', reasons: [], gaps: gaps };
+    if (t === null) { a.skip = 'no conversion factor on file for the date of service'; return null; }
+    var code = l.billed_code, modB = firstHit(l.billed_mods, t.pct), modP = firstHit(l.paid_mods, t.pct);
+    var pctB = has(t.pct, modB) ? t.pct[modB] : 100, pctP = has(t.pct, modP) ? t.pct[modP] : 100, supervised = modB === 'AD';
+    var bkey = l.payer + '|' + code;
+    var base = supervised ? 3 : anes.base.has(bkey) ? anes.base.get(bkey) : has(baseTable, code) ? baseTable[code] : null;
+    if (base === null) { a.skip = 'no base units for the code'; return null; }
+    var mb, mp;
+    try { mb = toFixed(l.units_billed, 1); mp = toFixed(l.units_paid, 1); } catch (e) { mb = mp = 0; }
+    if (!l.units_paid || mb <= 0) { a.skip = 'no minutes on the remit'; return null; }
+    var noTime = supervised || code === '01996', cap = has(t.caps, code) ? t.caps[code] : null;
+    var mbc = cap ? Math.min(mb, cap * 10) : mb;
+    var tu = function (m) { return noTime ? 0 : timeUnits(m, t.unit_minutes, t.rounding); };
+    var psB = firstHit(l.billed_mods, t.ps), psP = firstHit(l.paid_mods, t.ps);
+    Object.assign(a, { terms: t, pct_b: pctB, pct_p: pctP, base: base, mb: mb, mp: mp, t_contract: tu(mbc), t_paid: tu(mp),
+      t_down: noTime ? 0 : timeUnits(mp, t.unit_minutes, 'down'), ps_b: psB ? t.ps[psB] : 0, ps_p: psP ? t.ps[psP] : 0 });
+    a.u_contract = base * 10 + a.t_contract + a.ps_b * 10;
+    a.u_paid = base * 10 + a.t_paid + a.ps_p * 10;
+    return anesCents(a.u_contract, t.cf4, pctB);
+  }
+  function explainAnesthesia(l, gap, tol) {
+    var a = l.anes, g = a.gaps, cf4 = a.terms.cf4, pctP = a.pct_p, k;
+    if (pctP < a.pct_b) g.md_cut = anesCents(a.u_contract, cf4, a.pct_b - pctP);
+    if (a.t_paid < a.t_contract) g.time_cut = anesCents(a.t_contract - a.t_paid, cf4, pctP);
+    if (a.ps_p < a.ps_b) g.base_short = anesCents((a.ps_b - a.ps_p) * 10, cf4, pctP);
+    var rest = gap - ANES_REASONS.reduce(function (s, r) { return s + g[r]; }, 0);
+    if (rest > tol) {
+      var trunc = a.t_paid - a.t_down, baseHit = false;
+      for (k = 1; k <= a.base; k++) if (Math.abs(rest - anesCents(k * 10, cf4, pctP)) <= MATCH_CENTS) baseHit = true;
+      if (trunc > 0 && Math.abs(rest - anesCents(trunc, cf4, pctP)) <= MATCH_CENTS) g.time_cut += rest;
+      else if (baseHit) g.base_short += rest;
+      else g.cf_short += rest;
+    } else if (rest >= 0) {
+      var big = ANES_REASONS[0];
+      ANES_REASONS.forEach(function (r) { if (g[r] > g[big]) big = r; });
+      g[big] += rest;
+    } else {
+      var take = -rest;
+      ANES_REASONS.slice().reverse().forEach(function (r) { var cut = Math.min(g[r], take); g[r] -= cut; take -= cut; });
+    }
+    a.reasons = ANES_REASONS.filter(function (r) { return g[r] > 0; });
+    a.paid_cf4 = a.u_paid * pctP ? dhe(l.allowed * 100000, a.u_paid * pctP) : null;
+  }
+
   /* ---------- the check ---------- */
-  function classify(l, fees, tol) {
+  function classify(l, fees, tol, anes, baseTable, cfPayers) {
     if (l.allowed === null) l.allowed = l.paid + l.pr;
     var bl = emLevel(l.billed_code), pl = emLevel(l.paid_code);
-    l.contract_billed = rateOn(fees, l.payer, l.billed_code, l.dos);
+    var anesthesia = isAnesthesia(l.billed_code) && cfPayers.has(l.payer);
+    l.contract_billed = anesthesia ? priceAnesthesia(l, anes, baseTable) : rateOn(fees, l.payer, l.billed_code, l.dos);
     l.gap = null;
     if (l.paid === 0 && l.allowed === 0) {
       l.cls = 'denied';
       var hit = l.co.filter(function (k) { return ['CO-', 'OA-', 'PI-'].indexOf(k.slice(0, 3)) >= 0 && k !== 'CO-45'; })[0];
       l.carc = hit ? hit.slice(hit.indexOf('-') + 1) : 'other';
+    } else if (anesthesia) {
+      if (l.contract_billed !== null && l.contract_billed - l.allowed > tol) {
+        l.cls = 'anesthesia_short'; l.gap = l.contract_billed - l.allowed; explainAnesthesia(l, l.gap, tol);
+      } else l.cls = 'clean';
     } else if (bl && pl && pl < bl) {
       l.cls = 'downcoded';
       if (l.contract_billed !== null) l.gap = l.contract_billed - l.allowed;
@@ -408,16 +550,17 @@ footer b{color:var(--ink)}
   function sum(ls, f) { return ls.reduce(function (s, l) { return s + f(l); }, 0); }
   function distinct(ls) { return new Set(ls.map(function (l) { return l.acct; })).size; }
 
-  function run(files, feeText, opts) {
+  function run(files, feeText, opts, baseText) {
     opts = opts || {};
     var o = Object.assign({}, DEFAULTS, opts); o.minutes = Object.assign({}, DEFAULTS.minutes, opts.minutes || {});
     var tol = toCents(o.tolerance), hourlyC = toCents(o.hourly), woBp = toCents(o.writeoff_pct);
-    var fees = readFees(feeText), onFile = new Set();
+    var rf = readFees(feeText), fees = rf.fees, anes = rf.anes, baseTable = readBaseUnits(baseText || ''), onFile = new Set(), cfPayers = new Set();
     fees.forEach(function (v, k) { onFile.add(k.slice(0, k.lastIndexOf('|'))); });
+    anes.cf.forEach(function (v, k) { cfPayers.add(k.slice(0, k.lastIndexOf('|'))); onFile.add(k.slice(0, k.lastIndexOf('|'))); });
     var raw = [];
     files.forEach(function (f) { Array.prototype.push.apply(raw, read835(f[0], f[1])); });
     var st = settle(raw), lines = st.lines, reversed = st.reversed;
-    lines.forEach(function (l) { classify(l, fees, tol); });
+    lines.forEach(function (l) { classify(l, fees, tol, anes, baseTable, cfPayers); });
 
     var payerSet = new Set(lines.map(function (l) { return l.payer; }));
     Object.keys(reversed).forEach(function (p) { payerSet.add(p); });
@@ -430,20 +573,21 @@ footer b{color:var(--ink)}
         if (v.some(function (x) { return x.paid > 0; }) && v[0].received.length === 8 && v[0].first_pay_date.length === 8) days.push(daysBetween(v[0].received, v[0].first_pay_date));
       });
       var of = function (c) { return pl.filter(function (l) { return l.cls === c; }); };
-      var den = of('denied'), down = of('downcoded'), short = of('short_pay');
-      var touches = { denial: distinct(den), downcode: down.length, short_pay: distinct(short), reversal: reversed[payer] ? reversed[payer].size : 0,
+      var den = of('denied'), down = of('downcoded'), short = of('short_pay'), anesShort = of('anesthesia_short');
+      var touches = { denial: distinct(den), downcode: down.length, short_pay: distinct(short), anesthesia: distinct(anesShort), reversal: reversed[payer] ? reversed[payer].size : 0,
         slow: days.filter(function (d) { return d > o.slow_days; }).length };
       var minutes = 0; TOUCHES.forEach(function (k) { minutes += touches[k] * o.minutes[k]; });
       var staff = dhe(minutes * hourlyC, 60), paid = sum(pl, function (l) { return l.paid; });
-      var downGap = sum(down, function (l) { return l.gap || 0; }), shortGap = sum(short, function (l) { return l.gap; });
+      var downGap = sum(down, function (l) { return l.gap || 0; }), shortGap = sum(short, function (l) { return l.gap; }), anesGap = sum(anesShort, function (l) { return l.gap; });
       var deniedValue = sum(den, function (l) { return l.contract_billed || 0; }), writeoff = dhe(deniedValue * woBp, 10000);
-      var cost = downGap + shortGap + staff + writeoff;
+      var cost = downGap + shortGap + anesGap + staff + writeoff;
       var dos = pl.map(function (l) { return l.dos; }).filter(Boolean).sort(cmp);
       return { payer: payer, contract_on_file: priced ? 'yes' : 'no', first_date_of_service: dos.length ? dos[0] : '', last_date_of_service: dos.length ? dos[dos.length - 1] : '',
         claims: claims.size, service_lines: pl.length, paid: money(paid),
         denied_claims: touches.denial, denied_lines: den.length, denied_value_at_contract: priced ? money(deniedValue) : '',
         downcoded_lines: down.length, downcoded_gap: priced ? money(downGap) : '',
         short_pay_lines: short.length, short_pay_claims: touches.short_pay, short_pay_gap: priced ? money(shortGap) : '',
+        anesthesia_short_lines: anesShort.length, anesthesia_gap: priced ? money(anesGap) : '',
         reversed_claims: touches.reversal, claims_with_days_to_pay: days.length,
         days_to_pay_median: days.length ? half(median2(days)) : '', days_to_pay_p90: days.length ? p90(days) : '',
         slow_claims: touches.slow, staff_minutes: minutes, staff_cost: money(staff),
@@ -463,7 +607,9 @@ footer b{color:var(--ink)}
         denied_value_at_contract: priced ? money(sum(pick('denied'), function (l) { return l.contract_billed || 0; })) : '',
         downcoded_lines: pick('downcoded').length,
         downcoded_gap: priced ? money(sum(pick('downcoded'), function (l) { return l.gap || 0; })) : '',
-        short_pay_lines: pick('short_pay').length, short_pay_gap: priced ? money(sum(pick('short_pay'), function (l) { return l.gap; })) : '' };
+        short_pay_lines: pick('short_pay').length, short_pay_gap: priced ? money(sum(pick('short_pay'), function (l) { return l.gap; })) : '',
+        anesthesia_short_lines: pick('anesthesia_short').length,
+        anesthesia_gap: priced ? money(sum(pick('anesthesia_short'), function (l) { return l.gap; })) : '' };
     });
 
     var order = { downcoded: 0, short_pay: 1, denied: 2 }, opt = function (c) { return c === null ? '' : money(c); };
@@ -475,11 +621,61 @@ footer b{color:var(--ink)}
         adjustment_codes: l.co.join(' '), remark_codes: l.rarc.join(' '), file: l.file };
     });
 
+    var at = anesthesiaTables(lines, payers, cfPayers);
     var allDos = lines.map(function (l) { return l.dos; }).filter(Boolean).sort(cmp);
     return { files: files.map(function (f) { return f[0]; }), raw_lines: raw.length, lines: lines, by_payer: byPayer, by_code: byCode, pull: pull,
+      anes_by_payer: at.byPayer, anes_pull: at.pull,
       sample: payers.length > 0 && payers.every(function (p) { return p.indexOf('SAMPLE ') === 0; }),
       period: allDos.length ? [allDos[0], allDos[allDos.length - 1]] : ['', ''],
       payers_without_fees: payers.filter(function (p) { return !onFile.has(p); }) };
+  }
+  function anesthesiaTables(lines, payers, cfPayers) {
+    var byPayer = [];
+    payers.forEach(function (payer) {
+      var al = lines.filter(function (l) { return l.payer === payer && isAnesthesia(l.billed_code); });
+      if (!al.length) return;
+      var hasCf = cfPayers.has(payer);
+      var checked = al.filter(function (l) { return l.anes && !l.anes.skip; }), paidLines = checked.filter(function (l) { return l.cls !== 'denied'; });
+      var skipped = {};
+      al.forEach(function (l) { if (l.anes && l.anes.skip) skipped[l.anes.skip] = (skipped[l.anes.skip] || 0) + 1; });
+      var short = checked.filter(function (l) { return l.cls === 'anesthesia_short'; });
+      var allowed = sum(paidLines, function (l) { return l.allowed; });
+      var uPaid = sum(paidLines, function (l) { return l.anes.u_paid * l.anes.pct_p; }), uContract = sum(paidLines, function (l) { return l.anes.u_contract * l.anes.pct_b; });
+      var expected = sum(paidLines, function (l) { return l.contract_billed; });
+      var latest = null, latestDos = null;
+      checked.forEach(function (l) { if (latestDos === null || l.dos > latestDos) { latestDos = l.dos; latest = l.anes.terms.cf4; } });
+      var per = function (c, u) { return u ? fixed(dhe(c * 100000, u), 4) : ''; };
+      var row = { payer: payer, conversion_factor_on_file: hasCf ? 'yes' : 'no', anesthesia_lines: al.length,
+        lines_checked: checked.length, lines_not_checked: hasCf ? al.length - checked.length : al.length,
+        not_checked_why: hasCf ? Object.keys(skipped).sort(cmp).map(function (k) { return k + ': ' + skipped[k]; }).join('; ') : 'no conversion factor on file',
+        denied_lines: checked.filter(function (l) { return l.cls === 'denied'; }).length,
+        directed_lines: paidLines.filter(function (l) { return l.paid_mods.some(function (m) { return DIRECTED.indexOf(m) >= 0; }); }).length,
+        units_paid: hasCf ? fixed(sum(paidLines, function (l) { return l.anes.u_paid; }), 1) : '',
+        allowed: hasCf ? money(allowed) : '',
+        contract_cf_latest: latest !== null ? fixed(latest, 4) : '',
+        contract_per_unit: per(expected, uContract), paid_per_unit: per(allowed, uPaid),
+        short_lines: short.length, gap: hasCf ? money(sum(short, function (l) { return l.gap; })) : '' };
+      ANES_REASONS.forEach(function (r) {
+        var hit = short.filter(function (l) { return l.anes.reasons.indexOf(r) >= 0; });
+        row[r + '_lines'] = hit.length;
+        row[r + '_gap'] = hasCf ? money(sum(hit, function (l) { return l.anes.gaps[r]; })) : '';
+      });
+      byPayer.push(row);
+    });
+    var pull = lines.filter(function (l) { return l.cls === 'anesthesia_short'; }).sort(function (a, b) {
+      return cmp(a.payer, b.payer) || cmp(a.provider, b.provider) || cmp(a.dos, b.dos) || cmp(a.acct, b.acct) || (a.n - b.n);
+    }).map(function (l) {
+      var a = l.anes;
+      var row = { flag: a.reasons.join(' '), payer: l.payer, provider: l.provider, patient_account: l.acct, date_of_service: l.dos, code: l.billed_code,
+        billed_modifiers: l.billed_mods.join(' '), paid_modifiers: l.paid_mods.join(' '), minutes_billed: minutesText(a.mb), minutes_paid: minutesText(a.mp),
+        base_units: a.base, time_units_contract: fixed(a.t_contract, 1), time_units_paid: fixed(a.t_paid, 1), modifier_pct_billed: a.pct_b, modifier_pct_paid: a.pct_p,
+        contract_cf: fixed(a.terms.cf4, 4), paid_cf: a.paid_cf4 !== null ? fixed(a.paid_cf4, 4) : '',
+        expected: money(l.contract_billed), allowed: money(l.allowed), paid: money(l.paid), dollar_gap: money(l.gap) };
+      ANES_REASONS.forEach(function (r) { row[r + '_gap'] = money(a.gaps[r]); });
+      row.adjustment_codes = l.co.join(' '); row.remark_codes = l.rarc.join(' '); row.file = l.file;
+      return row;
+    });
+    return { byPayer: byPayer, pull: pull };
   }
   function csvField(v) { v = String(v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
   function toCsv(rows, sample) {
@@ -491,7 +687,7 @@ footer b{color:var(--ink)}
 
   /* ---------- the page ---------- */
   var $ = function (id) { return document.getElementById(id); };
-  var remits = null, feeFile = null, result = null, outputs = {};
+  var remits = null, feeFile = null, baseFile = null, result = null, outputs = {};
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var usd = function (s) { if (s === '') return ''; var p = s.split('.'); return (p[0][0] === '-' ? '-' : '') + '$' + Number(p[0].replace('-', '')).toLocaleString('en-US') + '.' + p[1]; };
   var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -508,6 +704,7 @@ footer b{color:var(--ink)}
   $('remit-folder').addEventListener('change', function (e) { pickRemits(e.target.files); });
   $('remit-files').addEventListener('change', function (e) { pickRemits(e.target.files); });
   $('fee-file').addEventListener('change', function (e) { feeFile = e.target.files[0] || null; $('fee-status').textContent = feeFile ? feeFile.name : 'Nothing chosen yet'; ready(); });
+  $('base-file').addEventListener('change', function (e) { baseFile = e.target.files[0] || null; $('base-status').textContent = baseFile ? baseFile.name : 'Only needed to check anesthesia codes (00100 to 01999)'; });
   function ready() { $('run').disabled = !(remits && remits.length && feeFile); }
   function relPath(f) { var p = f.webkitRelativePath || f.name, i = p.indexOf('/'); return f.webkitRelativePath && i >= 0 ? p.slice(i + 1) : p; }
   function num(id, fallback) { var v = $(id).value.trim(); return v === '' ? fallback : v; }
@@ -519,9 +716,9 @@ footer b{color:var(--ink)}
       var files = [];
       texts.forEach(function (t, i) { if (t.replace(/^[﻿ \t\r\n]+/, '').slice(0, 3) === 'ISA') files.push([picked[i][0], t]); });
       if (!files.length) throw new Error('none of the chosen files starts with an ISA segment, so none reads as an 835');
-      return feeFile.text().then(function (feeText) {
+      return Promise.all([feeFile.text(), baseFile ? baseFile.text() : '']).then(function (texts) {
         var slow = parseInt(num('i-slow', '30'), 10);
-        result = run(files, feeText, { hourly: num('i-hourly', DEFAULTS.hourly), writeoff_pct: num('i-wo', DEFAULTS.writeoff_pct), slow_days: isFinite(slow) && slow > 0 ? slow : 30 });
+        result = run(files, texts[0], { hourly: num('i-hourly', DEFAULTS.hourly), writeoff_pct: num('i-wo', DEFAULTS.writeoff_pct), slow_days: isFinite(slow) && slow > 0 ? slow : 30 }, texts[1]);
         show(result);
         $('run-status').textContent = 'Done. Read ' + files.length + ' files on this computer.';
       });
@@ -529,11 +726,23 @@ footer b{color:var(--ink)}
   });
 
   function show(r) {
-    outputs = { 'summary-by-payer.csv': toCsv(r.by_payer, r.sample), 'summary-by-payer-and-code.csv': toCsv(r.by_code, r.sample), 'chart-pull-list.csv': toCsv(r.pull, r.sample) };
+    outputs = { 'summary-by-payer.csv': toCsv(r.by_payer, r.sample), 'summary-by-payer-and-code.csv': toCsv(r.by_code, r.sample), 'chart-pull-list.csv': toCsv(r.pull, r.sample),
+      'anesthesia-by-payer.csv': toCsv(r.anes_by_payer, r.sample), 'anesthesia-pull-list.csv': toCsv(r.anes_pull, r.sample) };
+    var anes = r.anes_by_payer.length > 0;
+    $('anes-results').hidden = !anes;
+    [].forEach.call(document.querySelectorAll('.anes-save'), function (b) { b.hidden = !anes; });
+    $('anes-by-payer').tBodies[0].innerHTML = r.anes_by_payer.map(function (p) {
+      var part = function (k) { return p[k + '_lines'] ? p[k + '_lines'].toLocaleString('en-US') + ' (' + usd(p[k + '_gap']) + ')' : '0'; };
+      if (p.conversion_factor_on_file === 'no') return '<tr><td>' + esc(p.payer) + '</td><td colspan="8" style="white-space:normal;text-align:left">' + p.anesthesia_lines.toLocaleString('en-US') + ' lines, no conversion factor on file, not priced</td></tr>';
+      return '<tr><td>' + esc(p.payer) + '</td><td>' + p.lines_checked.toLocaleString('en-US') + ' of ' + p.anesthesia_lines.toLocaleString('en-US') + '</td><td>' +
+        (p.contract_per_unit ? '$' + p.contract_per_unit : '') + '</td><td>' + (p.paid_per_unit ? '$' + p.paid_per_unit : '') + '</td><td>' + part('cf_short') + '</td><td>' +
+        part('base_short') + '</td><td>' + part('time_cut') + '</td><td>' + part('md_cut') + '</td><td><b>' + usd(p.gap) + '</b></td></tr>';
+    }).join('');
     $('sample-banner').hidden = !r.sample;
     $('period').textContent = r.files.length + ' files, ' + r.lines.length.toLocaleString('en-US') + ' service lines after reversals, dates of service ' + dateText(r.period[0]) + ' to ' + dateText(r.period[1]) + '.';
     $('by-payer').tBodies[0].innerHTML = r.by_payer.map(function (p) {
-      var lower = p.downcoded_lines.toLocaleString('en-US') + (p.downcoded_gap ? ' (' + usd(p.downcoded_gap) + ')' : ''), short = p.short_pay_lines.toLocaleString('en-US') + (p.short_pay_gap ? ' (' + usd(p.short_pay_gap) + ')' : '');
+      var lower = p.downcoded_lines.toLocaleString('en-US') + (p.downcoded_gap ? ' (' + usd(p.downcoded_gap) + ')' : ''), shortLines = p.short_pay_lines + p.anesthesia_short_lines, shortGap = p.short_pay_gap ? money(toCents(p.short_pay_gap) + toCents(p.anesthesia_gap)) : '';
+      var short = shortLines.toLocaleString('en-US') + (shortGap ? ' (' + usd(shortGap) + ')' : '');
       return '<tr><td>' + esc(p.payer) + '</td><td><b>' + (p.cost_per_100_paid ? '$' + p.cost_per_100_paid : 'not priced') + '</b></td><td>' + p.claims.toLocaleString('en-US') + '</td><td>' + usd(p.paid) + '</td><td>' + p.denied_claims + '</td><td>' + lower + '</td><td>' + short +
         '</td><td>' + p.reversed_claims + '</td><td>' + (p.days_to_pay_median || 'unknown') + '</td></tr>';
     }).join('');
