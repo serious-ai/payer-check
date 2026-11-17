@@ -1,0 +1,6 @@
+payer,cpt,description,contracted_allowed,conversion_factor,modifier_pct,physical_status_units,max_minutes,effective
+SAMPLE PLAN F,,"Anesthesia, every code",,20.80,,,,2025-01-01
+SAMPLE PLAN G,,"Anesthesia, every code",,62.00,,P3=1 P4=2 P5=3,,2025-01-01
+SAMPLE PLAN G,,"Anesthesia, every code",,64.50,,P3=1 P4=2 P5=3,,2026-07-15
+SAMPLE PLAN H,,"Anesthesia, every code",,58.00,QZ=85,,01967=435,2025-01-01
+SAMPLE PLAN J,,"Anesthesia, every code",,55.00,,,,2025-01-01
