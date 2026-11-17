@@ -100,7 +100,7 @@ The rules come from Medicare's Claims Processing Manual, chapter 12, section 50 
 | `max_minutes` | A cap on time for a code, such as `01967=435` | No cap |
 | `base_units` | This payer's base units for the code on this row, when they differ from the base units file | The base units file |
 
-A row for one code carries its own terms, so fill in every column that applies there too. UnitedHealthcare's commercial anesthesia policy (2026R0032A, February 15, 2026 version) is one example of why the columns exist: it pays QZ at 85%, uses the ASA's base values, and caps labor epidurals (01967) at 435 minutes.
+A row for one code carries its own terms, so fill in every column that applies there too. UnitedHealthcare's commercial anesthesia policy (2026R0032A, February 15, 2026 version) is one example of why the columns exist: its modifier table pays QZ at 85%, it uses the ASA's base values, and its Obstetric Anesthesia Services section caps labor epidurals (01967) at 435 minutes. Payers carve out exceptions by state and plan, so price from the contract and policy that apply to your practice.
 
 **Base units.** CMS posts its base units on the [Anesthesiologists Center](https://www.cms.gov/medicare/payment/fee-schedules/physician/anesthesiologists-center) page. As of November 2026 the newest file there is the 2022 one, and the page says the base units are unchanged for 2026 and 2027. Save it as a CSV with a code column and a base units column. A payer that uses the ASA's values instead needs those in its `base_units` rows. This repo ships no base units table. The sample's file covers only its ten codes and isn't meant as a reference.
 
