@@ -2,7 +2,7 @@
 
 See what each insurance company really costs your practice, from your own payment files and your contracted rates. Free to use.
 
-**[Open the payer check](https://serious-ai.github.io/payer-check/payer-check.html)** in any web browser. There's nothing to install and no sign-up.
+**[Open the payer check](https://check.seriousai.partners/payer-check.html)** in any web browser. There's nothing to install and no sign-up.
 
 **Your files never leave your computer.** The page works like a calculator inside your browser. Nothing is uploaded, not to us and not to anyone else, and it works with your internet turned off. Your IT team can verify that in a few minutes (steps below).
 
