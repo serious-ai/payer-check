@@ -241,6 +241,7 @@ def test_rates_template_downloads_offline_and_reads(browser, tmp_path):
     assert windows == 1 and outside(log, url) == []
     text = (tmp_path / 'template.csv').read_text()
     assert text.splitlines()[0] == 'payer,cpt,description,contracted_allowed,effective'
+    assert all('Sample data' in line for line in text.splitlines()[1:] if line.strip()), 'every example row is labeled Sample data'
     sys.path.insert(0, str(ROOT))
     import payer_check as pc
     files, _ = fixture_files()
