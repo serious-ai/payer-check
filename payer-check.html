@@ -6,102 +6,215 @@
 <!-- The browser blocks every fetch, upload and outside file. It doesn't govern navigating the tab, so the page has no links or code that do, and tests/test_page.py checks it. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
-<title>Payer check</title>
+<meta name="description" content="A free check that shows what each insurance company costs your practice. It runs on your own computer, and your files are never uploaded.">
+<title>Free payer check | Serious AI Partners</title>
 <style>
-:root{--bg:#fbfaf7;--panel:#fff;--ink:#16202c;--muted:#4b5563;--line:#d9dde3;--accent:#1d3a5f;--accent-ink:#fff;--warn-bg:#fff4d6;--warn-ink:#5a4100;--ok:#14532d;--bad:#8a1c1c}
-@media (prefers-color-scheme:dark){:root{--bg:#10151c;--panel:#18202a;--ink:#e8ecf1;--muted:#a9b3bf;--line:#2c3744;--accent:#8fb4e3;--accent-ink:#0d1520;--warn-bg:#3a2f0f;--warn-ink:#ffe2a0;--ok:#86efac;--bad:#fca5a5}}
+:root{color-scheme:light;--navy:#0D1C37;--navy-2:#1D3857;--orange:#FF5A1F;--orange-ink:#C43C08;--ink:#090519;--body:#2C2C2C;--muted:#4A5260;--on-navy:#C9D3DF;--bg:#FFFFFF;--alt:#F5F6F8;--line:#DCE1E8;--warn-bg:#FFF1D6;--warn-ink:#5A4100;--bad:#A11B1B}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-main{max-width:980px;margin:0 auto;padding:24px 16px 48px}
-h1{font-size:28px;margin:0 0 4px}h2{font-size:19px;margin:0 0 8px}
-p{margin:0 0 10px}.muted{color:var(--muted)}small{color:var(--muted)}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin:16px 0}
-.promise{border-left:4px solid var(--accent)}
-.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-button,.btn{font:inherit;border:1px solid var(--accent);background:var(--panel);color:var(--accent);border-radius:8px;padding:8px 14px;cursor:pointer}
-button.primary{background:var(--accent);color:var(--accent-ink)}
-button:disabled{opacity:.5;cursor:default}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--body);font:18px/1.6 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+h1,h2,h3{font-family:Montserrat,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.2}
+h1{font-size:clamp(32px,5vw,48px);margin:0 0 16px;color:#fff;letter-spacing:-.01em}
+h2{font-size:clamp(24px,3.2vw,30px);margin:0 0 12px}
+h3{font-size:20px;margin:0 0 6px}
+p{margin:0 0 14px}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+header.top{background:var(--navy);color:#fff}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0;border-bottom:1px solid var(--navy-2)}
+.bar svg{height:56px;width:219px;display:block}
+.bar .tag{color:var(--on-navy);font-size:15px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.hero{padding:36px 0 44px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,90,31,.14);border:1px solid rgba(255,90,31,.55);color:#fff;border-radius:999px;padding:6px 14px;font-size:15px;font-weight:600;margin:0 0 16px}
+.badge svg{width:18px;height:18px;flex:none}
+.hero .lede{font-size:clamp(19px,2.4vw,22px);color:#E6EAF0;max-width:40em}
+.hero .lede b{color:#fff}
+.promise{background:var(--navy-2);color:#fff;border-radius:14px;padding:26px 28px;margin:28px 0 0;border-left:6px solid var(--orange)}
+.promise h2{color:#fff;display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.promise h2 svg{flex:none;width:34px;height:34px}
+.checks{list-style:none;margin:0 0 16px;padding:0}
+.checks li{position:relative;padding-left:34px;margin:0 0 10px;font-size:clamp(18px,2.2vw,21px);font-weight:600}
+.checks li::before{content:"";position:absolute;left:4px;top:.38em;width:14px;height:8px;border-left:3px solid var(--orange);border-bottom:3px solid var(--orange);transform:rotate(-45deg)}
+.promise p{color:var(--on-navy);margin:0 0 10px}
+.promise p b{color:#fff}
+.promise details{margin-top:6px}
+.promise summary{color:#fff;font-weight:600}
+.promise details p,.promise details li{color:var(--on-navy);font-size:16px}
+.promise details ol{margin:10px 0 0;padding-left:22px}
+.promise code{color:#fff;font-size:15px}
+section{padding:40px 0;border-bottom:1px solid var(--line)}
+section.alt{background:var(--alt)}
+.eyebrow{color:var(--orange-ink);font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 8px}
+.muted{color:var(--muted)}
+small,.small{font-size:16px;color:var(--muted)}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;margin:18px 0}
+.step{display:flex;gap:16px;align-items:flex-start}
+.num{flex:none;width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:18px;margin-top:2px}
+.step > div:not(.num){flex:1;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+button,.btn{font:inherit;font-size:17px;font-weight:600;border:2px solid var(--navy);background:#fff;color:var(--navy);border-radius:8px;padding:11px 20px;cursor:pointer;min-height:48px}
+button.primary{background:var(--orange);border-color:var(--orange);color:var(--ink);font-size:19px;padding:14px 30px;text-transform:uppercase;letter-spacing:.04em}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,.btn:focus-within{outline:3px solid var(--orange);outline-offset:2px}
 input[type=file]{position:absolute;width:1px;height:1px;opacity:0}
-label.pick{display:inline-block}
-input[type=number]{font:inherit;width:7em;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-.grid label{display:flex;flex-direction:column;gap:4px}
-.banner{background:var(--warn-bg);color:var(--warn-ink);border-radius:8px;padding:10px 14px;font-weight:600;margin:0 0 12px}
+label.pick{display:inline-flex;align-items:center}
+input[type=number]{font:inherit;width:8em;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.grid label{display:flex;flex-direction:column;gap:6px;font-size:16px}
+.status{color:var(--muted);font-size:16px}
+.banner{background:var(--warn-bg);color:var(--warn-ink);border-radius:8px;padding:10px 14px;font-weight:600;margin:0 0 14px;font-size:16px}
 .err{color:var(--bad);font-weight:600}
-.table-wrap{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:14px}
-th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:right;white-space:nowrap}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:16px}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:right;white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
-th{font-weight:600;color:var(--muted);vertical-align:bottom;white-space:normal}
-details summary{cursor:pointer;color:var(--accent)}
-footer{color:var(--muted);font-size:14px;margin-top:24px}
+th{font-weight:600;color:var(--muted);vertical-align:bottom;white-space:normal;font-size:15px}
+.ex td.bar-cell{width:45%}
+.ex .meter{height:14px;border-radius:7px;background:var(--orange);min-width:4px}
+.ex .meter.low{background:#9FB0C4}
+details summary{cursor:pointer;color:var(--navy);font-weight:600}
+.phone-note{display:none;background:var(--alt);border-radius:10px;padding:14px 16px;margin:0 0 16px;font-size:17px}
+@media (max-width:700px),(pointer:coarse) and (max-width:1024px){.phone-note{display:block}}
+@media (max-width:560px){body{font-size:17px}.hero{padding:24px 0 32px}.bar svg{height:44px;width:172px}.wrap{padding:0 16px}.bar .tag{display:none}.promise{padding:22px 18px}.card{padding:18px 16px}.step{gap:12px}.num{width:32px;height:32px;font-size:16px}.ex td.bar-cell{width:30%}th,td{padding:8px 6px}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+footer{padding:32px 0 48px;color:var(--muted);font-size:16px}
+footer b{color:var(--ink)}
 </style>
 </head>
 <body>
-<main>
-<h1>Payer check</h1>
-<p>See what each payer costs your practice, from your own 835 remits and your fee schedule.</p>
-
-<div class="card promise">
-<h2>Your files never leave this computer</h2>
-<p>Everything runs in this browser tab. The page has no code that talks to the internet and no links to other sites, and its security policy tells the browser to block every fetch, upload and outside file the page could ask for.</p>
-<p class="muted">How your IT person can check: save this page, turn off Wi-Fi, open the saved copy and run it. It works the same. They can also watch the browser's Network panel during a run (it stays empty) or read the source, which is one file with nothing loaded from anywhere.</p>
+<header class="top">
+<div class="wrap">
+<div class="bar">
+<svg viewBox="0 0 344 88" role="img" aria-label="Serious AI Partners. We stake the result."><path d="M41.0 16.6 L72.1 69.0 L9.9 69.0 Z" fill="none" stroke="#FFFFFF" stroke-width="2.44" stroke-linejoin="miter" stroke-miterlimit="10"/><path d="M28.5 51.3 L36.7 59.8 L52.3 44.6" fill="none" stroke="#FF5A1F" stroke-width="5.18" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="10"/><text x="96" y="47" font-family="Montserrat,Arial,sans-serif" font-weight="700" font-size="34" letter-spacing="3.4" fill="#FFFFFF">SERIOUS AI</text><text x="96" y="73" font-family="Inter,Arial,sans-serif" font-weight="500" font-size="11.5" letter-spacing="6" fill="#A9B6C6">WE STAKE THE RESULT</text></svg>
+<span class="tag">Free payer check</span>
 </div>
+<div class="hero">
+<p class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="11" rx="2" fill="none" stroke="#FF5A1F" stroke-width="2.4"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="#FF5A1F" stroke-width="2.4"/></svg>Free, private, nothing uploaded</p>
+<h1>See what each insurance company really costs your practice</h1>
+<p class="lede">Denials, visits paid at a lower level than you billed, payments short of your contract, and the staff time spent chasing all of it, added up <b>payer by payer</b>. Free to use, and it runs entirely on your own computer.</p>
 
+<div class="promise" id="promise">
+<h2><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="11" rx="2" fill="none" stroke="#FF5A1F" stroke-width="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="#FF5A1F" stroke-width="2"/></svg>Your files never leave your computer</h2>
+<ul class="checks">
+<li>Nothing is uploaded, not to us and not to anyone else.</li>
+<li>No sign-up, no account, no email address.</li>
+<li>It works with your internet turned off.</li>
+</ul>
+<p>This page works like a calculator that lives inside your web browser. Your billing files are read right here on your screen, and the results save back to your own computer. <b>Want to see for yourself?</b> Once this page has loaded, turn off your Wi-Fi and run the check. It works the same.</p>
+<details><summary>For your IT team: how to verify this in a few minutes</summary>
+<ol>
+<li>Save this page, disconnect from the network, open the saved copy and run it. It works the same.</li>
+<li>Open the browser's developer tools, go to the Network panel and run a check. The list stays empty.</li>
+<li>Read the page's first lines. Its Content Security Policy (<code>default-src 'none'; connect-src 'none'</code>) tells the browser to block every fetch, upload and outside file the page could ask for. The policy doesn't govern the page sending the tab elsewhere, so the page has no links and no code that opens another site.</li>
+<li>Read the source. It's one file with nothing loaded from anywhere, and the code is public with an automated test that fails the build on any network request.</li>
+</ol>
+</details>
+</div>
+</div>
+</div>
+</header>
+
+<main>
+<section class="alt">
+<div class="wrap">
+<p class="eyebrow">What you get</p>
+<h2>One number per insurance company: what it costs you for every $100 it pays</h2>
+<p>Here's what the check shows for a made-up practice, so you know what to expect before you gather anything.</p>
 <div class="card">
-<h2>1. Your 835 files</h2>
-<p class="muted">Choose the folder your clearinghouse saves remits to. Every file in it that starts with an ISA segment gets read.</p>
+<div class="banner">Sample data: 90 days of made-up payments for a made-up practice. These numbers are not results.</div>
+<div class="table-wrap"><table class="ex" id="example"><thead><tr><th>Insurance company</th><th>Paid in 90 days</th><th>Cost per $100 paid</th><th class="bar-cell"><span class="sr">Compared</span></th></tr></thead><tbody>
+<tr data-payer="SAMPLE PLAN A" data-cost="0.69"><td>Sample Plan A</td><td>$935,709</td><td><b>$0.69</b></td><td class="bar-cell"><div class="meter low" style="width:10%"></div></td></tr>
+<tr data-payer="SAMPLE PLAN B" data-cost="2.91"><td>Sample Plan B</td><td>$703,261</td><td><b>$2.91</b></td><td class="bar-cell"><div class="meter" style="width:41%"></div></td></tr>
+<tr data-payer="SAMPLE PLAN C" data-cost="7.15"><td>Sample Plan C</td><td>$675,079</td><td><b>$7.15</b></td><td class="bar-cell"><div class="meter" style="width:100%"></div></td></tr>
+<tr data-payer="SAMPLE PLAN D" data-cost="5.60"><td>Sample Plan D</td><td>$686,025</td><td><b>$5.60</b></td><td class="bar-cell"><div class="meter" style="width:78%"></div></td></tr>
+</tbody></table></div>
+<p class="small" style="margin-top:12px">In this example, Plan C costs the practice about ten times what Plan A does for every dollar it pays, mostly from payments short of contract and slow payment. The full results break each payer down by denials, lower-level payments, short payments, reversals and days to pay, and name the claims worth pulling.</p>
+</div>
+</div>
+</section>
+
+<section>
+<div class="wrap">
+<p class="eyebrow">What you'll need</p>
+<h2>Two files your billing team already has</h2>
+<p class="phone-note">On a phone? Everything here is readable, but the check itself works best on the computer where your billing files are saved. Open this same link there.</p>
+<div class="card step">
+<div class="num">1</div>
+<div>
+<h3>Insurance payment files, ideally the last 90 days</h3>
+<p>Your clearinghouse or billing system can export these. They often go by ERA, 835 or electronic remittance. If someone else handles your billing, ask them for "the 835 files for the last 90 days" and they'll know what you mean.</p>
 <div class="row">
 <label class="pick btn" for="remit-folder">Choose a folder</label><input id="remit-folder" type="file" webkitdirectory multiple>
 <label class="pick btn" for="remit-files">Or choose files</label><input id="remit-files" type="file" multiple>
-<span id="remit-status" class="muted">Nothing chosen yet</span>
+</div>
+<p id="remit-status" class="status" style="margin:10px 0 0">Nothing chosen yet</p>
 </div>
 </div>
-
-<div class="card">
-<h2>2. Your fee schedule</h2>
-<p class="muted">A CSV with the columns payer, cpt and contracted_allowed, plus an optional effective date (YYYY-MM-DD) for rates that change. Payer names need to match the payer name in the 835s.</p>
+<div class="card step">
+<div class="num">2</div>
+<div>
+<h3>Your contracted rates</h3>
+<p>A spreadsheet with one row for each insurance company and billing code: the insurance company's name (as it appears on its payments), the code and your contracted rate. Download the template, fill it in, and save it as a CSV file.</p>
 <div class="row">
-<label class="pick btn" for="fee-file">Choose the CSV</label><input id="fee-file" type="file" accept=".csv,text/csv">
-<span id="fee-status" class="muted">Nothing chosen yet</span>
+<button type="button" id="fee-template">Download the template</button>
+<label class="pick btn" for="fee-file">Choose your rates file</label><input id="fee-file" type="file" accept=".csv,text/csv">
 </div>
-<details style="margin-top:10px"><summary>Assumptions (change them to match your office)</summary>
-<div class="grid" style="margin-top:10px" id="inputs">
+<p id="fee-status" class="status" style="margin:10px 0 0">Nothing chosen yet</p>
+<details style="margin-top:14px"><summary>Adjust the assumptions (optional)</summary>
+<div class="grid" style="margin-top:12px" id="inputs">
 <label>Staff cost an hour, in dollars<input id="i-hourly" type="number" min="0" step="0.01" value="30.00"></label>
 <label>Denied dollars never recovered, in percent<input id="i-wo" type="number" min="0" max="100" step="0.1" value="46.0"></label>
 <label>A claim counts as slow after this many days<input id="i-slow" type="number" min="1" max="365" step="1" value="30"></label>
 </div>
-<p class="muted" style="margin-top:10px">Staff minutes for each time a claim needs handling again: 20 to work a denial, 15 to review a visit paid at a lower code, 5 for a short pay, 10 to re-post a reversal, 6 for a status check on a slow claim. These and the hourly cost are illustrative. The 46% is the rest of Premier's figure from hospitals and health systems on 2022 claims (March 21, 2024: 54.3% of claims private payers first denied were eventually paid), so put in your own rate if you track it.</p>
+<p class="small" style="margin-top:12px">Staff minutes each time a claim needs handling again: 20 to work a denial, 15 to review a visit paid at a lower code, 5 for a short pay, 10 to re-post a reversal, 6 for a status check on a slow claim. These and the hourly cost are illustrative. The 46% is the rest of Premier's figure from hospitals and health systems on 2022 claims (March 21, 2024: 54.3% of claims private payers first denied were eventually paid), so put in your own rate if you track it.</p>
 </details>
 </div>
-
-<div class="row"><button id="run" class="primary" type="button" disabled>Run the check</button><span id="run-status" class="muted"></span></div>
+</div>
+<div class="card step">
+<div class="num">3</div>
+<div>
+<h3>Run it</h3>
+<p>It reads everything on this computer and shows the results below. Larger practices may take a minute.</p>
+<div class="row"><button id="run" class="primary" type="button" disabled>Run the check</button><span id="run-status" class="status"></span></div>
+</div>
+</div>
+<p class="small">The easiest path is often to forward this page to whoever handles your billing. They'll have both files.</p>
 
 <div id="results" class="card" hidden>
 <div id="sample-banner" class="banner" hidden>Sample data: made-up remits from a made-up practice. These numbers are not results.</div>
 <h2>What each payer costs</h2>
-<p id="period" class="muted"></p>
+<p id="period" class="small"></p>
 <div class="table-wrap"><table id="by-payer"><thead><tr>
-<th>Payer</th><th>Claims</th><th>Paid</th><th>Denied claims</th><th>Paid at a lower code</th><th>Paid short of contract</th><th>Reversed claims</th><th>Median days to pay</th><th>Cost per $100 paid</th>
+<th>Payer</th><th>Cost per $100 paid</th><th>Claims</th><th>Paid</th><th>Denied claims</th><th>Paid at a lower code</th><th>Paid short of contract</th><th>Reversed claims</th><th>Median days to pay</th>
 </tr></thead><tbody></tbody></table></div>
-<p id="unpriced" class="muted"></p>
-<p class="muted">Cost per $100 paid adds the dollars paid short (lower codes and short pays, priced at your contract), denied dollars never recovered, and staff time, then sets it against what the payer paid.</p>
-<h2 style="margin-top:16px">Save the results</h2>
+<p class="small" style="margin-top:8px">Wide table: scroll sideways to see every column.</p>
+<p id="unpriced" class="small"></p>
+<p class="small">Cost per $100 paid adds the dollars paid short (lower codes and short pays, priced at your contract), denied dollars never recovered, and staff time, then sets it against what the payer paid.</p>
+<h3 style="margin-top:18px">Save the results to this computer</h3>
 <div class="row">
 <button type="button" data-out="summary-by-payer.csv">Summary by payer</button>
 <button type="button" data-out="summary-by-payer-and-code.csv">Summary by payer and code</button>
 <button type="button" data-out="chart-pull-list.csv">Chart-pull list</button>
 </div>
-<p class="muted" style="margin-top:10px">The two summaries hold totals only, with no patient-level fields. The chart-pull list has a row for every flagged line with its patient account number, so keep it on this computer.</p>
+<p class="small" style="margin-top:12px">The two summaries hold totals only, with no patient-level fields. The chart-pull list has a row for every flagged line with its patient account number, so keep it on this computer.</p>
 </div>
-
-<div class="card">
-<h2>What it reads</h2>
-<p class="muted">From each 835: the payer, each claim's account number, status and received date, the rendering provider, and each service line's codes, dates, amounts and adjustment codes. It never reads the patient's name. No AI model runs here, only plain code you can read in this file.</p>
 </div>
+</section>
 
-<footer>Payer check v0.1 from Serious AI Partners. Code under the Apache License 2.0, text under Creative Commons Attribution 4.0.</footer>
+<section class="alt">
+<div class="wrap">
+<p class="eyebrow">What it looks at</p>
+<h2>Only what's on the payment files</h2>
+<p>From each payment file: the insurance company, each claim's account number, status and date received, the treating provider, and each line's codes, dates, amounts and adjustment codes. It skips the patient's name. No AI runs here, only plain calculations anyone can read in this page's code.</p>
+</div>
+</section>
 </main>
+
+<footer>
+<div class="wrap">
+<p><b>Built by Chris Duff, M.D., at Serious AI Partners.</b> Questions? Reply to the email that brought you here.</p>
+<p>Payer check v0.1. Free to use. Code under the Apache License 2.0, text under Creative Commons Attribution 4.0.</p>
+</div>
+</footer>
 
 <script>
 /* Payer check v0.1. Line for line with payer_check.py. tests/test_page.py runs both on the same files and
@@ -421,8 +534,8 @@ footer{color:var(--muted);font-size:14px;margin-top:24px}
     $('period').textContent = r.files.length + ' files, ' + r.lines.length.toLocaleString('en-US') + ' service lines after reversals, dates of service ' + dateText(r.period[0]) + ' to ' + dateText(r.period[1]) + '.';
     $('by-payer').tBodies[0].innerHTML = r.by_payer.map(function (p) {
       var lower = p.downcoded_lines.toLocaleString('en-US') + (p.downcoded_gap ? ' (' + usd(p.downcoded_gap) + ')' : ''), short = p.short_pay_lines.toLocaleString('en-US') + (p.short_pay_gap ? ' (' + usd(p.short_pay_gap) + ')' : '');
-      return '<tr><td>' + esc(p.payer) + '</td><td>' + p.claims.toLocaleString('en-US') + '</td><td>' + usd(p.paid) + '</td><td>' + p.denied_claims + '</td><td>' + lower + '</td><td>' + short +
-        '</td><td>' + p.reversed_claims + '</td><td>' + (p.days_to_pay_median || 'unknown') + '</td><td><b>' + (p.cost_per_100_paid ? '$' + p.cost_per_100_paid : 'not priced') + '</b></td></tr>';
+      return '<tr><td>' + esc(p.payer) + '</td><td><b>' + (p.cost_per_100_paid ? '$' + p.cost_per_100_paid : 'not priced') + '</b></td><td>' + p.claims.toLocaleString('en-US') + '</td><td>' + usd(p.paid) + '</td><td>' + p.denied_claims + '</td><td>' + lower + '</td><td>' + short +
+        '</td><td>' + p.reversed_claims + '</td><td>' + (p.days_to_pay_median || 'unknown') + '</td></tr>';
     }).join('');
     $('unpriced').textContent = r.payers_without_fees.length ? 'No fee schedule rows for ' + r.payers_without_fees.join(', ') + ', so its dollars are left unpriced. Add its rates to the CSV to price it.' : '';
     $('results').hidden = false;
@@ -433,6 +546,13 @@ footer{color:var(--muted);font-size:14px;margin-top:24px}
       a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     });
+  });
+  /* A blank rates template, made on this computer like the results files. */
+  $('fee-template').addEventListener('click', function () {
+    var csv = 'payer,cpt,description,contracted_allowed,effective\r\nEXAMPLE HEALTH PLAN,99213,Office visit level 3 (replace this row with your own),95.00,\r\n';
+    var url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })), a = document.createElement('a');
+    a.href = url; a.download = 'contracted-rates-template.csv'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   });
   window.payerCheck = { version: VERSION, run: run, toCsv: toCsv };
 })();

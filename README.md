@@ -1,6 +1,14 @@
 # Payer check
 
-See what each payer costs your practice, read from your own 835 remits and your fee schedule.
+See what each insurance company really costs your practice, from your own payment files and your contracted rates. Free to use.
+
+**[Open the payer check](https://serious-ai.github.io/payer-check/payer-check.html)** in any web browser. There's nothing to install and no sign-up.
+
+**Your files never leave your computer.** The page works like a calculator inside your browser. Nothing is uploaded, not to us and not to anyone else, and it works with your internet turned off. Your IT team can verify that in a few minutes (steps below).
+
+You'll need two things your billing team already has: the insurance payment files (835s, also called ERAs) from the last 90 days or so, and a spreadsheet of your contracted rates. The page has a template for the rates.
+
+The rest of this page is for whoever checks the tool on your behalf.
 
 For each payer: claims, dollars paid, denied claims (valued at your contract rate), visits paid at a lower code than billed, lines paid short of contract, reversals, days to pay, the staff time all of that takes, and one number that pulls it together, the cost for every $100 the payer paid you.
 

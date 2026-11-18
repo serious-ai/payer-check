@@ -207,3 +207,42 @@ def test_page_matches_cli_on_edge_cases(browser):
     for k, got in zip(('by_payer', 'by_code', 'pull'), js):
         assert got == pc.to_csv(py[k], py['sample']), k
     assert outside(log, url) == []
+
+
+def test_example_matches_the_cli_on_the_sample():
+    """The worked example near the top of the page is the sample run, row for row, and says Sample data."""
+    import csv, io
+    src = PAGE.read_text()
+    shown = dict(re.findall(r'<tr data-payer="([^"]+)" data-cost="([^"]+)">', src))
+    assert shown, 'the page carries the worked example'
+    assert 'Sample data' in src[src.index('id="example"') - 400:src.index('id="example"')]
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        subprocess.run([sys.executable, str(ROOT / 'payer_check.py'), str(SAMPLE / '835'), str(SAMPLE / 'fee-schedule.csv'),
+                        '--out', d], check=True, capture_output=True)
+        rows = {r['payer']: r for r in csv.DictReader(io.StringIO((Path(d) / 'summary-by-payer.csv').read_text()))}
+    for payer, cost in shown.items():
+        assert rows[payer]['cost_per_100_paid'] == cost, payer
+        paid = '$' + format(round(float(rows[payer]['paid'])), ',')
+        assert re.search(r'data-payer="' + re.escape(payer) + r'"[^\n]*<td>' + re.escape(paid) + '</td>', src), (payer, paid)
+    print(f'\nWorked example matches the CLI sample run for {len(shown)} payers: ' + ', '.join(f'{p} ${c}' for p, c in shown.items()))
+
+
+def test_rates_template_downloads_offline_and_reads(browser, tmp_path):
+    """The template button saves a CSV on this computer, sends nothing, and the template reads as a fee schedule."""
+    url = PAGE.as_uri()
+    ctx, page, log = open_page(browser, url)
+    with page.expect_download() as d:
+        page.click('#fee-template')
+    d.value.save_as(tmp_path / 'template.csv')
+    page.wait_for_timeout(SETTLE_MS)
+    windows = len(ctx.pages)
+    ctx.close()
+    assert windows == 1 and outside(log, url) == []
+    text = (tmp_path / 'template.csv').read_text()
+    assert text.splitlines()[0] == 'payer,cpt,description,contracted_allowed,effective'
+    sys.path.insert(0, str(ROOT))
+    import payer_check as pc
+    files, _ = fixture_files()
+    pc.run(files, text, dict(hourly='30', writeoff_pct='46', slow_days=30))
+    print(f'\nTemplate saved on this computer ({len(text)} bytes), network requests: 0, windows or tabs open: {windows}')
