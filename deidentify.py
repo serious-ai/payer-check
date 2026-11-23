@@ -13,7 +13,8 @@ Each column is handled by its header, then checked by its contents:
   - Account, encounter, claim, member and similar numbers become random visit codes (164.514(c)): a code is not
     made from anything about the patient, and the key never leaves the practice.
   - Every date becomes its year. When a service date and a payment date sit side by side, the days between them
-    are worked out first and added as a column.
+    are worked out first and added as a column, and the payment date is dropped: a payment year beside the gap
+    could narrow down the service date.
   - Names, addresses, phone numbers, birth dates and other direct identifiers are dropped.
   - Amounts, codes, payer and provider names are kept. Any dates, phone numbers, emails or long numbers typed
     inside them are replaced.
@@ -32,9 +33,12 @@ VERSION = '0.1.0'
 W = lambda s: set(s.split())
 DROP = W('ssn social dob birth birthdate bday address addr street city zip zipcode postal phone tel telephone fax '
          'email mail mailing mobile cell url website ip license lic vehicle vin plate device serial photo picture '
-         'image biometric fingerprint face')
+         'image biometric fingerprint face birthday born')
 AGE = W('age')
-DATE = W('date dt dte dos from thru through admit admission discharge death dod expiration')
+DATE = W('date dt dte dos admit admission discharge death dod expiration posted')
+DATE_RANGE = W('from thru through')          # a date only beside a service word
+SERVICE = W('service svc srv dos')
+NAME_KEEP = W('facility location loc clinic site department dept practice')
 PROVIDER = W('provider prov rendering referring attending ordering supervising doctor physician dr npi clinician '
              'practitioner md staff user operator')
 ID_SUFFIX = W('id num nbr number no key identifier')
@@ -62,16 +66,26 @@ DATE_FMTS = (re.compile(r'^([0-9]{1,2})[/-]([0-9]{1,2})[/-]([0-9]{4}|[0-9]{2})(?
              re.compile(r'^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})(?:[ T].*)?$'))                     # year-month-day
 NUMBER = re.compile(r'^-?\$?[0-9,]*\.?[0-9]+$')
 A = re.ASCII
+MON = r'(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?'
+DATES_IN_TEXT = (r'\b' + MON + r' [0-9]{1,2}(?:st|nd|rd|th)?,? [0-9]{4}\b'        # Mar 4, 2026
+                 r'|\b[0-9]{1,2}[- ]' + MON + r'[- ,]+(?:[0-9]{4}|[0-9]{2})\b'      # 4-Mar-2026
+                 r'|\b[0-9]{1,2}[/-][0-9]{1,2}[/-](?:[0-9]{4}|[0-9]{2})\b'          # 03/04/2026
+                 r'|\b[0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2}\b'                      # 2026-03-04, 2026/03/04
+                 r'|\b' + MON + r' [0-9]{1,2}(?:st|nd|rd|th)?\b'                   # Mar 4
+                 r'|\b[0-9]{1,2}/[0-9]{1,2}\b'                                     # 3/4
+                 r'|\b[0-9]{8}\b')                                                 # 20260304
+AMOUNT_LIKE = re.compile(r'^-?\$?[0-9,]*\.[0-9]+$|^-?\$[0-9,]+$|^-?[0-9]{1,3}(?:,[0-9]{3})+$|^-?[0-9]{1,5}$')
 INLINE = ((re.compile(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', A), '[email]', 'emails'),
           (re.compile(r'(?:[Hh][Tt][Tt][Pp][Ss]?://|[Ww][Ww][Ww]\.)[^ \t\r\n]+', A), '[link]', 'web links'),
           (re.compile(r'\b[0-9]{3}-[0-9]{2}-[0-9]{4}\b', A), '[number]', 'social security numbers'),
           (re.compile(r'(?:\([0-9]{3}\) ?|\b[0-9]{3}[-. ])[0-9]{3}[-. ][0-9]{4}\b', A), '[phone]', 'phone numbers'),
-          (re.compile(r'\b[0-9]{1,2}[/-][0-9]{1,2}[/-](?:[0-9]{4}|[0-9]{2})\b|\b[0-9]{4}-[0-9]{2}-[0-9]{2}\b', A), '[date]', 'dates'),
+          (re.compile(DATES_IN_TEXT, A | re.I), '[date]', 'dates'),
           (re.compile(r'\b[0-9]{1,3}(?:\.[0-9]{1,3}){3}\b', A), '[number]', 'IP addresses'),
           (re.compile(r'\b[0-9]{6,}\b', A), '[number]', 'long numbers'))
 
 
 def tokens(header):
+    header = re.sub(r'([a-z])([A-Z])', r'\1 \2', header)            # PatientDOB reads as patient dob
     return re.sub(r'[^a-z0-9]+', ' ', header.lower().replace('#', ' num ')).split()
 
 
@@ -82,10 +96,14 @@ def classify(header):
         return 'drop', 'a direct identifier (' + ', '.join(sorted(t & DROP)) + ')'
     if t & AGE:
         return 'age', 'ages over 89 become 90+'
-    if t & DATE:
+    if t & DATE or (t & DATE_RANGE and t & SERVICE):
         return 'year', 'a date'
     if t & PROVIDER:
         return 'keep', 'provider details, not the patient'
+    if 'name' in t and t & NAME_KEEP:
+        return 'keep', 'a code or description'
+    if 'name' in t and not t & PAYER:
+        return 'drop', 'a name or person field'
     if (t & ID_SUFFIX and not t & ID_SUFFIX_EXCEPT) or (t & ID and not t & ID_EXCEPT and not t & AMOUNT):
         return 'code', 'an identifying number'
     if t & AMOUNT:
@@ -161,6 +179,17 @@ def rich_text(el):
     return out
 
 
+def serial_ok(v):
+    """An Excel date serial from 1 (Jan 1, 1900) to 2958465 (Dec 31, 9999)."""
+    v = v.strip()
+    if not re.match(r'^[+-]?(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][+-]?[0-9]+)?$', v):
+        return False
+    try:
+        return 1 <= math.floor(float(v)) <= 2958465
+    except OverflowError:
+        return False
+
+
 def col_index(ref):
     n = 0
     for ch in re.match(r'[A-Z]*', ref).group(0):
@@ -210,7 +239,7 @@ def read_xlsx(data):
                 val = (strings[int(v)] if v != '' else '', None)
             elif t == 'inlineStr':
                 val = (next((rich_text(x) for x in c if local(x.tag) == 'is'), ''), None)
-            elif t in (None, 'n') and v != '' and s < len(date_styles) and date_styles[s]:
+            elif t in (None, 'n') and s < len(date_styles) and date_styles[s] and serial_ok(v):
                 val = (v, epoch + datetime.timedelta(days=math.floor(float(v))))
             elif t == 'b':
                 val = ('TRUE' if v == '1' else 'FALSE', None)
@@ -255,20 +284,30 @@ def find_header(rows):
     most = max(counts or [0])
     for i, r in enumerate(rows[:30]):
         filled = [c for c in r if not is_blank(c)]
-        if len(filled) >= max(2, math.ceil(0.6 * most)) and all(c[1] is None and not NUMBER.match(c[0].strip())
-                                                               and parse_date(c) is None for c in filled):
+        words = [c for c in filled if c[1] is None and not NUMBER.match(c[0].strip()) and parse_date(c) is None]
+        if len(filled) >= max(2, math.ceil(0.6 * most)) and all(c[1] is None for c in filled) and 2 * len(words) >= len(filled):
             return i
-    return 0
+    raise ValueError("couldn't find the row of column headers in the first 30 rows")
 
 
-def scrub(text, counts):
-    if NUMBER.match(text.strip()):
+def scrub(cell, counts, amounts=False):
+    """A kept cell with any date, phone, email, link or long number inside it replaced. An Excel date cell
+    becomes [date]. A plain amount passes through, and in an amount column so does any number."""
+    text = cell[0]
+    if cell[1] is not None:
+        counts['dates'] = counts.get('dates', 0) + 1
+        return '[date]'
+    if AMOUNT_LIKE.match(text.strip()) or (amounts and NUMBER.match(text.strip())):
         return text
     for pat, repl, what in INLINE:
         text, n = pat.subn(repl, text)
         if n:
             counts[what] = counts.get(what, 0) + n
     return text
+
+
+SECOND_DATE = ('a second date. The days column carries the gap, and this year beside the service year could narrow '
+               'down the service date')
 
 
 def run(filename, data, overrides=None, seed=None):
@@ -298,8 +337,10 @@ def run(filename, data, overrides=None, seed=None):
         filled = [r[i] for r in body if not is_blank(r[i])]
         dates = sum(1 for c in filled if parse_date(c) is not None)
         if action in ('keep', 'drop') and filled and dates >= 0.8 * len(filled) and reason != 'provider details, not the patient':
-            if action == 'keep' or reason in ('not recognized', 'a date part finer than the year'):
+            if action == 'keep':
                 action, reason = 'year', 'holds dates'
+            elif reason in ('not recognized', 'a date part finer than the year'):
+                reason = 'holds dates of an unknown kind, which could be birth dates (set to Year only if not)'
         if action == 'keep' and len(filled) >= 20:
             texts = [c[0] for c in filled if not NUMBER.match(c[0].strip())]
             if texts and len(set(texts)) > 0.5 * len(texts) and sum(len(x) for x in texts) / len(texts) > 25:
@@ -308,7 +349,8 @@ def run(filename, data, overrides=None, seed=None):
             action, reason = overrides[name], 'set by hand'
         cols.append({'i': i, 'name': name, 'action': action, 'reason': reason, 'filled': len(filled)})
 
-    rand = mulberry32(seed) if seed is not None else (lambda n: secrets.randbelow(n))
+    if seed is None:
+        seed = secrets.randbits(32)                     # the page keeps one per chosen file, so codes hold across changes
     key_rows, prefix_at = [], 0
     for c in cols:
         if c['action'] != 'code':
@@ -323,7 +365,7 @@ def run(filename, data, overrides=None, seed=None):
         width_n = max(4, len(str(len(distinct))))
         prefix = PREFIXES[prefix_at % len(PREFIXES)] + ('' if prefix_at < len(PREFIXES) else str(prefix_at // len(PREFIXES)))
         prefix_at += 1
-        order = shuffled(range(len(distinct)), rand)
+        order = shuffled(range(len(distinct)), mulberry32((seed + 0x9E3779B9 * (c['i'] + 1)) & 0xFFFFFFFF))
         c['map'] = {distinct[k]: prefix + str(n + 1).zfill(width_n) for n, k in enumerate(order)}
         c['rank'] = {distinct[k]: n for n, k in enumerate(order)}
         c['distinct'] = len(distinct)
@@ -336,6 +378,10 @@ def run(filename, data, overrides=None, seed=None):
     pay = next((c for c in year_cols if c is not svc and set(tokens(c['name'])) & W(
         'tran trans transaction paid pay payment pmt posted post deposit check remit era process processed')), None)
     derived = 'Days from %s to %s' % (svc['name'], pay['name']) if svc and pay else None
+    if derived:                                         # a second year beside the gap could narrow the service date
+        for c in year_cols:
+            if c is not svc:
+                c['action'], c['reason'] = 'drop', SECOND_DATE
 
     inline, missing_days, unreadable = {}, 0, {}
     out_rows = []
@@ -354,10 +400,10 @@ def run(filename, data, overrides=None, seed=None):
                     unreadable[c['name']] = unreadable.get(c['name'], 0) + 1
                 v = str(d.year) if d else ''
             elif a == 'age':
-                m = re.match(r'\s*([0-9]+)', v)
+                m = re.match(r'\s*([0-9]+)', v) if cell[1] is None else None
                 v = ('90+' if int(m.group(1)) > 89 else m.group(1)) if m else ''
             else:
-                v = scrub(v, inline)
+                v = scrub(cell, inline, c['reason'] == 'an amount or count')
             out.append(v)
         if derived:
             a, b = parse_date(r[svc['i']]), parse_date(r[pay['i']])
@@ -372,7 +418,7 @@ def run(filename, data, overrides=None, seed=None):
     if any(c['action'] == 'code' for c in cols):
         out_rows.sort(key=lambda x: (x[0], x[1]))
     else:
-        order = shuffled(range(len(out_rows)), rand)
+        order = shuffled(range(len(out_rows)), mulberry32(seed))
         out_rows = [out_rows[k] for k in order]
 
     out_headers = [c['name'] for c in cols if c['action'] != 'drop'] + ([derived] if derived else [])
@@ -421,7 +467,8 @@ def record(filename, sheet, h, body, cols, derived, missing_days, inline, unread
             line = line.replace(' (set by hand).', '.').rstrip('.') + '. Set by hand.'
         L.append('- %s: %s' % (n, line))
     if derived:
-        L.append('- %s: added, worked out before the dates were cut%s.' % (
+        L.append('- %s: added, worked out before the dates were cut%s. Only the service year sits beside it, so the '
+                 'gap can\'t be combined with a second year to narrow down a date.' % (
             derived, ', left blank on %s missing a date' % plural(missing_days, 'row') if missing_days else ''))
     L.append('')
     if inline:
@@ -441,6 +488,8 @@ def record(filename, sheet, h, body, cols, derived, missing_days, inline, unread
                               'no name column found.') + ' Kept provider and payer names are not the patient\'s.',
           '2. Addresses, cities and ZIP codes: ' + note(by('address addr street city zip zipcode postal'), 'none found.'),
           '3. Dates: ' + ('cut to the year in %s.' % ', '.join(years) if years else 'no date column found.')
+          + (' Dropped beside the days column: %s.' % ', '.join(c['name'] for c in cols if c['reason'] == SECOND_DATE)
+             if derived else '')
           + (' Birth dates dropped: %s.' % ', '.join(by('dob birth birthdate bday')) if by('dob birth birthdate bday') else '')
           + (' Ages over 89 shown as 90+.' if any(c['action'] == 'age' for c in cols) else ''),
           '4-5. Phone and fax numbers: ' + note(by('phone tel telephone fax mobile cell'), 'no column found') + ('' if by('phone tel telephone fax mobile cell') else '; any inside kept text are replaced.'),

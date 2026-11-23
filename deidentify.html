@@ -158,7 +158,7 @@ ul.plain li{margin:0 0 10px}
 </div>
 <div class="row" style="margin-top:12px">
 <button type="button" data-out="record" disabled>Save the record of what changed</button>
-<button type="button" data-out="key" disabled>Save the code key (keep it here)</button>
+<button type="button" data-out="key" disabled>Save the code key (for the practice only)</button>
 </div>
 <p class="small" style="margin-top:12px">Send only the shareable copy. The record lists what happened to every column and checks all 18 Safe Harbor identifiers. The key matches each code back to the original account or encounter number, so your team can pull a chart later. It never leaves the practice.</p>
 <details id="record-view" hidden><summary>Read the record here</summary><pre id="record-text"></pre></details>
@@ -202,9 +202,13 @@ ul.plain li{margin:0 0 10px}
   function hits(t, set) { return t.filter(function (w) { return set[w]; }); }
   var DROP = W('ssn social dob birth birthdate bday address addr street city zip zipcode postal phone tel telephone fax ' +
     'email mail mailing mobile cell url website ip license lic vehicle vin plate device serial photo picture ' +
-    'image biometric fingerprint face');
+    'image biometric fingerprint face birthday born');
   var AGE = W('age');
-  var DATE = W('date dt dte dos from thru through admit admission discharge death dod expiration');
+  var DATE = W('date dt dte dos admit admission discharge death dod expiration posted');
+  var DATE_RANGE = W('from thru through'), SERVICE = W('service svc srv dos');
+  var SECOND_DATE = 'a second date. The days column carries the gap, and this year beside the service year could narrow ' +
+    'down the service date';
+  var NAME_KEEP = W('facility location loc clinic site department dept practice');
   var PROVIDER = W('provider prov rendering referring attending ordering supervising doctor physician dr npi clinician ' +
     'practitioner md staff user operator');
   var ID_SUFFIX = W('id num nbr number no key identifier');
@@ -230,23 +234,34 @@ ul.plain li{margin:0 0 10px}
   var PREFIXES = 'VKLMNPQRST';
   var DATE_FMTS = [/^([0-9]{1,2})[/-]([0-9]{1,2})[/-]([0-9]{4}|[0-9]{2})(?:[ T].*)?$/, /^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})(?:[ T].*)?$/];
   var NUMBER = /^-?\$?[0-9,]*\.?[0-9]+$/;
+  var AMOUNT_LIKE = /^-?\$?[0-9,]*\.[0-9]+$|^-?\$[0-9,]+$|^-?[0-9]{1,3}(?:,[0-9]{3})+$|^-?[0-9]{1,5}$/;
+  var MON = '(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\\.?';
+  var DATES_IN_TEXT = '\\b' + MON + ' [0-9]{1,2}(?:st|nd|rd|th)?,? [0-9]{4}\\b' +
+    '|\\b[0-9]{1,2}[- ]' + MON + '[- ,]+(?:[0-9]{4}|[0-9]{2})\\b' +
+    '|\\b[0-9]{1,2}[/-][0-9]{1,2}[/-](?:[0-9]{4}|[0-9]{2})\\b' +
+    '|\\b[0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2}\\b' +
+    '|\\b' + MON + ' [0-9]{1,2}(?:st|nd|rd|th)?\\b' +
+    '|\\b[0-9]{1,2}/[0-9]{1,2}\\b' +
+    '|\\b[0-9]{8}\\b';
   var INLINE = [[/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, '[email]', 'emails'],
     [/(?:[Hh][Tt][Tt][Pp][Ss]?:\/\/|[Ww][Ww][Ww]\.)[^ \t\r\n]+/g, '[link]', 'web links'],
     [/\b[0-9]{3}-[0-9]{2}-[0-9]{4}\b/g, '[number]', 'social security numbers'],
     [/(?:\([0-9]{3}\) ?|\b[0-9]{3}[-. ])[0-9]{3}[-. ][0-9]{4}\b/g, '[phone]', 'phone numbers'],
-    [/\b[0-9]{1,2}[/-][0-9]{1,2}[/-](?:[0-9]{4}|[0-9]{2})\b|\b[0-9]{4}-[0-9]{2}-[0-9]{2}\b/g, '[date]', 'dates'],
+    [new RegExp(DATES_IN_TEXT, 'gi'), '[date]', 'dates'],
     [/\b[0-9]{1,3}(?:\.[0-9]{1,3}){3}\b/g, '[number]', 'IP addresses'],
     [/\b[0-9]{6,}\b/g, '[number]', 'long numbers']];
 
   function tokens(header) {
-    return header.toLowerCase().replace(/#/g, ' num ').replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean);
+    return header.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase().replace(/#/g, ' num ').replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean);
   }
   function classify(header) {
     var t = tokens(header), h;
     if ((h = hits(t, DROP)).length) return ['drop', 'a direct identifier (' + uniq(h).sort().join(', ') + ')'];
     if (hits(t, AGE).length) return ['age', 'ages over 89 become 90+'];
-    if (hits(t, DATE).length) return ['year', 'a date'];
+    if (hits(t, DATE).length || (hits(t, DATE_RANGE).length && hits(t, SERVICE).length)) return ['year', 'a date'];
     if (hits(t, PROVIDER).length) return ['keep', PROVIDER_REASON];
+    if (t.indexOf('name') >= 0 && hits(t, NAME_KEEP).length) return ['keep', 'a code or description'];
+    if (t.indexOf('name') >= 0 && !hits(t, PAYER).length) return ['drop', 'a name or person field'];
     if ((hits(t, ID_SUFFIX).length && !hits(t, ID_SUFFIX_EXCEPT).length) || (hits(t, ID).length && !hits(t, ID_EXCEPT).length && !hits(t, AMOUNT).length))
       return ['code', 'an identifying number'];
     if (hits(t, AMOUNT).length) return ['keep', 'an amount or count'];
@@ -349,6 +364,13 @@ ul.plain li{margin:0 0 10px}
   var BUILTIN_DATE_FMTS = {};
   [[14, 23], [27, 37], [45, 48], [50, 59]].forEach(function (r) { for (var i = r[0]; i < r[1]; i++) BUILTIN_DATE_FMTS[i] = 1; });
   function isDateFormat(code) { return /[dy]/i.test(code.replace(/"[^"]*"|\[[^\]]*\]|\\./g, '')); }
+  /* An Excel date serial from 1 (Jan 1, 1900) to 2958465 (Dec 31, 9999), read the way Python's float() reads it. */
+  function serialOk(v) {
+    var s = v.trim();
+    if (!/^[+-]?(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][+-]?[0-9]+)?$/.test(s)) return false;
+    var n = Math.floor(Number(s));
+    return n >= 1 && n <= 2958465;
+  }
   function colIndex(ref) { var n = 0, m = /^[A-Z]*/.exec(ref)[0]; for (var i = 0; i < m.length; i++) n = n * 26 + m.charCodeAt(i) - 64; return n - 1; }
 
   function readXlsx(u8) {
@@ -380,7 +402,7 @@ ul.plain li{margin:0 0 10px}
             var vEl = kids(c, 'v')[0], v = vEl ? vEl.textContent : '';
             if (t === 's') val = [v !== '' ? strings[parseInt(v, 10)] : '', null];
             else if (t === 'inlineStr') { var is = kids(c, 'is')[0]; val = [is ? richText(is) : '', null]; }
-            else if ((t === null || t === 'n') && v !== '' && s < dateStyles.length && dateStyles[s]) val = [v, epoch + Math.floor(parseFloat(v))];
+            else if ((t === null || t === 'n') && s < dateStyles.length && dateStyles[s] && serialOk(v)) val = [v, epoch + Math.floor(parseFloat(v))];
             else if (t === 'b') val = [v === '1' ? 'TRUE' : 'FALSE', null];
             else val = [v, null];
             while (out.length < i) out.push(['', null]);
@@ -404,11 +426,7 @@ ul.plain li{margin:0 0 10px}
       return Math.floor(((t ^ (t >>> 14)) >>> 0) / 4294967296 * n);
     };
   }
-  function cryptoBelow(n) {
-    var lim = Math.floor(4294967296 / n) * n, b = new Uint32Array(1);
-    do { crypto.getRandomValues(b); } while (b[0] >= lim);
-    return b[0] % n;
-  }
+  function randomSeed() { var b = new Uint32Array(1); crypto.getRandomValues(b); return b[0]; }
   function shuffled(n, rand) {
     var a = []; for (var i = 0; i < n; i++) a.push(i);
     for (i = n - 1; i > 0; i--) { var j = rand(i + 1), x = a[i]; a[i] = a[j]; a[j] = x; }
@@ -422,12 +440,15 @@ ul.plain li{margin:0 0 10px}
     var most = Math.max.apply(null, [0].concat(counts));
     for (var i = 0; i < Math.min(30, rows.length); i++) {
       var filled = rows[i].filter(function (c) { return !isBlank(c); });
-      if (filled.length >= Math.max(2, Math.ceil(0.6 * most)) && filled.every(function (c) { return c[1] === null && !NUMBER.test(c[0].trim()) && parseDate(c) === null; })) return i;
+      var words = filled.filter(function (c) { return c[1] === null && !NUMBER.test(c[0].trim()) && parseDate(c) === null; });
+      if (filled.length >= Math.max(2, Math.ceil(0.6 * most)) && filled.every(function (c) { return c[1] === null; }) && 2 * words.length >= filled.length) return i;
     }
-    return 0;
+    throw new Error("couldn't find the row of column headers in the first 30 rows");
   }
-  function scrub(text, counts) {
-    if (NUMBER.test(text.trim())) return text;
+  function scrub(cell, counts, amounts) {
+    var text = cell[0];
+    if (cell[1] !== null) { counts.dates = (counts.dates || 0) + 1; return '[date]'; }
+    if (AMOUNT_LIKE.test(text.trim()) || (amounts && NUMBER.test(text.trim()))) return text;
     INLINE.forEach(function (p) {
       var n = 0;
       text = text.replace(p[0], function () { n++; return p[1]; });
@@ -442,7 +463,7 @@ ul.plain li{margin:0 0 10px}
   function run(filename, u8, overrides, seed) {
     overrides = overrides || {};
     var base = filename.split(/[\\/]/).pop(), stem = base.replace(/\.(csv|xlsx|txt)$/i, '');
-    var read = u8[0] === 0x50 && u8[1] === 0x4B ? readXlsx(u8) : Promise.resolve({ rows: readCsv(u8), sheet: null });
+    var read = Promise.resolve().then(function () { return u8[0] === 0x50 && u8[1] === 0x4B ? readXlsx(u8) : { rows: readCsv(u8), sheet: null }; });
     return read.then(function (got) {
       var rows = got.rows, sheet = got.sheet;
       if (!rows.length) throw new Error('the file has no rows');
@@ -462,7 +483,8 @@ ul.plain li{margin:0 0 10px}
         var filled = body.map(function (r) { return r[i]; }).filter(function (c) { return !isBlank(c); });
         var dates = filled.filter(function (c) { return parseDate(c) !== null; }).length;
         if ((action === 'keep' || action === 'drop') && filled.length && dates >= 0.8 * filled.length && reason !== PROVIDER_REASON) {
-          if (action === 'keep' || reason === 'not recognized' || reason === 'a date part finer than the year') { action = 'year'; reason = 'holds dates'; }
+          if (action === 'keep') { action = 'year'; reason = 'holds dates'; }
+          else if (reason === 'not recognized' || reason === 'a date part finer than the year') reason = 'holds dates of an unknown kind, which could be birth dates (set to Year only if not)';
         }
         if (action === 'keep' && filled.length >= 20) {
           var texts = filled.map(function (c) { return c[0]; }).filter(function (v) { return !NUMBER.test(v.trim()); });
@@ -476,7 +498,8 @@ ul.plain li{margin:0 0 10px}
         return { i: i, name: name, action: action, auto: auto, reason: reason, filled: filled.length, example: !first ? '' : first[1] !== null ? new Date(first[1] * 864e5).toISOString().slice(0, 10) : first[0] };
       });
 
-      var rand = seed !== undefined && seed !== null ? mulberry32(seed) : cryptoBelow, keyRows = [], prefixAt = 0;
+      if (seed === undefined || seed === null) seed = randomSeed();   /* the page keeps one per chosen file, so codes hold across changes */
+      var keyRows = [], prefixAt = 0;
       cols.forEach(function (c) {
         if (c.action !== 'code') return;
         var distinct = [], known = {};
@@ -484,7 +507,7 @@ ul.plain li{margin:0 0 10px}
         var w = Math.max(4, String(distinct.length).length);
         var prefix = PREFIXES[prefixAt % PREFIXES.length] + (prefixAt < PREFIXES.length ? '' : String(Math.floor(prefixAt / PREFIXES.length)));
         prefixAt++;
-        var order = shuffled(distinct.length, rand);
+        var order = shuffled(distinct.length, mulberry32((seed + 0x9E3779B9 * (c.i + 1)) >>> 0));
         c.map = {}; c.rank = {}; c.distinct = distinct.length;
         order.forEach(function (k, n) { c.map[distinct[k]] = prefix + pad(n + 1, w); c.rank[distinct[k]] = n; });
         distinct.forEach(function (v) { keyRows.push([c.name, v, c.map[v]]); });
@@ -494,6 +517,7 @@ ul.plain li{margin:0 0 10px}
       var svc = yearCols.filter(function (c) { return hits(tokens(c.name), W('dos service svc from')).length; })[0] || null;
       var pay = yearCols.filter(function (c) { return c !== svc && hits(tokens(c.name), W('tran trans transaction paid pay payment pmt posted post deposit check remit era process processed')).length; })[0] || null;
       var derived = svc && pay ? 'Days from ' + svc.name + ' to ' + pay.name : null;
+      if (derived) yearCols.forEach(function (c) { if (c !== svc) { c.action = 'drop'; c.reason = SECOND_DATE; } });
 
       var inline = {}, missingDays = 0, unreadable = {}, outRows = [];
       var firstCode = cols.filter(function (c) { return c.action === 'code'; })[0] || null;
@@ -508,9 +532,9 @@ ul.plain li{margin:0 0 10px}
             if (d === null && !isBlank(cell)) unreadable[c.name] = (unreadable[c.name] || 0) + 1;
             v = d !== null ? String(yearOf(d)) : '';
           } else if (a === 'age') {
-            var m = /^\s*([0-9]+)/.exec(v);
+            var m = cell[1] === null ? /^\s*([0-9]+)/.exec(v) : null;
             v = m ? (parseInt(m[1], 10) > 89 ? '90+' : m[1]) : '';
-          } else v = scrub(v, inline);
+          } else v = scrub(cell, inline, c.reason === 'an amount or count');
           out.push(v);
         });
         if (derived) {
@@ -521,7 +545,7 @@ ul.plain li{margin:0 0 10px}
         outRows.push([rank, idx, out]);
       });
       if (firstCode) outRows.sort(function (x, y) { return x[0] - y[0] || x[1] - y[1]; });
-      else { var order = shuffled(outRows.length, rand); outRows = order.map(function (k) { return outRows[k]; }); }
+      else { var order = shuffled(outRows.length, mulberry32(seed)); outRows = order.map(function (k) { return outRows[k]; }); }
 
       var outHeaders = cols.filter(function (c) { return c.action !== 'drop'; }).map(function (c) { return c.name; }).concat(derived ? [derived] : []);
       keyRows.sort(function (x, y) { return x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : x[2] < y[2] ? -1 : x[2] > y[2] ? 1 : 0; });
@@ -561,7 +585,8 @@ ul.plain li{margin:0 0 10px}
       if (c.reason === 'set by hand') line = line.replace(' (set by hand).', '.').replace(/\.+$/, '') + '. Set by hand.';
       L.push('- ' + n + ': ' + line);
     });
-    if (derived) L.push('- ' + derived + ': added, worked out before the dates were cut' + (missingDays ? ', left blank on ' + plural(missingDays, 'row') + ' missing a date' : '') + '.');
+    if (derived) L.push('- ' + derived + ': added, worked out before the dates were cut' + (missingDays ? ', left blank on ' + plural(missingDays, 'row') + ' missing a date' : '') + '. Only the service year sits beside it, so the ' +
+      'gap can\'t be combined with a second year to narrow down a date.');
     L.push('');
     var ik = Object.keys(inline);
     L.push(ik.length ? 'Inside kept columns, replaced: ' + ik.map(function (k) { return fmt(inline[k]) + ' ' + k; }).join(', ') + '.'
@@ -578,6 +603,7 @@ ul.plain li{margin:0 0 10px}
       '1. Names: ' + note(cols.filter(function (c) { return c.action === 'drop' && c.reason === 'a name or person field'; }).map(function (c) { return c.name; }), 'no name column found.') + ' Kept provider and payer names are not the patient\'s.',
       '2. Addresses, cities and ZIP codes: ' + note(by('address addr street city zip zipcode postal'), 'none found.'),
       '3. Dates: ' + (years.length ? 'cut to the year in ' + years.join(', ') + '.' : 'no date column found.') +
+        (derived ? ' Dropped beside the days column: ' + cols.filter(function (c) { return c.reason === SECOND_DATE; }).map(function (c) { return c.name; }).join(', ') + '.' : '') +
         (births.length ? ' Birth dates dropped: ' + births.join(', ') + '.' : '') +
         (cols.some(function (c) { return c.action === 'age'; }) ? ' Ages over 89 shown as 90+.' : ''),
       '4-5. Phone and fax numbers: ' + note(by('phone tel telephone fax mobile cell'), 'no column found') + inText('phone tel telephone fax mobile cell'),
@@ -600,14 +626,17 @@ ul.plain li{margin:0 0 10px}
   /* ---------- the page ---------- */
   var $ = function (id) { return document.getElementById(id); };
   var LABELS = { code: 'Random code', year: 'Year only', age: 'Keep, 90+ for ages over 89', keep: 'Keep', drop: 'Drop' };
-  var chosen = null, overrides = {}, outputs = null;
+  var chosen = null, overrides = {}, outputs = null, runId = 0, savedSince = false;
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function short(s) { s = String(s); return s.length > 40 ? s.slice(0, 40) + '...' : s; }
   function go() {
     if (!chosen) return;
     $('summary').className = 'status';
     $('summary').textContent = 'Working on this computer...';
-    run(chosen.name, chosen.bytes, overrides).then(function (r) {
+    var mine = ++runId, stale = savedSince;
+    savedSince = false;
+    run(chosen.name, chosen.bytes, overrides, chosen.seed).then(function (r) {
+      if (mine !== runId) return;
       outputs = r.files;
       $('columns').tBodies[0].innerHTML = r.cols.map(function (c) {
         var opts = ['code', 'year'].concat(c.auto === 'age' ? ['age'] : []).concat(['keep', 'drop']);
@@ -617,18 +646,25 @@ ul.plain li{margin:0 0 10px}
       }).join('');
       $('columns-wrap').hidden = false; $('columns-empty').hidden = true;
       var kept = r.cols.filter(function (c) { return c.action !== 'drop'; }).length;
-      $('summary').textContent = 'Ready: ' + fmt(r.rows) + ' rows, ' + kept + ' of ' + r.cols.length + ' columns kept. Nothing has left this computer.';
+      $('summary').textContent = 'Ready: ' + fmt(r.rows) + ' rows, ' + kept + ' of ' + r.cols.length + ' columns kept. Nothing has left this computer.' +
+        (stale ? ' A column changed after you saved, so save all three files again to keep them matched.' : '');
       [].forEach.call(document.querySelectorAll('[data-out]'), function (b) { b.disabled = false; });
       $('record-text').textContent = outputs[Object.keys(outputs)[1]];
       $('record-view').hidden = false;
-    }).catch(function (e) { $('summary').className = 'err'; $('summary').textContent = 'Stopped: ' + e.message; });
+    }).catch(function (e) {
+      if (mine !== runId) return;
+      outputs = null;
+      [].forEach.call(document.querySelectorAll('[data-out]'), function (b) { b.disabled = true; });
+      $('summary').className = 'err'; $('summary').textContent = 'Stopped: ' + e.message;
+    });
   }
   $('report-file').addEventListener('change', function () {
     var f = this.files[0];
     if (!f) return;
     overrides = {};
     $('file-status').textContent = f.name + ' (' + fmt(Math.ceil(f.size / 1024)) + ' KB), read on this computer';
-    f.arrayBuffer().then(function (b) { chosen = { name: f.name, bytes: new Uint8Array(b) }; go(); });
+    savedSince = false;
+    f.arrayBuffer().then(function (b) { chosen = { name: f.name, bytes: new Uint8Array(b), seed: randomSeed() }; go(); });
   });
   $('columns').addEventListener('change', function (e) {
     var s = e.target;
@@ -644,6 +680,7 @@ ul.plain li{margin:0 0 10px}
       var url = URL.createObjectURL(new Blob([outputs[name]], { type: type })), a = document.createElement('a');
       a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      savedSince = true;
     });
   });
   window.deidentify = { version: VERSION, run: run, classify: classify };
