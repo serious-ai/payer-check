@@ -1,0 +1,1409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The browser blocks every fetch, upload and outside file. It doesn't govern navigating the tab, so the page has no links or code that do, and tests/test_pnl_normalizer.py checks it. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="A free tool that sorts a medical practice's QuickBooks P&amp;L into standard cost categories and lists likely owner add-backs. It runs on your own computer, and your files are never uploaded.">
+<title>Free P&amp;L normalizer | Serious AI Partners</title>
+<style>
+:root{color-scheme:light;--navy:#0D1C37;--navy-2:#1D3857;--orange:#FF5A1F;--orange-ink:#C43C08;--ink:#090519;--body:#2C2C2C;--muted:#4A5260;--on-navy:#C9D3DF;--bg:#FFFFFF;--alt:#F5F6F8;--line:#DCE1E8;--warn-bg:#FFF1D6;--warn-ink:#5A4100;--bad:#A11B1B}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--body);font:18px/1.6 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+h1,h2,h3{font-family:Montserrat,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.2}
+h1{font-size:clamp(32px,5vw,48px);margin:0 0 16px;color:#fff;letter-spacing:-.01em}
+h2{font-size:clamp(24px,3.2vw,30px);margin:0 0 12px}
+h3{font-size:20px;margin:0 0 6px}
+p{margin:0 0 14px}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+header.top{background:var(--navy);color:#fff}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0;border-bottom:1px solid var(--navy-2)}
+.bar svg{height:56px;width:219px;display:block}
+.bar .tag{color:var(--on-navy);font-size:15px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.hero{padding:36px 0 44px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,90,31,.14);border:1px solid rgba(255,90,31,.55);color:#fff;border-radius:999px;padding:6px 14px;font-size:15px;font-weight:600;margin:0 0 16px}
+.badge svg{width:18px;height:18px;flex:none}
+.hero .lede{font-size:clamp(19px,2.4vw,22px);color:#E6EAF0;max-width:40em}
+.hero .lede b{color:#fff}
+.promise{background:var(--navy-2);color:#fff;border-radius:14px;padding:26px 28px;margin:28px 0 0;border-left:6px solid var(--orange)}
+.promise h2{color:#fff;display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.promise h2 svg{flex:none;width:34px;height:34px}
+.checks{list-style:none;margin:0 0 16px;padding:0}
+.checks li{position:relative;padding-left:34px;margin:0 0 10px;font-size:clamp(18px,2.2vw,21px);font-weight:600}
+.checks li::before{content:"";position:absolute;left:4px;top:.38em;width:14px;height:8px;border-left:3px solid var(--orange);border-bottom:3px solid var(--orange);transform:rotate(-45deg)}
+.promise p{color:var(--on-navy);margin:0 0 10px}
+.promise p b{color:#fff}
+.promise details{margin-top:6px}
+.promise summary{color:#fff;font-weight:600}
+.promise details p,.promise details li{color:var(--on-navy);font-size:16px}
+.promise details ol{margin:10px 0 0;padding-left:22px}
+.promise code{color:#fff;font-size:15px}
+section{padding:40px 0;border-bottom:1px solid var(--line)}
+section.alt{background:var(--alt)}
+.eyebrow{color:var(--orange-ink);font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 8px}
+.muted{color:var(--muted)}
+small,.small{font-size:16px;color:var(--muted)}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;margin:18px 0}
+.step{display:flex;gap:16px;align-items:flex-start}
+.num{flex:none;width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:18px;margin-top:2px}
+.step > div:not(.num){flex:1;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+button,.btn{font:inherit;font-size:17px;font-weight:600;border:2px solid var(--navy);background:#fff;color:var(--navy);border-radius:8px;padding:11px 20px;cursor:pointer;min-height:48px}
+button.primary{background:var(--orange);border-color:var(--orange);color:var(--ink);font-size:19px;padding:14px 30px;text-transform:uppercase;letter-spacing:.04em}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,.btn:focus-within{outline:3px solid var(--orange);outline-offset:2px}
+input[type=file]{position:absolute;width:1px;height:1px;opacity:0}
+label.pick{display:inline-flex;align-items:center}
+input[type=number]{font:inherit;width:8em;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.grid label{display:flex;flex-direction:column;gap:6px;font-size:16px}
+.status{color:var(--muted);font-size:16px}
+.banner{background:var(--warn-bg);color:var(--warn-ink);border-radius:8px;padding:10px 14px;font-weight:600;margin:0 0 14px;font-size:16px}
+.err{color:var(--bad);font-weight:600}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:16px}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;color:var(--muted);vertical-align:bottom;white-space:normal;font-size:15px}
+.ex td.bar-cell{width:45%}
+.ex .meter{height:14px;border-radius:7px;background:var(--orange);min-width:4px}
+.ex .meter.low{background:#9FB0C4}
+details summary{cursor:pointer;color:var(--navy);font-weight:600}
+.phone-note{display:none;background:var(--alt);border-radius:10px;padding:14px 16px;margin:0 0 16px;font-size:17px}
+@media (max-width:700px),(pointer:coarse) and (max-width:1024px){.phone-note{display:block}}
+@media (max-width:560px){body{font-size:17px}.hero{padding:24px 0 32px}.bar svg{height:44px;width:172px}.wrap{padding:0 16px}.bar .tag{display:none}.promise{padding:22px 18px}.card{padding:18px 16px}.step{gap:12px}.num{width:32px;height:32px;font-size:16px}.ex td.bar-cell{width:30%}th,td{padding:8px 6px}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+footer{padding:32px 0 48px;color:var(--muted);font-size:16px}
+footer b{color:var(--ink)}
+select{font:inherit;font-size:16px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);min-height:40px}
+#columns td{white-space:normal;text-align:left;vertical-align:top}
+#columns th{text-align:left}
+#columns td:nth-child(2){color:var(--muted);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;word-break:break-all}
+pre{white-space:pre-wrap;font-size:14px;background:var(--alt);border-radius:8px;padding:14px;margin:10px 0 0}
+ul.plain{padding-left:22px}
+ul.plain li{margin:0 0 10px}
+input[type=text]{font:inherit;width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+#review td{white-space:normal}
+#review td,#review th{text-align:left}
+#review td:nth-child(4),#review th:nth-child(4){text-align:right}
+#cats td:first-child{white-space:normal;min-width:12em}
+#review td:last-child{text-align:left;font-size:15px;color:var(--muted)}
+#cats td:last-child{white-space:normal}
+</style>
+</head>
+<body>
+<header class="top">
+<div class="wrap">
+<div class="bar">
+<svg viewBox="0 0 344 88" role="img" aria-label="Serious AI Partners. We stake the result."><path d="M41.0 16.6 L72.1 69.0 L9.9 69.0 Z" fill="none" stroke="#FFFFFF" stroke-width="2.44" stroke-linejoin="miter" stroke-miterlimit="10"/><path d="M28.5 51.3 L36.7 59.8 L52.3 44.6" fill="none" stroke="#FF5A1F" stroke-width="5.18" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="10"/><text x="96" y="47" font-family="Montserrat,Arial,sans-serif" font-weight="700" font-size="34" letter-spacing="3.4" fill="#FFFFFF">SERIOUS AI</text><text x="96" y="73" font-family="Inter,Arial,sans-serif" font-weight="500" font-size="11.5" letter-spacing="6" fill="#A9B6C6">WE STAKE THE RESULT</text></svg>
+<span class="tag">Free P&amp;L normalizer</span>
+</div>
+<div class="hero">
+<p class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="11" rx="2" fill="none" stroke="#FF5A1F" stroke-width="2.4"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="#FF5A1F" stroke-width="2.4"/></svg>Free, private, nothing uploaded</p>
+<h1>See what the practice really costs to run</h1>
+<p class="lede">Drop in your QuickBooks exports and card statements. The page sorts every dollar into <b>standard medical practice cost categories</b>, sets them next to public benchmarks, and lists the charges that look personal so the owner can answer them in one pass.</p>
+
+<div class="promise" id="promise">
+<h2><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="11" rx="2" fill="none" stroke="#FF5A1F" stroke-width="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="#FF5A1F" stroke-width="2"/></svg>Your files never leave your computer</h2>
+<ul class="checks">
+<li>Nothing is uploaded, not to us and not to anyone else.</li>
+<li>No sign-up, no account, no email address.</li>
+<li>It works with your internet turned off.</li>
+</ul>
+<p>This page works like a calculator that lives inside your web browser. Your files are read right here on your screen, and the results save back to your own computer. <b>Want to see for yourself?</b> Once this page has loaded, turn off your Wi-Fi and run it. It works the same.</p>
+<details><summary>For your IT team: how to verify this in a few minutes</summary>
+<ol>
+<li>Save this page, disconnect from the network, open the saved copy and run it. It works the same.</li>
+<li>Open the browser's developer tools, go to the Network panel and run it. The list stays empty.</li>
+<li>Read the page's first lines. Its Content Security Policy (<code>default-src 'none'; connect-src 'none'</code>) tells the browser to block every fetch, upload and outside file the page could ask for. The policy doesn't govern the page sending the tab elsewhere, so the page has no links and no code that opens another site.</li>
+<li>Read the source. It's one file with nothing loaded from anywhere, and the code is public with an automated test that fails the build on any network request.</li>
+</ol>
+</details>
+</div>
+</div>
+</div>
+</header>
+
+<main>
+<section>
+<div class="wrap">
+<p class="eyebrow">Three steps</p>
+<h2>Choose the files, set the providers, save the results</h2>
+<p class="phone-note">On a phone? Everything here is readable, but this works best on the computer where the exports are saved. Open this same link there.</p>
+<div class="card step">
+<div class="num">1</div>
+<div>
+<h3>Choose every file at once</h3>
+<p>CSV or Excel (.xlsx) exports, as they come out. The page works out which is which.</p>
+<ul class="plain">
+<li><b>Profit and Loss by Month</b> from QuickBooks, the last 12 months or more. This alone gives the cost picture.</li>
+<li><b>Transaction Detail by Account</b> (or a General Ledger) for the same months. This is what finds personal charges.</li>
+<li><b>Card statements</b> downloaded from the card's own website, for any card the practice pays (Amex, Chase, Capital One, Bank of America, Citi and most others).</li>
+<li>Optional: <b>Expenses by Vendor Summary</b>, used only when there's no line detail, and the <b>answered review list</b> from an earlier run.</li>
+</ul>
+<div class="row">
+<label class="pick btn" for="files">Choose the files</label><input id="files" type="file" multiple accept=".csv,.xlsx,.txt,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+</div>
+<p id="file-status" class="status" style="margin:10px 0 0">Nothing chosen yet</p>
+</div>
+</div>
+
+<div class="card step">
+<div class="num">2</div>
+<div>
+<h3>Tell it who works there</h3>
+<p>Provider counts turn costs into per-provider figures. Family last names catch payments to relatives.</p>
+<div class="grid">
+<label>Physicians (full-time equivalents)<input id="physicians" type="number" min="0" step="0.1" value="1"></label>
+<label>NPs and PAs (full-time equivalents)<input id="apps" type="number" min="0" step="0.1" value="0"></label>
+<label>Owner and family last names, comma separated<input id="family" type="text" autocomplete="off" spellcheck="false"></label>
+</div>
+</div>
+</div>
+
+<div class="card step">
+<div class="num">3</div>
+<div>
+<h3>Check the results and save them</h3>
+<p id="summary" class="status">Waiting for files.</p>
+<div id="results" hidden>
+<p class="small">Files read:</p>
+<ul class="plain" id="file-list"></ul>
+<div class="table-wrap"><table id="totals"><thead><tr><th>One year</th><th>Amount</th></tr></thead><tbody></tbody></table></div>
+<h3 style="margin-top:22px">Operating cost by category</h3>
+<div class="table-wrap"><table id="cats"><thead><tr><th>Category</th><th>Normalized</th><th>Share of revenue</th><th>Benchmark</th><th>Compared</th></tr></thead><tbody></tbody></table></div>
+<h3 style="margin-top:22px">For the owner to answer</h3>
+<p id="review-count" class="small"></p>
+<div class="table-wrap"><table id="review"><thead><tr><th>Confidence</th><th>Payee</th><th>Looks like</th><th>A year</th><th>Why</th></tr></thead><tbody></tbody></table></div>
+</div>
+<div class="row" style="margin-top:16px">
+<button type="button" class="primary" data-out="shareable" disabled>Save the shareable results</button>
+</div>
+<div class="row" style="margin-top:12px">
+<button type="button" data-out="1" disabled>Save only the review list</button>
+<button type="button" data-out="4" disabled>Save the name key (keep it here)</button>
+</div>
+<p class="small" style="margin-top:12px">The shareable results are four files: the normalized cost table, the review list, the line detail and a record of what the page did. They hold no patient names: patient refund and income lines are rolled up to one total per year with no names, and other people's names become codes. The name key matches each code back to the real name. It never leaves the practice.</p>
+<details id="record-view"><summary>Read the record here</summary><pre id="record-text"></pre></details>
+</div>
+</div>
+</div>
+</section>
+<section class="alt">
+<div class="wrap">
+<p class="eyebrow">What it does</p>
+<h2>A cleaner P&amp;L, and a short list for the owner</h2>
+<ul class="plain">
+<li><b>Every account lands in a standard cost category</b> (support staff, building, supplies, billing, insurance and the rest), so the practice can be set beside others. Provider pay, interest, depreciation and taxes are kept apart.</li>
+<li><b>Charges that look personal are grouped by payee</b> and sorted by how likely they are to be owner spending: High is counted as an add-back now, Medium waits for the owner's answer, and Low is a store worth sampling.</li>
+<li><b>The owner answers once.</b> Write personal, business or a percent next to each line of the review list, add that file next time, and the totals update.</li>
+<li><b>It checks its own math.</b> The account lines are added back up and compared with the report's own totals, and the record says if they differ.</li>
+<li><b>Patient details stay out.</b> Refunds to patients and income lines are rolled up with no names, memos are never written out, and names of individuals become codes.</li>
+</ul>
+<p>No AI runs here, only plain rules anyone can read in this page's code. The benchmarks are the best public figures and are dated; the record says where each comes from.</p>
+</div>
+</section>
+</main>
+<footer>
+<div class="wrap">
+<p><b>Built by Chris Duff, M.D., at Serious AI Partners.</b> Questions? Reply to the email this link came in, or ask the person who forwarded it.</p>
+<p>P&amp;L normalizer v0.1. Free to use. Code under the Apache License 2.0, text under Creative Commons Attribution 4.0.</p>
+</div>
+</footer>
+<script>
+/* P&L normalizer v0.1. Line for line with pnl_normalizer.py. tests/test_pnl_normalizer.py runs both on the same files and
+   requires byte-identical output, and fails the build on any network request from this page. */
+(function () {
+  'use strict';
+  var VERSION = '0.1.0';
+  var LEVEL_NAMES = { 3: 'High', 2: 'Medium', 1: 'Low', 0: '' };
+  var OUT = ['pnl-normalized-overhead.csv', 'pnl-add-back-review.csv', 'pnl-line-detail.csv', 'pnl-record.txt', 'pnl-name-key.csv'];
+
+  /* ---------- text ---------- */
+  function norm(s) { return ' ' + s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').split(' ').filter(Boolean).join(' ') + ' '; }
+  function strip(s) { return s.replace(/^\s+|\s+$/g, ''); }
+  function phrases(s) { return s.split('|').map(function (p) { return strip(norm(p)); }).filter(Boolean); }
+  function hit(text, plist) { for (var i = 0; i < plist.length; i++) if (text.indexOf(' ' + plist[i] + ' ') >= 0) return plist[i]; return null; }
+  function toks(s) { return strip(norm(s)).split(' ').filter(Boolean); }
+  function words(s) { return s.split(/\s+/).filter(Boolean); }
+  function capWords(s) { return s.split(' ').map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' '); }
+  function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
+  function setOf(list) { var o = {}; list.forEach(function (x) { o[x] = 1; }); return o; }
+  function pad2(n) { n = String(n); return n.length < 2 ? '0' + n : n; }
+  function pct(fmt, args) { var i = 0; return fmt.replace(/%[sd]/g, function () { return String(args[i++]); }); }
+
+  /* ---------- MGMA cost categories (DataDive Cost & Revenue glossary, 2023) ---------- */
+  var AAFP = 'MGMA via AAFP FPM 2010, family medicine, 2008 data';
+  var CATEGORIES = [
+    ['support_staff', 'Support staff (salaries, payroll taxes, benefits)', 320, 'MGMA 2026 APP Staffing and Access report, primary care, 2025 data: roughly 30-34% at the median'],
+    ['it', 'Information technology (software, EHR, phones, internet)', 19, AAFP],
+    ['drug', 'Drug supply', 34, AAFP],
+    ['med_surg', 'Medical and surgical supply', 17, AAFP],
+    ['building', 'Building and occupancy', 68, AAFP],
+    ['equipment', 'Furniture and equipment', 3, AAFP + ' (depreciation left out)'],
+    ['admin', 'Administrative supplies and services', 17, AAFP],
+    ['prof_liability', 'Professional liability insurance', 15, AAFP],
+    ['other_insurance', 'Other insurance premiums', 2, AAFP],
+    ['prof_fees', 'Outside professional fees (legal, consulting, accounting)', 9, AAFP],
+    ['marketing', 'Promotion and marketing', 4, AAFP],
+    ['lab', 'Clinical laboratory', 33, AAFP],
+    ['imaging', 'Radiology and imaging', 9, AAFP],
+    ['ancillary', 'Other ancillary services', null, ''],
+    ['billing', 'Billing and collections purchased services', 50, 'MGMA Stat 2025: revenue cycle about 5% of collections when outsourced'],
+    ['management', 'Management fees paid to an MSO', null, ''],
+    ['misc', 'Miscellaneous operating cost', 17, AAFP]
+  ];
+  var TOTAL_REF = [664, 'MGMA Better Performers report (Dec 2023), primary care, 2022 data: $443,682 of $667,995 per FTE physician'];
+  var OTHER_CATS = [['provider_comp', 'Provider pay and benefits (physicians, NPs, PAs)'], ['non_operating', 'Interest, depreciation, amortization, income taxes'],
+    ['revenue', 'Practice revenue'], ['other_income', 'Other income (not from patient care)'],
+    ['card_lump', 'Card charges with no matching QuickBooks row (booked in a lump, account not known)']];
+  var CAT_LABEL = {};
+  CATEGORIES.forEach(function (c) { CAT_LABEL[c[0]] = c[1]; });
+  OTHER_CATS.forEach(function (c) { CAT_LABEL[c[0]] = c[1]; });
+  var OVERHEAD = CATEGORIES.map(function (c) { return c[0]; });
+
+  /* ---------- account rules: first match wins ---------- */
+  var COMP = phrases('salary|salaries|wages|wage|compensation|comp|payroll|bonus|bonuses|pay|draw guaranteed');
+  var PROVIDER = phrases('physician|physicians|provider|providers|doctor|doctors|md|mds|np|nps|pa|pas|nurse practitioner|' +
+    'nurse practitioners|physician assistant|physician assistants|mid level|midlevel|app|apps|clinician|clinicians');
+  var OWNER_PAY = phrases('officer|officers|owner|owners|shareholder|shareholders|member|members|partner|partners');
+  var ACCOUNT_RULES = [
+    ['personal protective|ppe', 'med_surg', 0, '', ''],
+    ['personal property tax|property tax|property taxes', 'building', 0, '', ''],
+    ['owner draw|owner draws|draws|shareholder draw|member draw|distribution|distributions|personal|owner expense|' +
+     'owner expenses|owners expense|shareholder expense|due from shareholder|due from owner', 'misc', 3, 'Personal',
+     'an owner or personal account booked as a practice expense'],
+    ['charitable|charity|donation|donations', 'misc', 3, 'Personal', 'charitable giving is the owner\'s choice, not a practice cost'],
+    ['political|lobbying', 'misc', 3, 'Personal', 'political giving is not a practice cost'],
+    ['life insurance|officer life|key man|keyman|owner disability', 'other_insurance', 3, 'Personal',
+     'insurance on the owner\'s own life or income'],
+    ['interest|depreciation|amortization|income tax|income taxes|franchise tax|state tax|federal tax|corporate tax|' +
+     'llc fee|gain on|loss on sale', 'non_operating', 0, '', ''],
+    ['capitation', 'revenue', 0, '', ''],
+    ['locum|locums|locum tenens|guaranteed payment|guaranteed payments', 'provider_comp', 0, '', ''],
+    ['payroll service|payroll services|payroll processing|payroll fees|payroll fee', 'admin', 0, '', ''],
+    ['payroll tax|payroll taxes|employer taxes|fica|futa|suta|sui|sdi|ett|salaries|salary|wages|wage|payroll|' +
+     'employee benefits|benefits|health insurance|group health|medical insurance|dental insurance|vision insurance|' +
+     'workers comp|workers compensation|worker s comp|worker s compensation|401k|401 k|retirement|pension|' +
+     'profit sharing|bonus|bonuses|staffing|temp agency|temporary help|contract labor|employee|employees',
+     'support_staff', 0, '', ''],
+    ['settlement|lawsuit|litigation|judgment|penalty|penalties|fines|relocation|moving expense|moving expenses|' +
+     'non recurring|nonrecurring|one time', 'misc', 2, 'One-time', 'looks like a one-time cost, not a running one'],
+    ['billing|clearinghouse|revenue cycle|rcm|claims processing|collection agency|collection agencies|' +
+     'collections agency|availity|waystar|office ally|trizetto|change healthcare', 'billing', 0, '', ''],
+    ['management fee|management fees|mso', 'management', 0, '', ''],
+    ['malpractice|professional liability|med mal|medical liability', 'prof_liability', 0, '', ''],
+    ['insurance|umbrella|cyber|general liability', 'other_insurance', 0, '', ''],
+    ['lab|labs|laboratory|reference lab|quest|labcorp|pathology', 'lab', 0, '', ''],
+    ['radiology|imaging|x ray|xray|ultrasound|mri', 'imaging', 0, '', ''],
+    ['drug|drugs|pharmaceutical|pharmaceuticals|vaccine|vaccines|injectable|injectables|medication|medications|' +
+     'pharmacy', 'drug', 0, '', ''],
+    ['medical supplies|medical supply|clinical supplies|clinic supplies|surgical|exam supplies|med supplies|' +
+     'mckesson|henry schein|medline', 'med_surg', 0, '', ''],
+    ['club|clubs|country club|golf', 'misc', 3, 'Personal', 'club dues and golf are personal unless the owner shows otherwise'],
+    ['dues and subscriptions|dues subscriptions', 'admin', 0, '', ''],
+    ['software|computer|computers|it|technology|internet|ehr|emr|nextgen|electronic health|subscription|' +
+     'subscriptions|hosting|telephone|telephones|phone|phones|telecom|telecommunications|answering service|fax|' +
+     'data processing|cloud', 'it', 0, '', ''],
+    ['equipment|furniture|copier|copiers|fixtures', 'equipment', 0, '', ''],
+    ['rent|lease|leases|occupancy|utilities|utility|electric|electricity|gas and electric|gas electric|water|sewer|' +
+     'trash|waste|refuse|janitorial|cleaning|custodial|repairs|repair|maintenance|security|alarm|landscaping|' +
+     'pest control|building|facility|facilities|cam|common area', 'building', 0, '', ''],
+    ['legal|attorney|attorneys|lawyer|accounting|accountant|cpa|bookkeeping|consulting|consultant|consultants|' +
+     'professional fees|professional services|tax preparation|credentialing|outside services', 'prof_fees', 0, '', ''],
+    ['advertising|marketing|promotion|promotional|website|web design|seo|google ads|yelp|social media|sponsorship|' +
+     'sponsorships|public relations', 'marketing', 0, '', ''],
+    ['office supplies|office supply|office expense|office expenses|postage|shipping|delivery|courier|printing|' +
+     'bank charges|bank fees|bank service|service charges|merchant fees|merchant|credit card fees|card processing|' +
+     'processing fees|dues|memberships|membership|publications|books|licenses|license|permits|permit|' +
+     'continuing education|education|training|cme|seminars|conference|conferences|recruiting|recruitment|uniforms|' +
+     'laundry|shredding|stationery|supplies|taxes|tax', 'admin', 0, '', ''],
+    ['physical therapy|ancillary|dme|durable medical', 'ancillary', 0, '', ''],
+    ['meals|meal|entertainment|travel|airfare|lodging|hotel|hotels|auto|automobile|autos|vehicle|vehicles|car|cars|' +
+     'fuel|gasoline|gas|mileage|parking|tolls|gift|gifts', 'misc', 2, 'Personal',
+     'an account that often mixes personal and practice spending'],
+    ['ask my accountant|uncategorized|uncategorised|suspense', 'misc', 2, 'Review', 'a catch-all account nobody has sorted'],
+    ['miscellaneous|misc', 'misc', 1, 'Review', 'a catch-all account']
+  ].map(function (r) { return [phrases(r[0]), r[1], r[2], r[3], r[4]]; });
+
+  function accountRule(text, section) {
+    if (section === 'income') return ['revenue', 0, '', '', true];
+    if (section === 'other_income') return ['other_income', 0, '', '', true];
+    var i;
+    for (i = 0; i < 7; i++) if (hit(text, ACCOUNT_RULES[i][0])) return [ACCOUNT_RULES[i][1], ACCOUNT_RULES[i][2], ACCOUNT_RULES[i][3], ACCOUNT_RULES[i][4], true];
+    if (hit(text, OWNER_PAY) && hit(text, COMP)) return ['provider_comp', 0, 'Owner pay', '', true];
+    if (hit(text, PROVIDER) && hit(text, COMP)) return ['provider_comp', 0, '', '', true];
+    for (i = 7; i < ACCOUNT_RULES.length; i++) if (hit(text, ACCOUNT_RULES[i][0])) return [ACCOUNT_RULES[i][1], ACCOUNT_RULES[i][2], ACCOUNT_RULES[i][3], ACCOUNT_RULES[i][4], true];
+    if (section === 'other_expense') return ['non_operating', 0, '', '', false];
+    return ['misc', 0, '', '', false];
+  }
+
+  /* ---------- payee rules: [label, phrases, category hint, level, kind, weekend-sensitive] ---------- */
+  var VENDOR_RULES = [
+    ['Food delivery', 'doordash|uber eats|ubereats|grubhub|postmates|caviar', 'misc', 2, 'Personal', true],
+    ['Streaming and entertainment', 'netflix|hulu|disney plus|disneyplus|spotify|hbo max|max com|peacock|paramount|' +
+     'youtube tv|youtube premium|siriusxm|sirius xm|audible|playstation|xbox|nintendo|steam games|steampowered|' +
+     'ticketmaster|stubhub|live nation|seatgeek|amc theatres|amc theaters|regal cinemas|regal theatre|cinemark|' +
+     'fandango|disneyland|disney resort|walt disney world|universal studios|six flags|knotts|legoland', 'misc', 3, 'Personal', true],
+    ['Clothing and personal shopping', 'nordstrom|neiman marcus|saks|bloomingdale s|bloomingdales|louis vuitton|gucci|' +
+     'prada|chanel|hermes|tiffany|cartier|rolex|sephora|ulta|lululemon|nike|adidas|macy s|macys|old navy|zara|' +
+     'anthropologie|j crew|banana republic|jewelry|jeweler|jewelers', 'misc', 3, 'Personal', true],
+    ['School, childcare and kids', 'tuition|preschool|daycare|day care|montessori|tutoring|kumon|mathnasium|' +
+     'summer camp|little league|toys r us|build a bear|lego store', 'misc', 3, 'Personal', false],
+    ['Personal care, fitness and clubs', 'salon|nail|nails|barber|massage envy|hand and stone|equinox|' +
+     '24 hour fitness|la fitness|planet fitness|orangetheory|soulcycle|peloton|crunch fitness|gold s gym|golf|' +
+     'country club|topgolf', 'misc', 3, 'Personal', true],
+    ['Leisure travel', 'resort|cruise|carnival|royal caribbean|norwegian cruise|princess cruise|airbnb|vrbo|' +
+     'vail resorts|mammoth mountain|sandals|club med|ski', 'misc', 3, 'Personal', true],
+    ['Charitable giving', 'donation|church|parish|synagogue|mosque|gofundme|red cross|united way|st jude|unicef|' +
+     'charity', 'misc', 3, 'Personal', false],
+    ['Political giving', 'actblue|winred|for congress|for senate|for assembly|for mayor|campaign', 'misc', 3, 'Personal', false],
+    ['Alcohol', 'bevmo|total wine|liquor|wine com|winery|vineyard|brewery|brewing', 'misc', 3, 'Personal', true],
+    ['Pets', 'petco|petsmart|chewy|veterinary|banfield|vca animal', 'misc', 3, 'Personal', false],
+    ['Home furnishings and garden', 'wayfair|williams sonoma|pottery barn|restoration hardware|crate barrel|' +
+     'west elm|pool supply|pool service|nursery', 'misc', 2, 'Personal', true],
+    ['Meals and dining', 'restaurant|grill|cafe|bistro|sushi|steakhouse|steak house|pizza|pizzeria|taqueria|ramen|' +
+     'bbq|tavern|starbucks|coffee|peet s|chipotle|cheesecake factory|ruth s chris|mastro s|nobu|in n out|panera|tst',
+     'misc', 2, 'Personal', true],
+    ['Groceries', 'whole foods|wholefds|trader joe s|safeway|vons|ralphs|albertsons|sprouts|gelson s|erewhon|kroger|' +
+     'smart final|aldi|grocery', 'misc', 2, 'Personal', true],
+    ['Air travel', 'united airlines|united air|delta air|american airlines|american air|southwest air|southwest airlines|' +
+     'alaska air|jetblue|spirit airl|frontier airlines|hawaiian air|airline|airlines', 'misc', 2, 'Personal', true],
+    ['Hotels', 'marriott|hilton|hyatt|sheraton|westin|ritz carlton|four seasons|hotel|motel|expedia|booking com|' +
+     'hotels com', 'misc', 2, 'Personal', true],
+    ['Rides and rental cars', 'uber|lyft|hertz|avis|enterprise rent|national car|budget rent', 'misc', 2, 'Personal', true],
+    ['Vehicle and fuel', 'shell oil|shell service|chevron|arco|mobil|exxon|valero|costco gas|tesla supercharger|' +
+     'chargepoint|car wash|carwash|jiffy lube|dmv|bmw financial|mercedes benz financial|mb financial|' +
+     'toyota financial|lexus financial|honda financial|tesla motors|tesla inc|porsche|audi financial|ford credit|' +
+     'ally auto', 'misc', 2, 'Personal', false],
+    ['Person-to-person transfer', 'venmo|zelle|cash app|square cash|apple cash', 'misc', 2, 'Personal', false],
+    ['Cash withdrawal', 'atm|cash withdrawal', 'misc', 2, 'Personal', false],
+    ['Personal insurance', 'geico|progressive|state farm|allstate|farmers insurance|mercury insurance|' +
+     'northwestern mutual|mass mutual|massmutual|new york life|prudential|life insurance', 'other_insurance', 2, 'Personal', false],
+    ['Gifts and flowers', 'gift|gifts|flowers|1 800 flowers|ftd|proflowers|edible arrangements|harry david', 'misc', 2, 'Personal', false],
+    ['Mixed-use retailer', 'amazon|amzn|costco|target|walmart|wal mart|sam s club|home depot|lowe s|lowes|best buy|' +
+     'apple store|apple com|ebay|etsy|paypal|ikea|bed bath', 'misc', 1, 'Review', true],
+    ['Office supplier', 'staples|office depot|officemax|uline|usps|ups store|fedex|stamps com|pitney bowes', 'admin', 0, '', false],
+    ['Medical supplier', 'mckesson|henry schein|medline|cardinal health|moore medical|bound tree|concordance', 'med_surg', 0, '', false],
+    ['Reference lab', 'quest diagnostics|labcorp|laboratory corporation', 'lab', 0, '', false],
+    ['Software and phones', 'google workspace|gsuite|microsoft|adobe|zoom|dropbox|docusign|nextgen|athenahealth|' +
+     'verizon|at t|t mobile|comcast|spectrum|cox communications|ringcentral', 'it', 0, '', false],
+    ['Billing and clearinghouse', 'availity|waystar|office ally|trizetto|change healthcare', 'billing', 0, '', false],
+    ['Utilities', 'southern california edison|socalgas|so cal gas|ladwp|waste management|republic services|pg e', 'building', 0, '', false]
+  ].map(function (r) { return [r[0], phrases(r[1]), r[2], r[3], r[4], r[5]]; });
+  var P2P_LABEL = 'Person-to-person transfer';
+  var P2P_WORDS = setOf(phrases('zelle|venmo|cash|app|square|apple|payment|payments|pmt|to|from|sent|send|transfer|' +
+    'web|id|conf|confirmation|online|mobile|pay|p2p|debit|card|purchase|recurring|des|indn|co|' +
+    'ppd|ccd|web id|ach|xfer|inst|jpm|chase|bofa|wf'));
+
+  var CARD_CATS = [
+    ['restaurant|restaurants|dining|food drink|bars', 'misc', 2, 'Personal', 'Meals and dining (card category)', true],
+    ['groceries|grocery|supermarkets', 'misc', 2, 'Personal', 'Groceries (card category)', true],
+    ['travel|airline|airlines|airfare|lodging|hotel|hotels', 'misc', 2, 'Personal', 'Travel (card category)', true],
+    ['entertainment', 'misc', 2, 'Personal', 'Entertainment (card category)', true],
+    ['gas|gasoline|automotive|fuel', 'misc', 2, 'Personal', 'Vehicle and fuel (card category)', false],
+    ['personal|home', 'misc', 2, 'Personal', 'Personal or home (card category)', true],
+    ['gifts donations|donations|charity|charities', 'misc', 3, 'Personal', 'Gifts and donations (card category)', false],
+    ['shopping|merchandise|retail', 'misc', 1, 'Review', 'Shopping (card category)', true],
+    ['professional services', 'prof_fees', 0, '', '', false],
+    ['bills utilities|utilities', 'building', 0, '', '', false],
+    ['fees adjustments|fees', 'admin', 0, '', '', false]
+  ].map(function (r) { return [phrases(r[0]), r[1], r[2], r[3], r[4], r[5]]; });
+
+  var BUSINESS_WORDS = setOf(phrases(
+    'inc|llc|llp|lp|pc|pllc|corp|corporation|co|company|companies|group|services|service|medical|medicine|health|' +
+    'healthcare|bank|insurance|store|stores|market|supply|supplies|labs|lab|laboratory|center|centre|clinic|' +
+    'associates|partners|pharmacy|systems|solutions|software|tech|technologies|technology|city|county|state|' +
+    'department|dept|of|the|and|usa|america|american|national|financial|capital|management|consulting|cpa|law|' +
+    'office|offices|studio|foods|food|electric|edison|gas|water|power|energy|wireless|communications|southern|' +
+    'northern|california|pacific|valley|west|east|north|south|united|first|golden|sun|hospital|imaging|radiology|' +
+    'diagnostics|billing|collections|express|international|global|enterprises|holdings|trust|fund|foundation|' +
+    'university|college|school|academy|church|club|plan|care|staffing|solutions|network|depot|mart|shop|warehouse|' +
+    'payroll|irs|franchise|tax|board|ftb|edd|dmv|usps|ups|fedex|amazon|google|apple|microsoft|adobe|verizon|' +
+    'comcast|spectrum|cleaning|janitorial|landscaping|security|alarm|realty|properties|property|leasing|rentals|' +
+    'motors|auto|construction|plumbing|electrical|printing|marketing|media|design|agency|associates|ltd|dds|' +
+    'dmd|od|pt|chiropractic|dental|vision|optometry'));
+  var PERSON = /^[A-Za-z][A-Za-z'.-]*(?:,? +[A-Za-z][A-Za-z'.-]*){1,3}$/;
+  var US_STATES = setOf('AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY'.split(' '));
+  var INCOME_WORDS = phrases('income|revenue|revenues|fee for service|capitation|patient payments|insurance payments|' +
+    'sales|collections|copay|copays|medicare|medi cal|medicaid');
+  var BALANCE_WORDS = phrases('checking|savings|bank|receivable|receivables|payable|payables|loan|loans|line of credit|' +
+    'equity|retained earnings|opening balance|undeposited|credit card|visa|mastercard|amex|' +
+    'american express|accrued|prepaid|deposit|deposits|accumulated|fixed asset|fixed assets|' +
+    'liabilities|liability|draw|draws|distribution|distributions|capital stock|petty cash');
+  var MONEY_WORDS = phrases('checking|savings|bank|credit card|card|visa|mastercard|amex|american express|petty cash|cash|' +
+    'chase|wells fargo|bofa|capital one|citi|undeposited');
+  var REFUND_WORDS = phrases('refund|refunds|refunded|overpayment|overpayments|credit balance|credit balances');
+  var PATIENT_WORDS = phrases('patient|patients|pt|pts|overpayment|overpayments|credit balance|credit balances');
+  var PAYMENT_WORDS = phrases('payment thank you|autopay|auto pay|online payment|epayment|payment received|mobile payment|' +
+    'thank you|payment');
+  var STRONG_PAYMENT = phrases('payment thank you|autopay payment|auto pay|online payment thank|epayment|payment received|' +
+    'internet payment');
+  var NOT_INCOME = phrases('agency|expense|expenses|refund|refunds|tax|taxes');
+  var PREFIX_WORDS = setOf(phrases('sq|tst|sp|pp|py|dd|in|paypal|pos|purchase|debit|card|recurring|ach|checkcard|chk'));
+  var LOW_LIST_MIN = 100000;
+  var MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+  var FULL_MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+  function monthOfToken(t) {
+    var i = MONTHS.indexOf(t); if (i >= 0) return i + 1;
+    i = FULL_MONTHS.indexOf(t); if (i >= 0) return i + 1;
+    return t === 'sept' ? 9 : 0;
+  }
+
+  /* ---------- numbers: integer cents, rounded half away from zero ---------- */
+  function divRound(n, d) {
+    if (d <= 0) return 0;
+    var q = Math.floor((2 * Math.abs(n) + d) / (2 * d));
+    return n < 0 ? -q : q;
+  }
+  function cents(cell) {
+    if (cell[1] !== null) return null;
+    var s = strip(cell[0]).replace(/ /g, '').replace(/ /g, '');
+    if (s === '') return null;
+    var neg = false;
+    if (s.charAt(0) === '(' && s.charAt(s.length - 1) === ')') { neg = true; s = s.slice(1, -1); }
+    s = s.replace(/\$/g, '').replace(/,/g, '');
+    if (s.charAt(s.length - 1) === '-') { neg = !neg; s = s.slice(0, -1); }
+    if (s.charAt(0) === '-') { neg = !neg; s = s.slice(1); } else if (s.charAt(0) === '+') s = s.slice(1);
+    var m = /^([0-9]*)(?:\.([0-9]*))?$/.exec(s);
+    if (m && (m[1] || m[2])) {
+      var frac = m[2] || '';
+      if (frac.length <= 2) {
+        var c = parseInt(m[1] || '0', 10) * 100 + parseInt((frac + '00').slice(0, 2), 10);
+        return neg ? -c : c;
+      }
+    }
+    if (!/^(?:[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?|[0-9]+\.)$/.test(s)) return null;
+    var f = Math.floor(parseFloat(s) * 100 + 0.5);
+    return neg ? -f : f;
+  }
+  function money(c) { var a = Math.abs(c); return (c < 0 ? '-' : '') + Math.floor(a / 100) + '.' + pad2(a % 100); }
+  function tenths(t) { var a = Math.abs(t); return (t < 0 ? '-' : '') + Math.floor(a / 10) + '.' + (a % 10); }
+  function fnv(s) {
+    var b = new TextEncoder().encode(s), h = 0x811C9DC5;
+    for (var i = 0; i < b.length; i++) h = Math.imul(h ^ b[i], 0x01000193) >>> 0;
+    var x = h.toString(16).toUpperCase(); while (x.length < 8) x = '0' + x;
+    return 'R' + x;
+  }
+
+  /* ---------- dates, as whole days since 1970-01-01 ---------- */
+  function ymd(y, m, d) {
+    if (m < 1 || m > 12 || d < 1 || y < 1) return null;
+    var t = Date.UTC(y, m - 1, d), dt = new Date(t);
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) return null;
+    return Math.round(t / 864e5);
+  }
+  function parseDate(cell) {
+    if (cell[1] !== null) return cell[1];
+    var s = strip(cell[0]), m = /^([0-9]{1,2})[/-]([0-9]{1,2})[/-]([0-9]{4}|[0-9]{2})(?:[ T].*)?$/.exec(s);
+    if (m) {
+      var y = parseInt(m[3], 10);
+      if (m[3].length === 2) y += y <= 69 ? 2000 : 1900;
+      return ymd(y, parseInt(m[1], 10), parseInt(m[2], 10));
+    }
+    m = /^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})(?:[ T].*)?$/.exec(s);
+    if (m) return ymd(parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10));
+    return null;
+  }
+  function dparts(day) { var d = new Date(day * 864e5); return [d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate(), d.getUTCDay()]; }
+  function iso(day) { var p = dparts(day); var y = String(p[0]); while (y.length < 4) y = '0' + y; return y + '-' + pad2(p[1]) + '-' + pad2(p[2]); }
+  function ymOf(day) { var p = dparts(day); return p[0] * 12 + p[1] - 1; }
+  function yearOf(day) { return dparts(day)[0]; }
+  function isWeekend(day) { var w = dparts(day)[3]; return w === 0 || w === 6; }
+  function ymText(ym) { var y = String(Math.floor(ym / 12)); while (y.length < 4) y = '0' + y; return y + '-' + pad2(ym % 12 + 1); }
+
+  function monthLabel(cell) {
+    if (cell[1] !== null) { var p = dparts(cell[1]); return p[0] * 12 + p[1] - 1; }
+    var s = strip(cell[0]), m = /^([0-9]{1,2})\/([0-9]{4})$/.exec(s);
+    if (m && parseInt(m[1], 10) >= 1 && parseInt(m[1], 10) <= 12) return parseInt(m[2], 10) * 12 + parseInt(m[1], 10) - 1;
+    m = /^([0-9]{4})-([0-9]{2})$/.exec(s);
+    if (m && parseInt(m[2], 10) >= 1 && parseInt(m[2], 10) <= 12) return parseInt(m[1], 10) * 12 + parseInt(m[2], 10) - 1;
+    var t = toks(s), found = t.map(monthOfToken).filter(Boolean);
+    if (!found.length || Object.keys(setOf(found)).length !== 1 || t.indexOf('total') >= 0) return null;
+    var year = null, seen = false;
+    t.forEach(function (x) {
+      if (monthOfToken(x)) seen = true;
+      else if (/^(19|20)[0-9]{2}$/.test(x)) year = parseInt(x, 10);
+      else if (seen && year === null && /^[0-9]{2}$/.test(x)) year = 2000 + parseInt(x, 10);
+    });
+    if (year === null) return null;
+    return year * 12 + found[0] - 1;
+  }
+  function titleRange(text) {
+    var t = toks(text), marks = [], i, j;
+    for (i = 0; i < t.length; i++) {
+      var mo = monthOfToken(t[i]);
+      if (mo) {
+        var yr = null;
+        for (j = i + 1; j < Math.min(t.length, i + 4); j++) {
+          if (monthOfToken(t[j])) break;
+          if (/^(19|20)[0-9]{2}$/.test(t[j])) { yr = parseInt(t[j], 10); break; }
+        }
+        marks.push([mo, yr]);
+      }
+    }
+    var re = /([0-9]{1,2})\/[0-9]{1,2}\/([0-9]{4})/g, m;
+    while ((m = re.exec(text)) !== null) marks.push([parseInt(m[1], 10), parseInt(m[2], 10)]);
+    if (!marks.length) return null;
+    for (i = marks.length - 2; i >= 0; i--) if (marks[i][1] === null) marks[i][1] = marks[i + 1][1];
+    if (marks[0][1] === null || marks[marks.length - 1][1] === null) return null;
+    var a = marks[0][1] * 12 + marks[0][0] - 1, b = marks[marks.length - 1][1] * 12 + marks[marks.length - 1][0] - 1;
+    if (b < a) return null;
+    return [a, b - a + 1];
+  }
+
+  /* ---------- readers: rows of [text, day or null] ---------- */
+  function decode(u8) {
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(u8); } catch (e) {
+      var s = ''; for (var i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]); return s;
+    }
+  }
+  /* The same reading as Python's csv module (excel dialect). */
+  function readCsv(u8) {
+    var t = decode(u8), rows = [], row = [], f = '', st = 'rec', i = 0, c;
+    function endRow() { rows.push(row); row = []; st = 'rec'; if (c === '\r' && t[i + 1] === '\n') i++; }
+    for (; i < t.length; i++) {
+      c = t[i];
+      if (st === 'rec') {
+        if (c === '\r' || c === '\n') { endRow(); continue; }
+        st = 'start';
+      }
+      if (st === 'start') {
+        if (c === '"') { st = 'q'; } else if (c === ',') { row.push(''); } else if (c === '\r' || c === '\n') { row.push(''); endRow(); } else { f = c; st = 'f'; }
+      } else if (st === 'f') {
+        if (c === ',') { row.push(f); f = ''; st = 'start'; } else if (c === '\r' || c === '\n') { row.push(f); f = ''; endRow(); } else f += c;
+      } else if (st === 'q') {
+        if (c === '"') st = 'qq'; else f += c;
+      } else {
+        if (c === '"') { f += '"'; st = 'q'; } else if (c === ',') { row.push(f); f = ''; st = 'start'; } else if (c === '\r' || c === '\n') { row.push(f); f = ''; endRow(); } else { f += c; st = 'f'; }
+      }
+    }
+    if (st !== 'rec') { row.push(f); rows.push(row); }
+    return rows.map(function (r) { return r.map(function (v) { return [v, null]; }); });
+  }
+  function unzip(u8) {
+    var dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength), e = u8.length - 22, files = {};
+    while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+    if (e < 0) throw new Error('the file is not a readable Excel (.xlsx) file');
+    var n = dv.getUint16(e + 10, true), p = dv.getUint32(e + 16, true);
+    for (var k = 0; k < n; k++) {
+      if (dv.getUint32(p, true) !== 0x02014b50) throw new Error('the Excel file looks damaged');
+      var nlen = dv.getUint16(p + 28, true), name = new TextDecoder().decode(u8.subarray(p + 46, p + 46 + nlen));
+      files[name] = { method: dv.getUint16(p + 10, true), size: dv.getUint32(p + 20, true), at: dv.getUint32(p + 42, true) };
+      p += 46 + nlen + dv.getUint16(p + 30, true) + dv.getUint16(p + 32, true);
+    }
+    return {
+      has: function (name) { return !!files[name]; },
+      read: function (name) {
+        var f = files[name];
+        if (!f) return Promise.reject(new Error('the Excel file is missing ' + name));
+        var start = f.at + 30 + dv.getUint16(f.at + 26, true) + dv.getUint16(f.at + 28, true), data = u8.slice(start, start + f.size);
+        if (f.method === 0) return Promise.resolve(new TextDecoder().decode(data));
+        if (f.method !== 8) return Promise.reject(new Error('the Excel file uses a compression this page can\'t read'));
+        var stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+        return new Response(stream).arrayBuffer().then(function (b) { return new TextDecoder().decode(new Uint8Array(b)); });
+      }
+    };
+  }
+  function xml(text) { return new DOMParser().parseFromString(text, 'application/xml'); }
+  function all(node, name) { return [].slice.call(node.getElementsByTagNameNS('*', name)); }
+  function kids(node, name) { return [].filter.call(node.children, function (c) { return c.localName === name; }); }
+  function richText(el) {
+    var out = '';
+    [].forEach.call(el.children, function (ch) {
+      if (ch.localName === 't') out += ch.textContent;
+      else if (ch.localName === 'r') kids(ch, 't').forEach(function (t) { out += t.textContent; });
+    });
+    return out;
+  }
+  var BUILTIN_DATE_FMTS = {};
+  [[14, 23], [27, 37], [45, 48], [50, 59]].forEach(function (r) { for (var i = r[0]; i < r[1]; i++) BUILTIN_DATE_FMTS[i] = 1; });
+  function isDateFormat(code) { return /[dy]/i.test(code.replace(/"[^"]*"|\[[^\]]*\]|\\./g, '')); }
+  function colIndex(ref) { var n = 0, m = /^[A-Z]*/.exec(ref)[0]; for (var i = 0; i < m.length; i++) n = n * 26 + m.charCodeAt(i) - 64; return n - 1; }
+  function repeat(s, n) { var o = ''; for (var i = 0; i < n; i++) o += s; return o; }
+
+  function readXlsx(u8) {
+    var z = unzip(u8), get = function (n) { return z.has(n) ? z.read(n) : Promise.resolve(null); };
+    return Promise.all([z.read('xl/workbook.xml'), z.read('xl/_rels/workbook.xml.rels'), get('xl/sharedStrings.xml'), get('xl/styles.xml')]).then(function (parts) {
+      var wb = xml(parts[0]), epoch = Math.round(Date.UTC(1899, 11, 30) / 864e5);
+      all(wb, 'workbookPr').forEach(function (el) { var v = el.getAttribute('date1904'); if (v === '1' || v === 'true') epoch = Math.round(Date.UTC(1904, 0, 1) / 864e5); });
+      var sheet = all(wb, 'sheet')[0], rid = [].filter.call(sheet.attributes, function (a) { return a.localName === 'id'; })[0].value;
+      var target = all(xml(parts[1]), 'Relationship').filter(function (r) { return r.getAttribute('Id') === rid; })[0].getAttribute('Target');
+      var path = target.charAt(0) === '/' ? target.replace(/^\/+/, '') : 'xl/' + target;
+      var strings = parts[2] ? [].filter.call(xml(parts[2]).documentElement.children, function () { return true; }).map(richText) : [];
+      var dateStyles = [], indents = [];
+      if (parts[3]) {
+        var st = xml(parts[3]), custom = {};
+        all(st, 'numFmt').forEach(function (el) { custom[el.getAttribute('numFmtId')] = el.getAttribute('formatCode') || ''; });
+        kids(st.documentElement, 'cellXfs').forEach(function (el) {
+          kids(el, 'xf').forEach(function (xf) {
+            var fid = xf.getAttribute('numFmtId') || '0';
+            dateStyles.push(has(custom, fid) ? isDateFormat(custom[fid]) : !!BUILTIN_DATE_FMTS[parseInt(fid, 10)]);
+            var ind = 0;
+            kids(xf, 'alignment').forEach(function (al) { var v = al.getAttribute('indent') || ''; if (/^[0-9]+$/.test(v)) ind = parseInt(v, 10); });
+            indents.push(ind);
+          });
+        });
+      }
+      return z.read(path).then(function (sheetXml) {
+        return all(xml(sheetXml), 'row').map(function (row) {
+          var out = [], nxt = 0;
+          kids(row, 'c').forEach(function (c) {
+            var r = c.getAttribute('r'), i = r ? colIndex(r) : nxt, t = c.getAttribute('t'), s = parseInt(c.getAttribute('s') || '0', 10), val;
+            nxt = i + 1;
+            var vEl = kids(c, 'v')[0], v = vEl ? vEl.textContent : '', fEl = kids(c, 'f')[0], f = fEl ? strip(fEl.textContent) : '';
+            if (v === '' && /^=?-?[0-9]*\.?[0-9]+$/.test(f)) { v = f.replace(/^=+/, ''); t = 'n'; }
+            var padTxt = s < indents.length ? repeat('  ', indents[s]) : '';
+            if (t === 's') val = [padTxt + (v !== '' ? strings[parseInt(v, 10)] : ''), null];
+            else if (t === 'inlineStr') { var is = kids(c, 'is')[0]; val = [padTxt + (is ? richText(is) : ''), null]; }
+            else if (t === 'str') val = [padTxt + v, null];
+            else if ((t === null || t === 'n') && v !== '' && s < dateStyles.length && dateStyles[s]) val = [v, epoch + Math.floor(parseFloat(v))];
+            else if (t === 'b') val = [v === '1' ? 'TRUE' : 'FALSE', null];
+            else val = [v, null];
+            while (out.length < i) out.push(['', null]);
+            out.push(val);
+          });
+          return out;
+        });
+      });
+    });
+  }
+  function readRows(u8) { return u8[0] === 0x50 && u8[1] === 0x4B ? readXlsx(u8) : Promise.resolve(readCsv(u8)); }
+
+  /* ---------- telling files apart ---------- */
+  var DATE_HEADS = ['transaction date', 'trans date', 'txn date', 'date', 'tran date', 'posted date', 'post date', 'posting date', 'trans dt', 'date posted'];
+  var AMOUNT_HEADS = ['amount', 'amount usd', 'debit', 'credit', 'debit amount', 'credit amount', 'charges', 'charge amount'];
+  function cellNorm(c) { return strip(norm(c[0])); }
+  function findHeader(rows, test) {
+    for (var i = 0; i < Math.min(40, rows.length); i++) if (test(rows[i].map(cellNorm), rows[i])) return i;
+    return -1;
+  }
+  function anyIn(t, list) { return list.some(function (x) { return t.indexOf(x) >= 0; }); }
+  function titleOf(rows, h) { var p = []; rows.slice(0, h).forEach(function (r) { r.forEach(function (c) { p.push(c[0]); }); }); return p.join(' '); }
+  function detect(rows) {
+    var h = findHeader(rows, function (t) { return t.indexOf('review id') >= 0 && t.indexOf('owner decision') >= 0; });
+    if (h >= 0) return ['decisions', h];
+    h = findHeader(rows, function (t) { return t.indexOf('category') >= 0 && t.indexOf('pct of revenue') >= 0; });
+    if (h >= 0) return ['benchmarks', h];
+    h = findHeader(rows, function (t) { return anyIn(t, DATE_HEADS) && anyIn(t, AMOUNT_HEADS); });
+    if (h >= 0) return ['transactions', h];
+    h = findHeader(rows, function (t, r) { return t.slice(1).indexOf('total') >= 0 || r.slice(1).filter(function (c) { return monthLabel(c) !== null; }).length >= 1; });
+    if (h < 0) return ['unknown', -1];
+    var title = norm(titleOf(rows, h)), first = rows[h].length ? cellNorm(rows[h][0]) : '';
+    if (first === 'vendor' || title.indexOf(' vendor ') >= 0) return ['vendors', h];
+    var months = rows[h].slice(1).filter(function (c) { return monthLabel(c) !== null; }).length;
+    if (months || hit(title, phrases('profit and loss|profit loss|income statement|p l')) || first === 'distribution account' || first === 'account') return ['pnl', h];
+    return ['unknown', -1];
+  }
+  function indentOf(v) { return v.length - v.replace(/^ +/, '').length; }
+  var SECTION_NAMES = [['income', phrases('income|revenue|revenues|ordinary income')], ['cogs', phrases('cost of goods sold|cogs|cost of sales')],
+    ['expense', phrases('expenses|expense|operating expenses')], ['other_income', phrases('other income')], ['other_expense', phrases('other expenses|other expense')]];
+  var COMPUTED = phrases('gross profit|net operating income|net ordinary income|net other income|net income|net profit|net loss|net revenue');
+  function sectionOf(label) {
+    var n = strip(norm(label));
+    for (var i = 0; i < SECTION_NAMES.length; i++) if (SECTION_NAMES[i][1].indexOf(n) >= 0) return SECTION_NAMES[i][0];
+    return null;
+  }
+  function totalTarget(label) {
+    var n = strip(norm(label));
+    if (n.length >= 18 && n.slice(-18) === ' with sub accounts') n = n.slice(0, -18);
+    if (n.indexOf('total for ') === 0) return n.slice(10);
+    if (n.indexOf('total ') === 0) return n.slice(6);
+    if (n === 'total') return '';
+    return null;
+  }
+  function accountKey(label) {
+    var segs = label.split(':');
+    return toks(segs[segs.length - 1]).filter(function (t) { return !/^[0-9]+$/.test(t); }).join(' ');
+  }
+
+  /* ---------- the P&L ---------- */
+  function parsePnl(rows, h) {
+    var head = rows[h], mcols = [], i;
+    head.forEach(function (c, i) { if (i > 0 && monthLabel(c) !== null) mcols.push([i, monthLabel(c)]); });
+    var tcol = null;
+    for (i = 1; i < head.length; i++) if (cellNorm(head[i]).split(' ').indexOf('total') >= 0) { tcol = i; break; }
+    var firstAmt = mcols.length ? mcols[0][0] : (tcol !== null ? tcol : 1);
+    var title = titleOf(rows, h);
+    var ms = Object.keys(setOf(mcols.map(function (m) { return m[1]; }))).map(Number).sort(function (a, b) { return a - b; });
+    var pnl = { lines: [], months: ms, fileTotals: {}, single: !mcols.length, range: mcols.length ? null : titleRange(title), skipped: 0 };
+    var cols = mcols.length ? mcols : (tcol !== null ? [[tcol, null]] : []);
+    var body = [];
+    rows.slice(h + 1).forEach(function (r) {
+      var labels = [];
+      r.slice(0, firstAmt).forEach(function (c, i) { if (strip(c[0])) labels.push([i, c[0]]); });
+      if (!labels.length) return;
+      var amts = new Map(), anyAmt = false;
+      cols.forEach(function (cm) {
+        var c = cm[0] < r.length ? cents(r[cm[0]]) : null;
+        if (c !== null) anyAmt = true;
+        amts.set(cm[1], (amts.get(cm[1]) || 0) + (c || 0));
+      });
+      body.push([labels[0][0] * 100 + indentOf(labels[0][1]), strip(labels[0][1]), amts, anyAmt]);
+    });
+    var targets = {};
+    body.forEach(function (b) { var t = totalTarget(b[1]); if (t) targets[t] = 1; });
+    var stack = [], section = null;
+    function sumMap(m) { var s = 0; m.forEach(function (v) { s += v; }); return s; }
+    body.forEach(function (b) {
+      var depth = b[0], label = b[1], amts = b[2], anyAmt = b[3], n = strip(norm(label)), tgt = totalTarget(label);
+      if (tgt !== null) {
+        var key = sectionOf(tgt);
+        if (key && anyAmt) pnl.fileTotals[key] = sumMap(amts);
+        if (stack.some(function (x) { return x[1] === tgt; })) {
+          while (stack.length && stack[stack.length - 1][1] !== tgt) stack.pop();
+          stack.pop();
+        }
+        return;
+      }
+      if (COMPUTED.indexOf(n) >= 0) { if (n === 'net income' && anyAmt) pnl.fileTotals.net = sumMap(amts); return; }
+      var sec = sectionOf(label);
+      if (sec && !anyAmt) { section = sec; stack = []; return; }
+      if (n === 'ordinary income expense' || n === 'other income expense' || n === 'ordinary income expenses') return;
+      while (stack.length && depth > 0 && stack[stack.length - 1][0] >= depth) stack.pop();
+      var parent = stack.length ? stack[stack.length - 1][2] : '';
+      if (anyAmt) {
+        if (section === null) pnl.skipped++;
+        else pnl.lines.push({ label: label, parent: parent, section: section, amounts: amts });
+      }
+      if (!anyAmt || has(targets, n)) stack.push([depth, n, label]);
+    });
+    return pnl;
+  }
+
+  /* ---------- line detail ---------- */
+  function headIndex(t, names) { for (var i = 0; i < names.length; i++) if (t.indexOf(names[i]) >= 0) return t.indexOf(names[i]); return null; }
+  function parseTransactions(rows, h, fname) {
+    var t = rows[h].map(cellNorm);
+    var col = {
+      date: headIndex(t, DATE_HEADS), type: headIndex(t, ['transaction type', 'type', 'trans type']),
+      name: headIndex(t, ['name', 'payee', 'vendor', 'vendor name', 'payee name']),
+      desc: headIndex(t, ['memo description', 'description', 'transaction description', 'merchant', 'merchant name', 'details']),
+      memo: headIndex(t, ['memo', 'extended details', 'appears on your statement as']),
+      account: headIndex(t, ['account', 'account full name', 'account name', 'distribution account', 'gl account']),
+      split: headIndex(t, ['split', 'split account', 'item split account']),
+      amount: headIndex(t, ['amount', 'amount usd', 'charge amount', 'charges']),
+      debit: headIndex(t, ['debit', 'debit amount']), credit: headIndex(t, ['credit', 'credit amount']),
+      cardcat: headIndex(t, ['category']), status: headIndex(t, ['status'])
+    };
+    var ledger = anyIn(t, ['split', 'num', 'transaction type', 'account full name', 'distribution account', 'split account', 'account name']) ||
+      (t.indexOf('account') >= 0 && !anyIn(t, ['card member', 'card no', 'card number', 'receipt']));
+    var out = [], stack = [], skipped = 0;
+    rows.slice(h + 1).forEach(function (r) {
+      function get(k) { return col[k] !== null && col[k] < r.length ? r[col[k]] : ['', null]; }
+      var d = parseDate(get('date')), amt;
+      if (col.amount !== null) amt = cents(get('amount'));
+      else {
+        var de = cents(get('debit')), cr = cents(get('credit'));
+        amt = de === null && cr === null ? null : Math.abs(de || 0) - Math.abs(cr || 0);
+      }
+      var filled = [];
+      r.forEach(function (c, i) { if (strip(c[0])) filled.push([i, strip(c[0])]); });
+      if (d === null) {
+        if (!filled.length) return;
+        var label = filled[0][1], tgt = totalTarget(label);
+        if (tgt !== null) {
+          if (stack.some(function (x) { return x[0] === tgt; })) {
+            while (stack.length && stack[stack.length - 1][0] !== tgt) stack.pop();
+            stack.pop();
+          }
+          return;
+        }
+        if (amt === null && filled.length === 1 && filled[0][0] < (col.date || 1) + 1 && filled[0][0] !== col.date) {
+          ledger = true;
+          stack.push([strip(norm(label)), label]);
+        } else skipped++;
+        return;
+      }
+      if (amt === null) { skipped++; return; }
+      if (strip(norm(get('status')[0])) === 'pending') { skipped++; return; }
+      var acctCell = strip(get('account')[0]), split = strip(get('split')[0]), account, other;
+      if (stack.length) { account = stack[stack.length - 1][1]; other = split || acctCell; } else { account = acctCell; other = split; }
+      var segs = account.split(':'), parent = segs.length > 1 ? strip(segs[segs.length - 2]) : '';
+      account = strip(segs[segs.length - 1]);
+      if (!parent && stack.length > 1) parent = stack[stack.length - 2][1];
+      var swapped = false;
+      if (account && other && hit(norm(account), MONEY_WORDS) && other.toLowerCase().indexOf('-split') !== 0) {
+        segs = other.split(':');
+        account = strip(segs[segs.length - 1]); parent = segs.length > 1 ? strip(segs[segs.length - 2]) : ''; swapped = true;
+      }
+      var desc = strip(get('desc')[0]), memo = strip(get('memo')[0]);
+      out.push({ date: d, name: strip(get('name')[0]), memo: strip(desc + ' ' + memo), desc: desc || strip(get('name')[0]),
+        type: strip(get('type')[0]), account: account, parent: parent, amount: amt, swapped: swapped,
+        cardcat: strip(get('cardcat')[0]), file: fname, card: false });
+    });
+    if (!ledger) out.forEach(function (x) { x.card = true; });
+    return [out, skipped, ledger];
+  }
+  function parseVendors(rows, h) {
+    var head = rows[h].map(cellNorm), tots = [], mcols = [];
+    head.forEach(function (x, i) { if (x === 'total') tots.push(i); });
+    rows[h].forEach(function (c, i) { if (i > 0 && monthLabel(c) !== null) mcols.push(i); });
+    var title = titleOf(rows, h), out = [];
+    rows.slice(h + 1).forEach(function (r) {
+      if (!r.some(function (c) { return strip(c[0]); })) return;
+      var name = r.length ? strip(r[0][0]) : '';
+      if (totalTarget(name) !== null) return;
+      var c;
+      if (tots.length) { var ti = tots[tots.length - 1]; c = ti < r.length ? cents(r[ti]) : null; }
+      else {
+        var vals = mcols.filter(function (i) { return i < r.length; }).map(function (i) { return cents(r[i]); });
+        c = vals.every(function (v) { return v === null; }) ? null : vals.reduce(function (s, v) { return s + (v || 0); }, 0);
+      }
+      if (c === null) return;
+      out.push({ name: name || '(no payee)', amount: c });
+    });
+    var rng = titleRange(title);
+    if (mcols.length) {
+      var ms = mcols.map(function (i) { return monthLabel(rows[h][i]); }).sort(function (a, b) { return a - b; });
+      rng = [ms[0], ms[ms.length - 1] - ms[0] + 1];
+    }
+    return [out, rng];
+  }
+
+  /* ---------- names ---------- */
+  function vendorMatch(text) {
+    for (var i = 0; i < VENDOR_RULES.length; i++) { var p = hit(text, VENDOR_RULES[i][1]); if (p) return [VENDOR_RULES[i], p]; }
+    return null;
+  }
+  function personLike(name) {
+    var s = strip(name);
+    if (!PERSON.test(s)) return false;
+    var t = toks(s);
+    if (t.length < 2 || t.some(function (x) { return has(BUSINESS_WORDS, x); })) return false;
+    return vendorMatch(norm(s)) === null;
+  }
+  function cleanMerchant(desc) {
+    var keep = words(desc).filter(function (tk) { return !/[0-9@/]/.test(tk); });
+    return strip(Array.from(keep.join(' ')).slice(0, 60).join(''));
+  }
+  function merchantKey(desc) {
+    var t = toks(cleanMerchant(desc)).filter(function (x) { return !has(PREFIX_WORDS, x); });
+    if (t.length && has(US_STATES, t[t.length - 1].toUpperCase()) && t.length > 2) t = t.slice(0, -1);
+    if (t.length && t[0] === 'the' && t.length > 1) t = t.slice(1);
+    return t.slice(0, 3).join(' ').toUpperCase() || '(no description)';
+  }
+  var GENERIC = setOf(phrases(
+    'grill|cafe|bistro|sushi|steakhouse|steak house|pizza|pizzeria|taqueria|ramen|bbq|tavern|coffee|restaurant|tst|' +
+    'hotel|motel|resort|cruise|ski|tuition|preschool|daycare|day care|montessori|tutoring|summer camp|salon|nail|nails|' +
+    'barber|golf|country club|donation|church|parish|synagogue|mosque|charity|campaign|liquor|winery|vineyard|brewery|' +
+    'brewing|nursery|pool supply|pool service|jewelry|jeweler|jewelers|gift|gifts|flowers|atm|cash withdrawal|grocery|' +
+    'airline|airlines|life insurance|veterinary|for congress|for senate|for assembly|for mayor|car wash|carwash|dmv'));
+  function brand(vm) { if (!vm || has(GENERIC, vm[1])) return null; return capWords(vm[1]); }
+  function decisionShare(d) {
+    if (d === undefined || d === null) return null;
+    var dn = strip(norm(d));
+    if (['personal', 'p', 'yes', 'y', 'add back', 'addback', 'all personal'].indexOf(dn) >= 0) return 100;
+    if (['business', 'b', 'no', 'n', 'keep', 'practice'].indexOf(dn) >= 0) return 0;
+    var m = /^\s*([0-9]{1,3})\s*%?\s*(?:personal)?\s*$/.exec(d.toLowerCase());
+    if (m && parseInt(m[1], 10) <= 100) return parseInt(m[1], 10);
+    return null;
+  }
+  function isPayment(x) {
+    if (['payment', 'autopay', 'payment received'].indexOf(strip(norm(x.type))) >= 0) return true;
+    return !!(hit(norm(x.desc + ' ' + x.memo), PAYMENT_WORDS) && x.amount <= 0) || !!hit(norm(x.desc), STRONG_PAYMENT);
+  }
+  function csvText(rows) {
+    function q(v) {
+      v = String(v);
+      var c0 = v.charAt(0);
+      if (c0 === '=' || c0 === '+' || c0 === '@' || c0 === '\t' || c0 === '\r' || (c0 === '-' && v.length > 1 && !/[0-9.]/.test(v.charAt(1)))) v = "'" + v;
+      if (/[,"\r\n]/.test(v)) v = '"' + v.replace(/"/g, '""') + '"';
+      return v;
+    }
+    return rows.map(function (r) { return r.map(q).join(',') + '\r\n'; }).join('');
+  }
+
+  /* ---------- the run ---------- */
+  function parseSettings(s) {
+    s = s || {};
+    function h(k, dflt) {
+      var v = strip(String(has(s, k) && s[k] !== null && s[k] !== undefined ? s[k] : dflt));
+      var c = v ? cents([v, null]) : null;
+      return c !== null && c >= 0 ? c : cents([dflt, null]);
+    }
+    var fam = toks(String(s.family || '')).filter(function (t) { return t.length >= 2; });
+    return { physicians: h('physicians', '1'), apps: h('apps', '0'), family: fam };
+  }
+
+  function run(inputs, settings) {
+    var st = parseSettings(settings), rec = ['P&L normalizer ' + VERSION, ''];
+    var pnls = [], txns = [], vendors = [], vendorMeta = [], decisions = {}, bench = {}, kinds = [];
+    var chain = Promise.resolve();
+    inputs.forEach(function (inp) {
+      chain = chain.then(function () {
+        var base = inp.name.split(/[\\/]/).pop();
+        return readRows(inp.bytes).then(function (rows) {
+          var dk = detect(rows), kind = dk[0], h = dk[1];
+          kinds.push([base, kind]);
+          if (kind === 'pnl') {
+            var p = parsePnl(rows, h);
+            p.file = base;
+            pnls.push(p);
+            var span = p.months.length ? p.months.length + ' months, ' + ymText(p.months[0]) + ' to ' + ymText(p.months[p.months.length - 1]) : 'one total column';
+            rec.push('- ' + base + ': a profit and loss report (' + span + '), ' + p.lines.length + ' accounts with amounts.');
+          } else if (kind === 'transactions') {
+            var got = parseTransactions(rows, h, base);
+            got[0].forEach(function (x) { txns.push(x); });
+            rec.push('- ' + base + ': ' + (got[2] ? 'QuickBooks line detail' : 'a card or bank statement') + ', ' + got[0].length + ' dated rows' + (got[1] ? ', ' + got[1] + ' other rows left out' : '') + '.');
+          } else if (kind === 'vendors') {
+            var gv = parseVendors(rows, h);
+            gv[0].forEach(function (x) { vendors.push(x); });
+            vendorMeta.push(gv[1]);
+            rec.push('- ' + base + ': an expenses by vendor summary, ' + gv[0].length + ' vendors.');
+          } else if (kind === 'decisions') {
+            var t = rows[h].map(cellNorm), ri = t.indexOf('review id'), di = t.indexOf('owner decision'), n = 0;
+            rows.slice(h + 1).forEach(function (r) {
+              if (Math.max(ri, di) < r.length && strip(r[ri][0]) && strip(r[di][0])) { decisions[strip(r[ri][0])] = strip(r[di][0]); n++; }
+            });
+            rec.push('- ' + base + ': the owner\'s answers on the review list, ' + n + ' answered.');
+          } else if (kind === 'benchmarks') {
+            var tb = rows[h].map(cellNorm), ci = tb.indexOf('category'), pi = tb.indexOf('pct of revenue'), si = tb.indexOf('source');
+            rows.slice(h + 1).forEach(function (r) {
+              if (Math.max(ci, pi) < r.length) {
+                var key = strip(r[ci][0]), pc = cents(r[pi]);
+                if (OVERHEAD.indexOf(key) >= 0 && pc !== null) bench[key] = [divRound(pc, 10), si >= 0 && si < r.length ? strip(r[si][0]) : ''];
+              }
+            });
+            rec.push('- ' + base + ': benchmarks for ' + Object.keys(bench).length + ' categories, used in place of the built-in ones.');
+          } else rec.push('- ' + base + ': not a report this tool reads. Left out.');
+        }, function () { kinds.push([base, 'unreadable']); rec.push('- ' + base + ': could not be read. Left out.'); });
+      });
+    });
+    return chain.then(function () { var r = build(st, rec, pnls, txns, vendors, vendorMeta, decisions, bench); r.kinds = kinds; return r; });
+  }
+
+  function inSet(ym, wset) { return wset === null || has(wset, ym); }
+  function sortBy(arr, key) {
+    return arr.map(function (x, i) { return [key(x), i, x]; }).sort(function (a, b) {
+      for (var i = 0; i < a[0].length; i++) { if (a[0][i] < b[0][i]) return -1; if (a[0][i] > b[0][i]) return 1; }
+      return a[1] - b[1];
+    }).map(function (x) { return x[2]; });
+  }
+
+  function build(st, rec, pnls, txns, vendors, vendorMeta, decisions, bench) {
+    var notes = [], pnl = pnls.length ? pnls[0] : null, i;
+    if (pnls.length > 1) notes.push('More than one profit and loss report came in. The first one (' + pnl.file + ') is used.');
+    var win = null, nmonths = 0;
+    if (pnl && pnl.months.length) { win = pnl.months.slice(-12); nmonths = win.length; }
+    else if (pnl && pnl.range) { win = []; for (i = 0; i < pnl.range[1]; i++) win.push(pnl.range[0] + i); nmonths = win.length; }
+    else if (pnl) { nmonths = 12; notes.push('The profit and loss report has one total column and no readable date range, so it is read as 12 months and every dated row is used.'); }
+    else if (txns.length) {
+      var lastm = Math.max.apply(null, txns.map(function (x) { return ymOf(x.date); }));
+      win = []; for (i = lastm - 11; i <= lastm; i++) win.push(i);
+      var seenM = {}; txns.forEach(function (x) { var y = ymOf(x.date); if (y > lastm - 12) seenM[y] = 1; });
+      nmonths = Object.keys(seenM).length;
+    }
+    var wset = win ? setOf(win) : null;
+
+    var pkeys = {};
+    if (pnl) pnl.lines.forEach(function (ln) { var k = accountKey(ln.label); if (!has(pkeys, k)) pkeys[k] = ln.section; });
+    var ledger = txns.filter(function (x) { return !x.card; }), cards = txns.filter(function (x) { return x.card; });
+    var direct = {};
+    ledger.forEach(function (x) { if (!x.swapped) direct[[x.file, accountKey(x.account), x.date, Math.abs(x.amount)].join('\u0001')] = 1; });
+    var mirrors = ledger.filter(function (x) { return x.swapped && has(direct, [x.file, accountKey(x.account), x.date, Math.abs(x.amount)].join('\u0001')); });
+    ledger = ledger.filter(function (x) { return mirrors.indexOf(x) < 0; });
+
+    function files(list) { return Object.keys(setOf(list.map(function (x) { return x.file; }))).sort(); }
+    files(cards).forEach(function (f) {
+      var rows = cards.filter(function (x) { return x.file === f; }), body = rows.filter(function (x) { return !isPayment(x); });
+      if (body.filter(function (x) { return x.amount < 0; }).length * 2 > body.length) rows.forEach(function (x) { x.amount = -x.amount; });
+    });
+    files(ledger.filter(function (x) { return x.swapped; })).forEach(function (f) {
+      var rows = ledger.filter(function (x) { return x.file === f && x.swapped; });
+      if (rows.filter(function (x) { return x.amount < 0; }).length * 2 > rows.length) rows.forEach(function (x) { x.amount = -x.amount; });
+    });
+
+    var names = {}, nameOrder = [];
+    function code(name) {
+      var k = strip(norm(name));
+      if (!has(names, k)) { names[k] = ['Individual ' + pad2(nameOrder.length + 1), strip(name)]; nameOrder.push(k); }
+      return names[k][0];
+    }
+    var collapsed = new Map(), collapsedKeys = [], incomeInWindow = 0, left = { balance: 0, payments: 0, outside: 0, draws: 0 }, items = [];
+    function addCollapsed(kind, year, acct, amount) {
+      var k = kind + '\u0001' + year + '\u0001' + acct;
+      if (!collapsed.has(k)) { collapsed.set(k, [0, 0]); collapsedKeys.push([kind, year, acct, k]); }
+      var c = collapsed.get(k); c[0]++; c[1] += amount;
+    }
+    function copy(x, extra) { var o = {}; Object.keys(x).forEach(function (k) { o[k] = x[k]; }); Object.keys(extra).forEach(function (k) { o[k] = extra[k]; }); return o; }
+    ledger.forEach(function (x) {
+      var text = norm(x.parent + ' ' + x.account), memoN = norm(x.memo + ' ' + x.name), akey = accountKey(x.account), section;
+      if (Object.keys(pkeys).length) section = has(pkeys, akey) ? pkeys[akey] : (hit(text, INCOME_WORDS) && !hit(text, NOT_INCOME) ? 'income' : 'balance');
+      else if (hit(text, INCOME_WORDS) && !hit(text, NOT_INCOME)) section = 'income';
+      else if (x.account && hit(text, BALANCE_WORDS)) section = 'balance';
+      else section = 'expense';
+      var refund = !!((hit(text, REFUND_WORDS) && (hit(text, PATIENT_WORDS) || section === 'income')) || (hit(memoN, REFUND_WORDS) && hit(memoN, PATIENT_WORDS)));
+      if (refund || section === 'income' || section === 'other_income') {
+        addCollapsed(refund ? 'Patient refunds' : 'Income', yearOf(x.date), x.account || '(no account)', x.amount);
+        if (!refund && section === 'income' && inSet(ymOf(x.date), wset)) incomeInWindow += x.amount;
+        return;
+      }
+      if (section === 'balance') {
+        if (hit(text, phrases('draw|draws|distribution|distributions'))) left.draws += x.amount;
+        left.balance++;
+        return;
+      }
+      if (!inSet(ymOf(x.date), wset)) { left.outside++; return; }
+      items.push(copy(x, { section: section, src: 'ledger', card_text: '' }));
+    });
+    var byAmt = new Map();
+    items.forEach(function (it) { if (!byAmt.has(it.amount)) byAmt.set(it.amount, []); byAmt.get(it.amount).push(it); });
+    var matched = 0;
+    cards.forEach(function (x) {
+      if (isPayment(x)) { left.payments++; return; }
+      if (!inSet(ymOf(x.date), wset)) { left.outside++; return; }
+      var cand = byAmt.get(x.amount) || [], hr = null;
+      for (var j = 0; j < cand.length; j++) if (!cand[j].matched && Math.abs(cand[j].date - x.date) <= 5) { hr = cand[j]; break; }
+      if (hr) { hr.matched = true; hr.card_text = x.desc; hr.cardcat = hr.cardcat || x.cardcat; matched++; return; }
+      items.push(copy(x, { section: 'expense', src: 'card', card_text: '' }));
+    });
+
+    var states = {};
+    items.forEach(function (it) {
+      var t = words((it.card_text || it.desc || it.memo).toUpperCase());
+      it.state = t.length >= 3 && has(US_STATES, t[t.length - 1]) ? t[t.length - 1] : '';
+      if (it.state) states[it.state] = (states[it.state] || 0) + 1;
+    });
+    var stCount = 0; Object.keys(states).forEach(function (k) { stCount += states[k]; });
+    var home = stCount >= 10 ? sortBy(Object.keys(states), function (k) { return [-states[k], k]; })[0] : '';
+
+    var covered = {};
+    items.forEach(function (it) {
+      var r;
+      if (it.src === 'ledger' && it.account) { r = accountRule(norm(it.parent + ' ' + it.account), it.section); covered[accountKey(it.account)] = 1; }
+      else r = ['misc', 0, '', '', false];
+      var cat = r[0], level = r[1], kind = r[2], why = r[3], mapped = r[4];
+      var reasons = why ? [why] : [], label = '', ws = false;
+      var vm = vendorMatch(norm(it.name + ' ' + it.memo + ' ' + it.card_text));
+      if (vm) {
+        var rule = vm[0], p = vm[1];
+        label = rule[0]; ws = rule[5];
+        if (!mapped) cat = rule[2];
+        if (rule[3] > level) { level = rule[3]; kind = rule[4]; reasons = ['matched "' + p + '"'].concat(reasons); }
+        else if (rule[3] && rule[3] === level) reasons = ['matched "' + p + '"'].concat(reasons);
+      } else if (!mapped && it.cardcat) {
+        for (var j = 0; j < CARD_CATS.length; j++) {
+          var cc = CARD_CATS[j];
+          if (hit(norm(it.cardcat), cc[0])) {
+            cat = cc[1];
+            if (cc[2] > level) { level = cc[2]; kind = cc[3]; label = cc[4]; ws = cc[5]; reasons = ['the card company filed it as "' + it.cardcat + '"']; }
+            break;
+          }
+        }
+      }
+      var nm = it.name, person = !!nm && personLike(nm), shown, group;
+      if (label === P2P_LABEL && !person) {
+        var srcText = it.src === 'card' ? it.desc : (it.card_text || it.memo);
+        var rest = toks(cleanMerchant(srcText)).filter(function (x) { return !has(P2P_WORDS, x); });
+        shown = group = P2P_LABEL + ' to ' + code(rest.length ? capWords(rest.join(' ')) : 'Unnamed');
+      } else if (it.src === 'card') {
+        shown = cleanMerchant(it.desc) || '(no description)';
+        group = brand(vm) || merchantKey(it.desc);
+      } else if (person) shown = group = code(nm);
+      else if (nm) shown = group = nm;
+      else shown = group = brand(vm) || (vm ? merchantKey(it.memo) : '(no payee)');
+      var famText = norm(nm + ' ' + (it.src === 'card' ? it.desc : ''));
+      var fam = st.family.filter(function (f) { return famText.indexOf(' ' + f + ' ') >= 0; });
+      if (fam.length) { level = 3; kind = 'Family member'; reasons = ['the payee shares a family name you entered'].concat(reasons); }
+      if (level && !vm && it.src === 'ledger' && !fam.length) group = 'Other charges in ' + it.account;
+      it.cat = cat; it.level = level; it.kind = kind; it.reasons = reasons; it.label = label; it.ws = ws; it.shown = shown; it.group = group;
+      it.weekend = isWeekend(it.date); it.gid = '';
+    });
+
+    var groups = new Map();
+    function newGroup(key, who, account, cat, kind, level, reasons) {
+      var g = { id: fnv(key), who: who, account: account, cat: cat, kind: kind, level: level, n: 0, amount: 0, months: {}, weekend: 0,
+        states: new Map(), reasons: reasons.slice(), ws: false, first: null, last: null, example: '' };
+      groups.set(key, g);
+      return g;
+    }
+    items.forEach(function (it) {
+      if (!it.level) return;
+      var acct = it.src === 'ledger' ? it.account : 'Card statement';
+      var key = [it.kind, strip(norm(it.group)), accountKey(acct)].join('|');
+      var cat = it.src === 'card' && pnl ? 'card_lump' : it.cat;
+      var g = groups.get(key) || newGroup(key, it.group, acct, cat, it.label || it.kind, 0, []);
+      g.level = Math.max(g.level, it.level); g.n++; g.amount += it.amount; g.months[ymOf(it.date)] = 1;
+      g.weekend += it.weekend ? 1 : 0; g.ws = g.ws || it.ws;
+      if (g.first === null || it.date < g.first) g.first = it.date;
+      if (g.last === null || it.date > g.last) g.last = it.date;
+      if (!g.example) g.example = it.shown;
+      if (it.state) g.states.set(it.state, (g.states.get(it.state) || 0) + 1);
+      it.reasons.forEach(function (r) { if (g.reasons.indexOf(r) < 0) g.reasons.push(r); });
+      it.gid = g.id;
+    });
+
+    var pnlLines = [];
+    if (pnl) pnl.lines.forEach(function (ln) {
+      var amt = 0;
+      ln.amounts.forEach(function (v, m) { if (m === null || inSet(m, wset)) amt += v; });
+      var r = accountRule(norm(ln.parent + ' ' + ln.label), ln.section), cat = r[0];
+      if (!r[4] && ln.section === 'cogs') cat = 'med_surg';
+      var e = { label: ln.label, parent: ln.parent, section: ln.section, amount: amt, cat: cat, level: r[1], kind: r[2], mapped: r[4], gid: '' };
+      pnlLines.push(e);
+      if (r[1] && amt > 0 && !has(covered, accountKey(ln.label))) {
+        var key = [r[2], 'whole account', accountKey(ln.label)].join('|');
+        var g = newGroup(key, '(whole account)', ln.label, cat, r[2], r[1], [r[3], 'no line detail came in for this account, so all of it is listed']);
+        g.amount = amt;
+        ln.amounts.forEach(function (v, m) { if (v && m !== null && inSet(m, wset)) g.months[m] = 1; });
+        e.gid = g.id;
+      }
+    });
+
+    var vendorRows = [];
+    if (vendors.length && !items.length) {
+      var rng = vendorMeta.filter(Boolean)[0] || null, vmonths = rng ? rng[1] : 12;
+      if (!nmonths) nmonths = vmonths;
+      vendors.forEach(function (v) {
+        var vm = vendorMatch(norm(v.name)), shown = personLike(v.name) ? code(v.name) : v.name;
+        var cat = vm ? vm[0][2] : 'misc', lv = vm ? vm[0][3] : 0, kind = vm ? vm[0][4] : '';
+        var reasons = vm && lv ? ['matched "' + vm[1] + '"'] : [];
+        if (st.family.some(function (f) { return norm(v.name).indexOf(' ' + f + ' ') >= 0; })) { lv = 3; kind = 'Family member'; reasons = ['the payee shares a family name you entered'].concat(reasons); }
+        var amt = vmonths === nmonths ? v.amount : divRound(v.amount * nmonths, vmonths);
+        var row = { shown: shown, amount: amt, cat: cat, level: lv, gid: '' };
+        vendorRows.push(row);
+        if (lv && amt > 0) {
+          var key = [kind, strip(norm(shown)), 'vendor summary'].join('|');
+          var g = newGroup(key, shown, 'Expenses by vendor', cat, kind, lv, reasons);
+          g.amount = amt; row.gid = g.id;
+        }
+      });
+    }
+
+    groups.forEach(function (g) {
+      if (g.n >= 3 && g.ws && g.weekend * 100 >= 60 * g.n && g.level < 3) { g.level++; g.reasons.push(g.weekend + ' of ' + g.n + ' charges on a Saturday or Sunday'); }
+      var away = 0, far = [];
+      g.states.forEach(function (v, k) { if (k !== home) { away += v; far.push(k); } });
+      if (home && g.ws && g.n >= 2 && away * 2 >= g.n && g.level === 2) { g.level++; g.reasons.push('mostly outside ' + home + ' (' + far.sort().join(', ') + ')'); }
+    });
+    var used = 0;
+    groups.forEach(function (g) { g.share = decisionShare(has(decisions, g.id) ? decisions[g.id] : null); if (g.share !== null) used++; });
+
+    var factor = nmonths || 12;
+    function ann(c) { return divRound(c * 12, factor); }
+    var reported = {};
+    OVERHEAD.concat(['provider_comp', 'non_operating', 'revenue', 'other_income', 'card_lump']).forEach(function (k) { reported[k] = 0; });
+    var ownerPay = 0;
+    if (pnl) pnlLines.forEach(function (e) {
+      if (e.cat === 'revenue' && e.section !== 'income') reported.revenue -= e.amount; else reported[e.cat] += e.amount;
+      if (e.kind === 'Owner pay') ownerPay += e.amount;
+    });
+    else {
+      items.forEach(function (it) { reported[it.cat] += it.amount; });
+      vendorRows.forEach(function (r) { reported[r.cat] += r.amount; });
+      reported.revenue += incomeInWindow;
+    }
+    var likely = {}, possible = {}, confirmed = {};
+    Object.keys(reported).forEach(function (k) { likely[k] = 0; possible[k] = 0; confirmed[k] = 0; });
+    groups.forEach(function (g) {
+      if (g.amount <= 0) return;
+      if (g.share !== null) confirmed[g.cat] += divRound(g.amount * g.share, 100);
+      else if (g.level === 3) likely[g.cat] += g.amount;
+      else if (g.level === 2) possible[g.cat] += g.amount;
+    });
+    var rev = ann(reported.revenue), phys = st.physicians, apps = st.apps, prov = phys + apps;
+    function pc(c) { return rev > 0 ? tenths(divRound(c * 1000, rev)) : ''; }
+    function per(c, fte) { return fte > 0 ? money(divRound(c * 100, fte)) : ''; }
+    function versus(c, ref, band) {
+      if (ref === null || rev <= 0) return '';
+      var gap = divRound(c * 1000, rev) - ref;
+      if (gap > band) return 'above by ' + tenths(gap) + ' points';
+      if (-gap > band) return 'below by ' + tenths(-gap) + ' points';
+      return 'in line';
+    }
+    var out = [['section', 'line', 'reported_annual', 'likely_add_backs', 'owner_confirmed_add_backs', 'normalized_annual',
+      'possible_add_backs_not_counted', 'normalized_pct_of_revenue', 'normalized_per_fte_physician',
+      'normalized_per_fte_provider', 'benchmark_pct_of_revenue', 'vs_benchmark', 'benchmark_source']];
+    out.push(['Revenue', CAT_LABEL.revenue, money(rev), '', '', money(rev), '', pc(rev), per(rev, phys), per(rev, prov), '', '', '']);
+    var tr = 0, tl = 0, tc = 0, tp = 0, summaryCats = [];
+    CATEGORIES.forEach(function (cdef) {
+      var key = cdef[0], label = cdef[1], ref = cdef[2], src = cdef[3];
+      if (has(bench, key)) { ref = bench[key][0]; src = bench[key][1]; }
+      var r = ann(reported[key]), l = ann(likely[key]), c = ann(confirmed[key]), p = ann(possible[key]), nrm = r - l - c;
+      tr += r; tl += l; tc += c; tp += p;
+      var vs = versus(nrm, ref, Math.max(10, divRound((ref || 0) * 25, 100)));
+      summaryCats.push([label, nrm, pc(nrm), ref !== null ? tenths(ref) : '', vs]);
+      out.push(['Operating cost', label, money(r), money(l), money(c), money(nrm), money(p), pc(nrm), per(nrm, phys), per(nrm, prov),
+        ref !== null ? tenths(ref) : '', vs, ref !== null ? src : '']);
+    });
+    var cl = ann(likely.card_lump), cc = ann(confirmed.card_lump), cp = ann(possible.card_lump);
+    if (cl || cc || cp) {
+      /* charges only on a card statement: in the P&L somewhere (the practice pays the card), but no one category */
+      tl += cl; tc += cc; tp += cp;
+      out.push(['Operating cost', CAT_LABEL.card_lump, '', money(cl), money(cc), '', money(cp), '', '', '', '', '', '']);
+    }
+    var nt = tr - tl - tc;
+    out.push(['Operating cost', 'Total operating cost', money(tr), money(tl), money(tc), money(nt), money(tp), pc(nt), per(nt, phys), per(nt, prov),
+      tenths(TOTAL_REF[0]), versus(nt, TOTAL_REF[0], 30), TOTAL_REF[1]]);
+    ['provider_comp', 'non_operating'].forEach(function (key) {
+      var r = ann(reported[key]);
+      out.push(['Not operating cost', CAT_LABEL[key], money(r), '', '', money(r), '', pc(r), per(r, phys), per(r, prov), '', '', '']);
+    });
+    var summary = { revenue: rev, reported: tr, likely: tl, confirmed: tc, possible: tp, normalized: nt, adjusted: null, ebitda: null, cats: summaryCats };
+    if (pnl) {
+      var ovh = 0; OVERHEAD.forEach(function (k) { ovh += reported[k]; });
+      var ni = ann(reported.revenue + reported.other_income - ovh - reported.provider_comp - reported.non_operating);
+      var nonop = ann(reported.non_operating), oth = ann(reported.other_income), ebitda = ni + nonop - oth, adj = ebitda + tl + tc;
+      summary.ebitda = ebitda; summary.adjusted = adj;
+      [['Net income as reported', ni], ['Add back interest, depreciation, amortization, income taxes', nonop],
+        ['Take out other income (not from patient care)', -oth], ['EBITDA as reported', ebitda],
+        ['Add likely owner add-backs (High)', tl], ['Add add-backs the owner confirmed', tc], ['Adjusted EBITDA', adj],
+        ['Possible add-backs not counted yet (Medium)', tp], ['Adjusted EBITDA if every possible add-back holds', adj + tp],
+        ['Owner pay booked in the P&L (set to market pay at the site visit)', ann(ownerPay)]].forEach(function (b) {
+        out.push(['Earnings', b[0], '', '', '', money(b[1]), '', pc(b[1]), '', '', '', '', '']);
+      });
+    }
+    var normalized = csvText(out);
+
+    var rv = [['review_id', 'confidence', 'looks_like', 'payee', 'account', 'category', 'charges', 'months_with_charges',
+      'first_charge', 'last_charge', 'amount_in_period', 'annualized', 'why_flagged', 'owner_decision']], listed = 0, top = [];
+    var garr = []; groups.forEach(function (g) { garr.push(g); });
+    sortBy(garr, function (g) { return [-g.level, -g.amount, g.id]; }).forEach(function (g) {
+      if (g.amount <= 0 || (g.level === 1 && ann(g.amount) < LOW_LIST_MIN)) return;
+      listed++;
+      var row = [g.id, LEVEL_NAMES[g.level], g.kind, g.who, g.account, CAT_LABEL[g.cat], g.n ? String(g.n) : '',
+        Object.keys(g.months).length ? String(Object.keys(g.months).length) : '', g.first !== null ? iso(g.first) : '', g.last !== null ? iso(g.last) : '',
+        money(g.amount), money(ann(g.amount)), g.reasons.filter(Boolean).join('; '), has(decisions, g.id) ? decisions[g.id] : ''];
+      rv.push(row); top.push(row);
+    });
+    var review = csvText(rv);
+
+    var levelOf = {}; groups.forEach(function (g) { levelOf[g.id] = g.level; });
+    function lvOf(id) { return LEVEL_NAMES[id && has(levelOf, id) ? levelOf[id] : 0]; }
+    var ld = [['source_file', 'row_type', 'date', 'payee', 'account', 'category', 'amount', 'confidence', 'review_id']];
+    var wtext = win ? ymText(win[0]) + ' to ' + ymText(win[win.length - 1]) : '';
+    pnlLines.forEach(function (e) {
+      ld.push([pnl.file, 'P&L account, period total', wtext, '', (e.parent ? e.parent + ': ' : '') + e.label, CAT_LABEL[e.cat], money(e.amount), lvOf(e.gid), e.gid]);
+    });
+    sortBy(items, function (x) { return [x.date, x.file, x.shown, x.amount]; }).forEach(function (it) {
+      ld.push([it.file, it.src === 'card' ? 'card charge' : 'transaction', iso(it.date), it.shown, it.src === 'ledger' ? it.account : '',
+        CAT_LABEL[it.cat], money(it.amount), lvOf(it.gid), it.gid]);
+    });
+    vendorRows.forEach(function (r) { ld.push(['', 'vendor total', '', r.shown, '', CAT_LABEL[r.cat], money(r.amount), lvOf(r.gid), r.gid]); });
+    sortBy(collapsedKeys, function (k) { return [k[0], k[1], k[2]]; }).forEach(function (k) {
+      var c = collapsed.get(k[3]);
+      ld.push(['', k[0].toLowerCase() + ', ' + c[0] + ' rows collapsed, no names', String(k[1]), '', k[2],
+        k[0] === 'Income' ? CAT_LABEL.revenue : 'Patient refunds', money(c[1]), '', '']);
+    });
+    var detail = csvText(ld);
+    var keyText = csvText([['code', 'name']].concat(nameOrder.map(function (k) { return names[k]; })));
+
+    rec.push('');
+    if (win) rec.push('Period: ' + ymText(win[0]) + ' to ' + ymText(win[win.length - 1]) + ', ' + nmonths + ' months with data' + (nmonths !== 12 ? ', scaled to 12 to make a year' : '') + '.');
+    else if (nmonths) rec.push('Period: ' + nmonths + ' months' + (nmonths !== 12 ? ', scaled to 12 to make a year' : '') + '.');
+    if (pnl) {
+      var checks = [];
+      [['income', 'Income'], ['cogs', 'Cost of goods sold'], ['expense', 'Expenses'], ['other_income', 'Other income'], ['other_expense', 'Other expenses']].forEach(function (kl) {
+        if (has(pnl.fileTotals, kl[0])) {
+          var mine = 0;
+          pnl.lines.forEach(function (ln) { if (ln.section === kl[0]) ln.amounts.forEach(function (v) { mine += v; }); });
+          var ft = pnl.fileTotals[kl[0]];
+          checks.push('- ' + kl[1] + ': the accounts add to ' + money(mine) + '; the report\'s own total says ' + money(ft) + '.' + (mine === ft ? '' : ' THEY DIFFER: check the export.'));
+        }
+      });
+      if (checks.length) { rec.push('Reconciliation, over every month in the report:'); checks.forEach(function (c) { rec.push(c); }); }
+      var unmapped = pnlLines.filter(function (e) { return !e.mapped; }).map(function (e) { return e.label; });
+      if (unmapped.length) rec.push('Accounts no rule placed (counted as miscellaneous, or non-operating under Other expenses): ' + unmapped.join(', ') + '.');
+      if (pnl.skipped) rec.push(pnl.skipped + ' rows with amounts sat above the first section heading and were left out.');
+    }
+    var nRef = 0, nInc = 0;
+    collapsedKeys.forEach(function (k) { var c = collapsed.get(k[3]); if (k[0] === 'Patient refunds') nRef += c[0]; else nInc += c[0]; });
+    rec.push('', 'Privacy, for the files shared outside the practice:',
+      '- Patient refund rows: ' + nRef + ', collapsed to one total per year and account, with no names, dates or memos.',
+      '- Income rows: ' + nInc + ', collapsed the same way, because customer names on income lines can be patients.',
+      '- Individuals\' names replaced by codes: ' + nameOrder.length + '. pnl-name-key.csv holds the real names and stays at the practice.',
+      '- Memo and description text is read to match payees and never written out. Card merchant names are shown without any numbers.');
+    if (left.balance || left.payments || left.outside) rec.push('', 'Left out: ' + left.balance + ' balance sheet rows (bank, card, loan and equity accounts), ' + left.payments + ' card payments, ' + left.outside + ' rows outside the period.');
+    if (left.draws) rec.push('Owner draws or distributions in the detail (equity, not expense): ' + money(left.draws) + '.');
+    if (mirrors.length) rec.push('Rows that appeared twice in the detail (under the expense account and under the card or bank account) and counted once: ' + mirrors.length + '.');
+    if (cards.length) {
+      rec.push('Card statement rows matched to a QuickBooks row (same amount, within 5 days) and counted once: ' + matched + '.');
+      var unmatched = items.filter(function (it) { return it.src === 'card'; }).length;
+      if (pnl && unmatched) rec.push('Card statement charges with no matching QuickBooks row: ' + unmatched + '. They are taken as practice spending booked ' +
+        'in a lump when the card is paid, so their add-backs come off total operating cost, not one category. ' +
+        'Leave out the statement of any card the practice does not pay.');
+    }
+    if (home) rec.push('Home state, from the most common state on charges: ' + home + '.');
+    if (vendors.length && items.length) rec.push('The expenses by vendor summary was not needed: line detail came in, and it is finer.');
+    rec.push('', 'Review list: ' + listed + ' groups. How it decides:',
+      '- High (likely add-back): personal by nature, such as streaming, clothing, school, clubs, leisure travel, charity, political giving, or a payee sharing a family name. Counted in Adjusted EBITDA.',
+      '- Medium (possible): spending that often mixes personal and practice use, such as meals, travel, fuel, groceries and transfers to individuals. Shown, not counted, until the owner answers.',
+      '- Low: mixed-use stores such as Amazon and Costco, listed above $1,000 a year, to sample at the visit.',
+      '- A group moves up one level when most of its charges fall on a weekend or outside the home state.',
+      '- To answer, write personal, business, or a percent personal (like 40%) in owner_decision, then run the tool again with the answered file added. Answers used this run: ' + used + '.',
+      '', 'Benchmarks are percent of total revenue by MGMA cost category, and "in line" means within a quarter of the reference (at least 1 point). The built-in references are the best public figures and are dated: category splits are MGMA family medicine 2008 data (AAFP FPM, March 2010), support staff is MGMA primary care 2025 data, billing is an MGMA Stat 2025 rule of thumb, and total operating cost is MGMA primary care 2022 data. Current category figures sit in MGMA DataDive; add a benchmarks CSV (category, pct_of_revenue, source) to use them.',
+      'Depreciation sits with interest and taxes here, outside operating cost; MGMA counts it inside, usually about 1% of revenue. Providers: ' + money(phys) + ' physician FTE and ' + money(apps) + ' NP/PA FTE, counted one to one for per-provider figures as MGMA does.');
+    if (notes.length) { rec.push(''); notes.forEach(function (n) { rec.push(n); }); }
+    rec.push('');
+    var filesOut = {};
+    filesOut[OUT[0]] = normalized; filesOut[OUT[1]] = review; filesOut[OUT[2]] = detail; filesOut[OUT[3]] = rec.join('\n'); filesOut[OUT[4]] = keyText;
+    return { files: filesOut, summary: summary, top: top, listed: listed, names: nameOrder.length };
+  }
+
+  /* ---------- the page ---------- */
+  var $ = function (id) { return document.getElementById(id); };
+  var chosen = [], outputs = null, busy = 0;
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function dollars(c) { var d = Math.round(c / 100); return (d < 0 ? '-$' : '$') + Math.abs(d).toLocaleString('en-US'); }
+  var KIND_LABEL = { pnl: 'Profit and loss', transactions: 'Line detail or card statement', vendors: 'Expenses by vendor', decisions: 'Owner answers', benchmarks: 'Benchmarks', unknown: 'Not recognized, left out', unreadable: 'Could not be read' };
+  function settings() { return { physicians: $('physicians').value, apps: $('apps').value, family: $('family').value }; }
+  function go() {
+    if (!chosen.length) return;
+    var mine = ++busy;
+    $('summary').className = 'status';
+    $('summary').textContent = 'Working on this computer...';
+    run(chosen, settings()).then(function (r) {
+      if (mine !== busy) return;
+      outputs = r.files;
+      $('file-list').innerHTML = r.kinds.map(function (k) { return '<li><b>' + esc(k[0]) + '</b>: ' + esc(KIND_LABEL[k[1]]) + '</li>'; }).join('');
+      var s = r.summary;
+      $('totals').tBodies[0].innerHTML = [
+        ['Revenue, one year', dollars(s.revenue)], ['Operating cost as booked', dollars(s.reported)],
+        ['Likely owner add-backs (High)', dollars(s.likely)], ['Add-backs the owner confirmed', dollars(s.confirmed)],
+        ['Operating cost, normalized', dollars(s.normalized)], ['Possible add-backs, not counted yet', dollars(s.possible)]
+      ].concat(s.adjusted !== null ? [['EBITDA as reported', dollars(s.ebitda)], ['Adjusted EBITDA', dollars(s.adjusted)]] : [])
+        .map(function (x) { return '<tr><td>' + esc(x[0]) + '</td><td>' + esc(x[1]) + '</td></tr>'; }).join('');
+      $('cats').tBodies[0].innerHTML = s.cats.filter(function (c) { return c[1] !== 0 || c[3]; }).map(function (c) {
+        return '<tr><td>' + esc(c[0]) + '</td><td>' + esc(dollars(c[1])) + '</td><td>' + esc(c[2] ? c[2] + '%' : '') + '</td><td>' + esc(c[3] ? c[3] + '%' : '') + '</td><td>' + esc(c[4]) + '</td></tr>';
+      }).join('');
+      $('review').tBodies[0].innerHTML = r.top.slice(0, 15).map(function (x) {
+        return '<tr><td>' + esc(x[1]) + '</td><td>' + esc(x[3] === '(whole account)' ? x[4] + ' (whole account)' : x[3]) + '</td><td>' + esc(x[2]) + '</td><td>' + esc(dollars(cents([x[11], null]))) + '</td><td>' + esc(x[12]) + '</td></tr>';
+      }).join('');
+      $('review-count').textContent = r.listed > 15 ? 'The first 15 of ' + r.listed + ' are shown here; the saved list has all of them.' : r.listed + ' to answer.';
+      $('results').hidden = false;
+      $('summary').textContent = 'Ready. ' + r.listed + ' items for the owner, ' + r.names + ' names turned into codes. Nothing has left this computer.';
+      [].forEach.call(document.querySelectorAll('[data-out]'), function (b) { b.disabled = false; });
+      $('record-text').textContent = outputs[OUT[3]];
+    }).catch(function (e) { $('summary').className = 'err'; $('summary').textContent = 'Stopped: ' + e.message; });
+  }
+  $('files').addEventListener('change', function () {
+    var fl = [].slice.call(this.files);
+    if (!fl.length) return;
+    $('file-status').textContent = fl.length + (fl.length === 1 ? ' file' : ' files') + ', read on this computer';
+    Promise.all(fl.map(function (f) { return f.arrayBuffer().then(function (b) { return { name: f.name, bytes: new Uint8Array(b) }; }); }))
+      .then(function (got) { chosen = got; go(); });
+  });
+  ['physicians', 'apps', 'family'].forEach(function (id) { $(id).addEventListener('change', go); });
+  function save(name) {
+    var type = /\.txt$/.test(name) ? 'text/plain' : 'text/csv';
+    var url = URL.createObjectURL(new Blob([outputs[name]], { type: type })), el = document.createElement('a');
+    el.href = url; el.download = name; document.body.appendChild(el); el.click(); el.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+  [].forEach.call(document.querySelectorAll('[data-out]'), function (b) {
+    b.addEventListener('click', function () {
+      if (!outputs) return;
+      var which = b.getAttribute('data-out');
+      if (which === 'shareable') { [0, 1, 2, 3].forEach(function (i, n) { setTimeout(function () { save(OUT[i]); }, n * 300); }); }
+      else save(OUT[parseInt(which, 10)]);
+    });
+  });
+  window.pnlNormalizer = { version: VERSION, run: run, rules: { account: ACCOUNT_RULES, vendor: VENDOR_RULES, card: CARD_CATS, categories: CATEGORIES } };
+})();
+</script>
+</body>
+</html>

@@ -129,6 +129,42 @@ python3 deidentify.py "CPT Payment Report.xlsx" --out deidentified
 
 `--keep`, `--drop`, `--code` and `--year` take a column name and override its default. The page and the script share one logic, and the tests require byte-identical files from the same input. `sample-data/deid/` holds a made-up payment report, as CSV and Excel (`tools/make_deid_sample.py`).
 
+## P&L normalizer
+
+**[Open the P&L normalizer](https://check.seriousai.partners/pnl-normalizer.html)** to see what a practice really costs to run, from its own QuickBooks exports. Same build as the payer check: one file, in the browser, nothing uploaded, the same Content Security Policy and the same no-network test (`tests/test_pnl_normalizer.py`).
+
+What goes in, all chosen at once (CSV or Excel, as exported; the page works out which is which):
+
+- **Profit and Loss by Month** (QuickBooks Online or Desktop), 12 months or more. Alone, it gives the cost picture.
+- **Transaction Detail by Account** or a General Ledger for the same months. This is what finds personal charges.
+- **Card statements** as downloaded from the issuer (Amex, Chase, Capital One, Bank of America, Citi and similar layouts).
+- Optional: **Expenses by Vendor Summary** (used only when there's no line detail), the **answered review list** from an earlier run, and a **benchmarks CSV** (`category`, `pct_of_revenue`, `source`) to replace the built-in references.
+
+What comes out:
+
+| File | What's in it | Share it? |
+|---|---|---|
+| `pnl-normalized-overhead.csv` | A year of cost by MGMA cost category, as booked and after add-backs, as a share of revenue and per FTE provider, beside a dated public benchmark, plus an earnings bridge to Adjusted EBITDA | Yes |
+| `pnl-add-back-review.csv` | Charges that look personal, grouped by payee, with confidence, a reason and an `owner_decision` column | Yes |
+| `pnl-line-detail.csv` | Every line used and where it went | Yes |
+| `pnl-record.txt` | What was read, the reconciliation to the report's own totals, and every rule applied | Yes |
+| `pnl-name-key.csv` | Each "Individual NN" code and the real name | No. It stays at the practice. |
+
+How it decides:
+
+- Every account lands in a cost category by plain word rules (rent goes to building, malpractice to professional liability, and so on). Provider and owner pay, interest, depreciation and taxes sit outside operating cost.
+- **High** confidence (personal by nature: streaming, clothing, school, clubs, leisure travel, charity, or a payee sharing a family name) counts in Adjusted EBITDA now. **Medium** (meals, travel, fuel, groceries, transfers to individuals) is shown but not counted until the owner answers. **Low** (Amazon, Costco and similar) is listed above $1,000 a year to sample. A group moves up a level when most charges fall on a weekend or out of state.
+- The owner writes `personal`, `business` or a percent (like `40%`) in `owner_decision` and runs it again with that file added.
+- Card charges with no matching QuickBooks row are taken as practice spending booked in a lump, so their add-backs come off total operating cost rather than one category. Leave out a card the practice doesn't pay.
+
+Patient details stay out of the four shareable files: patient refund lines and income lines (whose customer names can be patients) are rolled up to one total per year and account, memos are read for matching but never written, and individuals' names become codes. The benchmarks are the best public MGMA figures and are dated (the record cites each); current figures sit in MGMA DataDive.
+
+```bash
+python3 pnl_normalizer.py exports/ --physicians 1 --apps 5.5 --family Lastname --out pnl-output
+```
+
+`sample-data/pnl/` holds a made-up practice's exports and an answer key (`tools/make_pnl_sample.py`).
+
 ## License
 
 Code under the [Apache License 2.0](LICENSE). Documentation under [Creative Commons Attribution 4.0](LICENSE-docs). From Serious AI Partners.

@@ -1,0 +1,244 @@
+Transaction Detail by Account,,,,,,,,
+Sample Family Medicine (Sample data),,,,,,,,
+"November 2024-December, 2025",,,,,,,,
+,,,,,,,,
+,Transaction date,Transaction type,Num,Name,Memo/Description,Account full name,Amount,Balance
+2100 Sample Practice Amex,,,,,,,,
+,05/04/2025,Expense,,,TARGET 00012345 SIMI VALLEY CA,6100 Office Supplies,-129.00,-129.00
+Total for 2100 Sample Practice Amex,,,,,,,-$129.00,
+4000 Insurance Payments,,,,,,,,
+,11/10/2024,Deposit,,Sample Patient Charlie,Copay,2100 Sample Practice Amex,40.00,40.00
+,12/10/2024,Deposit,,Sample Patient Charlie,Copay,2100 Sample Practice Amex,40.00,80.00
+,01/10/2025,Deposit,,Sample Patient Charlie,Copay,2100 Sample Practice Amex,40.00,120.00
+,02/10/2025,Deposit,,Sample Patient Charlie,Copay,2100 Sample Practice Amex,40.00,160.00
+,03/10/2025,Deposit,,Sample Patient Charlie,Copay,2100 Sample Practice Amex,40.00,200.00
+,04/10/2025,Deposit,,Sample Patient Charlie,Copay,2100 Sample Practice Amex,40.00,240.00
+,05/10/2025,Deposit,,Sample Patient Charlie,Copay,2100 Sample Practice Amex,40.00,280.00
+,06/10/2025,Deposit,,Sample Patient Charlie,Copay,2100 Sample Practice Amex,40.00,320.00
+,07/10/2025,Deposit,,Sample Patient Charlie,Copay,2100 Sample Practice Amex,40.00,360.00
+,08/10/2025,Deposit,,Sample Patient Charlie,Copay,2100 Sample Practice Amex,40.00,400.00
+,09/10/2025,Deposit,,Sample Patient Charlie,Copay,2100 Sample Practice Amex,40.00,440.00
+,10/10/2025,Deposit,,Sample Patient Charlie,Copay,2100 Sample Practice Amex,40.00,480.00
+,11/10/2025,Deposit,,Sample Patient Charlie,Copay,2100 Sample Practice Amex,40.00,520.00
+,12/10/2025,Deposit,,Sample Patient Charlie,Copay,2100 Sample Practice Amex,40.00,560.00
+Total for 4000 Insurance Payments,,,,,,,$560.00,
+4900 Patient Refunds,,,,,,,,
+,11/18/2024,Check,,Sample Patient Alpha,Refund of overpayment,2100 Sample Practice Amex,-85.00,-85.00
+,11/25/2024,Check,,Sample Patient Bravo,Pt credit balance refund,2100 Sample Practice Amex,-65.00,-150.00
+,12/18/2024,Check,,Sample Patient Alpha,Refund of overpayment,2100 Sample Practice Amex,-85.00,-235.00
+,12/25/2024,Check,,Sample Patient Bravo,Pt credit balance refund,2100 Sample Practice Amex,-65.00,-300.00
+,01/18/2025,Check,,Sample Patient Alpha,Refund of overpayment,2100 Sample Practice Amex,-85.00,-385.00
+,01/25/2025,Check,,Sample Patient Bravo,Pt credit balance refund,2100 Sample Practice Amex,-65.00,-450.00
+,02/18/2025,Check,,Sample Patient Alpha,Refund of overpayment,2100 Sample Practice Amex,-85.00,-535.00
+,02/25/2025,Check,,Sample Patient Bravo,Pt credit balance refund,2100 Sample Practice Amex,-65.00,-600.00
+,03/18/2025,Check,,Sample Patient Alpha,Refund of overpayment,2100 Sample Practice Amex,-85.00,-685.00
+,03/25/2025,Check,,Sample Patient Bravo,Pt credit balance refund,2100 Sample Practice Amex,-65.00,-750.00
+,04/18/2025,Check,,Sample Patient Alpha,Refund of overpayment,2100 Sample Practice Amex,-85.00,-835.00
+,04/25/2025,Check,,Sample Patient Bravo,Pt credit balance refund,2100 Sample Practice Amex,-65.00,-900.00
+,05/18/2025,Check,,Sample Patient Alpha,Refund of overpayment,2100 Sample Practice Amex,-85.00,-985.00
+,05/25/2025,Check,,Sample Patient Bravo,Pt credit balance refund,2100 Sample Practice Amex,-65.00,"-1,050.00"
+,06/18/2025,Check,,Sample Patient Alpha,Refund of overpayment,2100 Sample Practice Amex,-85.00,"-1,135.00"
+,06/25/2025,Check,,Sample Patient Bravo,Pt credit balance refund,2100 Sample Practice Amex,-65.00,"-1,200.00"
+,07/18/2025,Check,,Sample Patient Alpha,Refund of overpayment,2100 Sample Practice Amex,-85.00,"-1,285.00"
+,07/25/2025,Check,,Sample Patient Bravo,Pt credit balance refund,2100 Sample Practice Amex,-65.00,"-1,350.00"
+,08/18/2025,Check,,Sample Patient Alpha,Refund of overpayment,2100 Sample Practice Amex,-85.00,"-1,435.00"
+,08/25/2025,Check,,Sample Patient Bravo,Pt credit balance refund,2100 Sample Practice Amex,-65.00,"-1,500.00"
+,09/18/2025,Check,,Sample Patient Alpha,Refund of overpayment,2100 Sample Practice Amex,-85.00,"-1,585.00"
+,09/25/2025,Check,,Sample Patient Bravo,Pt credit balance refund,2100 Sample Practice Amex,-65.00,"-1,650.00"
+,10/18/2025,Check,,Sample Patient Alpha,Refund of overpayment,2100 Sample Practice Amex,-85.00,"-1,735.00"
+,10/25/2025,Check,,Sample Patient Bravo,Pt credit balance refund,2100 Sample Practice Amex,-65.00,"-1,800.00"
+,11/18/2025,Check,,Sample Patient Alpha,Refund of overpayment,2100 Sample Practice Amex,-85.00,"-1,885.00"
+,11/25/2025,Check,,Sample Patient Bravo,Pt credit balance refund,2100 Sample Practice Amex,-65.00,"-1,950.00"
+,12/18/2025,Check,,Sample Patient Alpha,Refund of overpayment,2100 Sample Practice Amex,-85.00,"-2,035.00"
+,12/25/2025,Check,,Sample Patient Bravo,Pt credit balance refund,2100 Sample Practice Amex,-65.00,"-2,100.00"
+Total for 4900 Patient Refunds,,,,,,,"-$2,100.00",
+6050 Dues & Subscriptions,,,,,,,,
+,11/03/2024,Expense,,Netflix,NETFLIX.COM LOS GATOS CA,2100 Sample Practice Amex,22.99,22.99
+,12/03/2024,Expense,,Netflix,NETFLIX.COM LOS GATOS CA,2100 Sample Practice Amex,22.99,45.98
+,01/03/2025,Expense,,Netflix,NETFLIX.COM LOS GATOS CA,2100 Sample Practice Amex,22.99,68.97
+,01/09/2025,Bill,,Sample County Medical Association,Annual dues,2100 Sample Practice Amex,650.00,718.97
+,02/03/2025,Expense,,Netflix,NETFLIX.COM LOS GATOS CA,2100 Sample Practice Amex,22.99,741.96
+,03/03/2025,Expense,,Netflix,NETFLIX.COM LOS GATOS CA,2100 Sample Practice Amex,22.99,764.95
+,04/03/2025,Expense,,Netflix,NETFLIX.COM LOS GATOS CA,2100 Sample Practice Amex,22.99,787.94
+,05/03/2025,Expense,,Netflix,NETFLIX.COM LOS GATOS CA,2100 Sample Practice Amex,22.99,810.93
+,06/03/2025,Expense,,Netflix,NETFLIX.COM LOS GATOS CA,2100 Sample Practice Amex,22.99,833.92
+,07/03/2025,Expense,,Netflix,NETFLIX.COM LOS GATOS CA,2100 Sample Practice Amex,22.99,856.91
+,08/03/2025,Expense,,Netflix,NETFLIX.COM LOS GATOS CA,2100 Sample Practice Amex,22.99,879.90
+,09/03/2025,Expense,,Netflix,NETFLIX.COM LOS GATOS CA,2100 Sample Practice Amex,22.99,902.89
+,10/03/2025,Expense,,Netflix,NETFLIX.COM LOS GATOS CA,2100 Sample Practice Amex,22.99,925.88
+,11/03/2025,Expense,,Netflix,NETFLIX.COM LOS GATOS CA,2100 Sample Practice Amex,22.99,948.87
+,12/03/2025,Expense,,Netflix,NETFLIX.COM LOS GATOS CA,2100 Sample Practice Amex,22.99,971.86
+Total for 6050 Dues & Subscriptions,,,,,,,$971.86,
+6080 Meals & Entertainment,,,,,,,,
+,11/06/2024,Expense,,,PANERA BREAD #4411 SIMI VALLEY CA,2100 Sample Practice Amex,184.50,184.50
+,11/09/2024,Expense,,Sample Steakhouse,SAMPLE STEAKHOUSE THOUSAND OAKS CA,2100 Sample Practice Amex,323.00,507.50
+,12/04/2024,Expense,,,PANERA BREAD #4411 SIMI VALLEY CA,2100 Sample Practice Amex,184.50,692.00
+,12/14/2024,Expense,,Sample Steakhouse,SAMPLE STEAKHOUSE THOUSAND OAKS CA,2100 Sample Practice Amex,324.00,"1,016.00"
+,01/01/2025,Expense,,,PANERA BREAD #4411 SIMI VALLEY CA,2100 Sample Practice Amex,184.50,"1,200.50"
+,01/11/2025,Expense,,Sample Steakhouse,SAMPLE STEAKHOUSE THOUSAND OAKS CA,2100 Sample Practice Amex,313.00,"1,513.50"
+,02/05/2025,Expense,,,PANERA BREAD #4411 SIMI VALLEY CA,2100 Sample Practice Amex,184.50,"1,698.00"
+,02/08/2025,Expense,,Sample Steakhouse,SAMPLE STEAKHOUSE THOUSAND OAKS CA,2100 Sample Practice Amex,314.00,"2,012.00"
+,03/05/2025,Expense,,,PANERA BREAD #4411 SIMI VALLEY CA,2100 Sample Practice Amex,184.50,"2,196.50"
+,03/08/2025,Expense,,Sample Steakhouse,SAMPLE STEAKHOUSE THOUSAND OAKS CA,2100 Sample Practice Amex,315.00,"2,511.50"
+,04/02/2025,Expense,,,PANERA BREAD #4411 SIMI VALLEY CA,2100 Sample Practice Amex,184.50,"2,696.00"
+,04/12/2025,Expense,,Sample Steakhouse,SAMPLE STEAKHOUSE THOUSAND OAKS CA,2100 Sample Practice Amex,316.00,"3,012.00"
+,05/07/2025,Expense,,,PANERA BREAD #4411 SIMI VALLEY CA,2100 Sample Practice Amex,184.50,"3,196.50"
+,05/10/2025,Expense,,Sample Steakhouse,SAMPLE STEAKHOUSE THOUSAND OAKS CA,2100 Sample Practice Amex,317.00,"3,513.50"
+,06/04/2025,Expense,,,PANERA BREAD #4411 SIMI VALLEY CA,2100 Sample Practice Amex,184.50,"3,698.00"
+,06/14/2025,Expense,,Sample Steakhouse,SAMPLE STEAKHOUSE THOUSAND OAKS CA,2100 Sample Practice Amex,318.00,"4,016.00"
+,07/02/2025,Expense,,,PANERA BREAD #4411 SIMI VALLEY CA,2100 Sample Practice Amex,184.50,"4,200.50"
+,07/12/2025,Expense,,Sample Steakhouse,SAMPLE STEAKHOUSE THOUSAND OAKS CA,2100 Sample Practice Amex,319.00,"4,519.50"
+,08/06/2025,Expense,,,PANERA BREAD #4411 SIMI VALLEY CA,2100 Sample Practice Amex,184.50,"4,704.00"
+,08/09/2025,Expense,,Sample Steakhouse,SAMPLE STEAKHOUSE THOUSAND OAKS CA,2100 Sample Practice Amex,320.00,"5,024.00"
+,09/03/2025,Expense,,,PANERA BREAD #4411 SIMI VALLEY CA,2100 Sample Practice Amex,184.50,"5,208.50"
+,09/13/2025,Expense,,Sample Steakhouse,SAMPLE STEAKHOUSE THOUSAND OAKS CA,2100 Sample Practice Amex,321.00,"5,529.50"
+,10/01/2025,Expense,,,PANERA BREAD #4411 SIMI VALLEY CA,2100 Sample Practice Amex,184.50,"5,714.00"
+,10/11/2025,Expense,,Sample Steakhouse,SAMPLE STEAKHOUSE THOUSAND OAKS CA,2100 Sample Practice Amex,322.00,"6,036.00"
+,11/05/2025,Expense,,,PANERA BREAD #4411 SIMI VALLEY CA,2100 Sample Practice Amex,184.50,"6,220.50"
+,11/08/2025,Expense,,Sample Steakhouse,SAMPLE STEAKHOUSE THOUSAND OAKS CA,2100 Sample Practice Amex,323.00,"6,543.50"
+,12/03/2025,Expense,,,PANERA BREAD #4411 SIMI VALLEY CA,2100 Sample Practice Amex,184.50,"6,728.00"
+,12/13/2025,Expense,,Sample Steakhouse,SAMPLE STEAKHOUSE THOUSAND OAKS CA,2100 Sample Practice Amex,324.00,"7,052.00"
+Total for 6080 Meals & Entertainment,,,,,,,"$7,052.00",
+6090 Medical Supplies,,,,,,,,
+,11/12/2024,Bill,,McKesson Medical-Surgical,Invoice,2100 Sample Practice Amex,"4,200.00","4,200.00"
+,11/20/2024,Bill,,Henry Schein,Invoice,2100 Sample Practice Amex,"1,350.00","5,550.00"
+,12/12/2024,Bill,,McKesson Medical-Surgical,Invoice,2100 Sample Practice Amex,"4,200.00","9,750.00"
+,12/20/2024,Bill,,Henry Schein,Invoice,2100 Sample Practice Amex,"1,350.00","11,100.00"
+,01/12/2025,Bill,,McKesson Medical-Surgical,Invoice,2100 Sample Practice Amex,"4,200.00","15,300.00"
+,01/20/2025,Bill,,Henry Schein,Invoice,2100 Sample Practice Amex,"1,350.00","16,650.00"
+,02/12/2025,Bill,,McKesson Medical-Surgical,Invoice,2100 Sample Practice Amex,"4,200.00","20,850.00"
+,02/20/2025,Bill,,Henry Schein,Invoice,2100 Sample Practice Amex,"1,350.00","22,200.00"
+,03/12/2025,Bill,,McKesson Medical-Surgical,Invoice,2100 Sample Practice Amex,"4,200.00","26,400.00"
+,03/20/2025,Bill,,Henry Schein,Invoice,2100 Sample Practice Amex,"1,350.00","27,750.00"
+,04/12/2025,Bill,,McKesson Medical-Surgical,Invoice,2100 Sample Practice Amex,"4,200.00","31,950.00"
+,04/20/2025,Bill,,Henry Schein,Invoice,2100 Sample Practice Amex,"1,350.00","33,300.00"
+,05/12/2025,Bill,,McKesson Medical-Surgical,Invoice,2100 Sample Practice Amex,"4,200.00","37,500.00"
+,05/20/2025,Bill,,Henry Schein,Invoice,2100 Sample Practice Amex,"1,350.00","38,850.00"
+,06/12/2025,Bill,,McKesson Medical-Surgical,Invoice,2100 Sample Practice Amex,"4,200.00","43,050.00"
+,06/20/2025,Bill,,Henry Schein,Invoice,2100 Sample Practice Amex,"1,350.00","44,400.00"
+,07/12/2025,Bill,,McKesson Medical-Surgical,Invoice,2100 Sample Practice Amex,"4,200.00","48,600.00"
+,07/20/2025,Bill,,Henry Schein,Invoice,2100 Sample Practice Amex,"1,350.00","49,950.00"
+,08/12/2025,Bill,,McKesson Medical-Surgical,Invoice,2100 Sample Practice Amex,"4,200.00","54,150.00"
+,08/20/2025,Bill,,Henry Schein,Invoice,2100 Sample Practice Amex,"1,350.00","55,500.00"
+,09/12/2025,Bill,,McKesson Medical-Surgical,Invoice,2100 Sample Practice Amex,"4,200.00","59,700.00"
+,09/20/2025,Bill,,Henry Schein,Invoice,2100 Sample Practice Amex,"1,350.00","61,050.00"
+,10/12/2025,Bill,,McKesson Medical-Surgical,Invoice,2100 Sample Practice Amex,"4,200.00","65,250.00"
+,10/20/2025,Bill,,Henry Schein,Invoice,2100 Sample Practice Amex,"1,350.00","66,600.00"
+,11/12/2025,Bill,,McKesson Medical-Surgical,Invoice,2100 Sample Practice Amex,"4,200.00","70,800.00"
+,11/20/2025,Bill,,Henry Schein,Invoice,2100 Sample Practice Amex,"1,350.00","72,150.00"
+,12/12/2025,Bill,,McKesson Medical-Surgical,Invoice,2100 Sample Practice Amex,"4,200.00","76,350.00"
+,12/20/2025,Bill,,Henry Schein,Invoice,2100 Sample Practice Amex,"1,350.00","77,700.00"
+Total for 6090 Medical Supplies,,,,,,,"$77,700.00",
+6100 Office Supplies,,,,,,,,
+,11/06/2024,Expense,,Staples,STAPLES 00123 SIMI VALLEY CA,2100 Sample Practice Amex,98.00,98.00
+,11/14/2024,Expense,,,COSTCO WHSE #0479 SIMI VALLEY CA,2100 Sample Practice Amex,210.00,308.00
+,11/22/2024,Expense,,,AMAZON MKTPL*2K4HX1 AMZN.COM/BILL WA,2100 Sample Practice Amex,64.00,372.00
+,12/06/2024,Expense,,Staples,STAPLES 00123 SIMI VALLEY CA,2100 Sample Practice Amex,98.00,470.00
+,12/14/2024,Expense,,,COSTCO WHSE #0479 SIMI VALLEY CA,2100 Sample Practice Amex,210.00,680.00
+,12/22/2024,Expense,,,AMAZON MKTPL*2K4HX1 AMZN.COM/BILL WA,2100 Sample Practice Amex,64.00,744.00
+,01/06/2025,Expense,,Staples,STAPLES 00123 SIMI VALLEY CA,2100 Sample Practice Amex,98.00,842.00
+,01/14/2025,Expense,,,COSTCO WHSE #0479 SIMI VALLEY CA,2100 Sample Practice Amex,210.00,"1,052.00"
+,01/22/2025,Expense,,,AMAZON MKTPL*2K4HX1 AMZN.COM/BILL WA,2100 Sample Practice Amex,64.00,"1,116.00"
+,02/06/2025,Expense,,Staples,STAPLES 00123 SIMI VALLEY CA,2100 Sample Practice Amex,98.00,"1,214.00"
+,02/14/2025,Expense,,,COSTCO WHSE #0479 SIMI VALLEY CA,2100 Sample Practice Amex,210.00,"1,424.00"
+,02/22/2025,Expense,,,AMAZON MKTPL*2K4HX1 AMZN.COM/BILL WA,2100 Sample Practice Amex,64.00,"1,488.00"
+,03/06/2025,Expense,,Staples,STAPLES 00123 SIMI VALLEY CA,2100 Sample Practice Amex,98.00,"1,586.00"
+,03/14/2025,Expense,,,COSTCO WHSE #0479 SIMI VALLEY CA,2100 Sample Practice Amex,210.00,"1,796.00"
+,03/22/2025,Expense,,,AMAZON MKTPL*2K4HX1 AMZN.COM/BILL WA,2100 Sample Practice Amex,64.00,"1,860.00"
+,04/06/2025,Expense,,Staples,STAPLES 00123 SIMI VALLEY CA,2100 Sample Practice Amex,98.00,"1,958.00"
+,04/14/2025,Expense,,,COSTCO WHSE #0479 SIMI VALLEY CA,2100 Sample Practice Amex,210.00,"2,168.00"
+,04/22/2025,Expense,,,AMAZON MKTPL*2K4HX1 AMZN.COM/BILL WA,2100 Sample Practice Amex,64.00,"2,232.00"
+,05/06/2025,Expense,,Staples,STAPLES 00123 SIMI VALLEY CA,2100 Sample Practice Amex,98.00,"2,330.00"
+,05/14/2025,Expense,,,COSTCO WHSE #0479 SIMI VALLEY CA,2100 Sample Practice Amex,210.00,"2,540.00"
+,05/22/2025,Expense,,,AMAZON MKTPL*2K4HX1 AMZN.COM/BILL WA,2100 Sample Practice Amex,64.00,"2,604.00"
+,06/06/2025,Expense,,Staples,STAPLES 00123 SIMI VALLEY CA,2100 Sample Practice Amex,98.00,"2,702.00"
+,06/14/2025,Expense,,,COSTCO WHSE #0479 SIMI VALLEY CA,2100 Sample Practice Amex,210.00,"2,912.00"
+,06/22/2025,Expense,,,AMAZON MKTPL*2K4HX1 AMZN.COM/BILL WA,2100 Sample Practice Amex,64.00,"2,976.00"
+,07/06/2025,Expense,,Staples,STAPLES 00123 SIMI VALLEY CA,2100 Sample Practice Amex,98.00,"3,074.00"
+,07/14/2025,Expense,,,COSTCO WHSE #0479 SIMI VALLEY CA,2100 Sample Practice Amex,210.00,"3,284.00"
+,07/22/2025,Expense,,,AMAZON MKTPL*2K4HX1 AMZN.COM/BILL WA,2100 Sample Practice Amex,64.00,"3,348.00"
+,08/06/2025,Expense,,Staples,STAPLES 00123 SIMI VALLEY CA,2100 Sample Practice Amex,98.00,"3,446.00"
+,08/14/2025,Expense,,,COSTCO WHSE #0479 SIMI VALLEY CA,2100 Sample Practice Amex,210.00,"3,656.00"
+,08/22/2025,Expense,,,AMAZON MKTPL*2K4HX1 AMZN.COM/BILL WA,2100 Sample Practice Amex,64.00,"3,720.00"
+,09/06/2025,Expense,,Staples,STAPLES 00123 SIMI VALLEY CA,2100 Sample Practice Amex,98.00,"3,818.00"
+,09/14/2025,Expense,,,COSTCO WHSE #0479 SIMI VALLEY CA,2100 Sample Practice Amex,210.00,"4,028.00"
+,09/22/2025,Expense,,,AMAZON MKTPL*2K4HX1 AMZN.COM/BILL WA,2100 Sample Practice Amex,64.00,"4,092.00"
+,10/06/2025,Expense,,Staples,STAPLES 00123 SIMI VALLEY CA,2100 Sample Practice Amex,98.00,"4,190.00"
+,10/14/2025,Expense,,,COSTCO WHSE #0479 SIMI VALLEY CA,2100 Sample Practice Amex,210.00,"4,400.00"
+,10/22/2025,Expense,,,AMAZON MKTPL*2K4HX1 AMZN.COM/BILL WA,2100 Sample Practice Amex,64.00,"4,464.00"
+,11/06/2025,Expense,,Staples,STAPLES 00123 SIMI VALLEY CA,2100 Sample Practice Amex,98.00,"4,562.00"
+,11/14/2025,Expense,,,COSTCO WHSE #0479 SIMI VALLEY CA,2100 Sample Practice Amex,210.00,"4,772.00"
+,11/22/2025,Expense,,,AMAZON MKTPL*2K4HX1 AMZN.COM/BILL WA,2100 Sample Practice Amex,64.00,"4,836.00"
+,12/06/2025,Expense,,Staples,STAPLES 00123 SIMI VALLEY CA,2100 Sample Practice Amex,98.00,"4,934.00"
+,12/14/2025,Expense,,,COSTCO WHSE #0479 SIMI VALLEY CA,2100 Sample Practice Amex,210.00,"5,144.00"
+,12/22/2025,Expense,,,AMAZON MKTPL*2K4HX1 AMZN.COM/BILL WA,2100 Sample Practice Amex,64.00,"5,208.00"
+Total for 6100 Office Supplies,,,,,,,"$5,208.00",
+6140 Salaries & Wages,,,,,,,,
+,11/15/2024,Payroll Check,,Pat Samplefam,,2100 Sample Practice Amex,"4,000.00","4,000.00"
+,11/15/2024,Payroll Check,,Sample Staffer Alpha,,2100 Sample Practice Amex,"4,200.00","8,200.00"
+,11/15/2024,Payroll Check,,Sample Staffer Bravo,,2100 Sample Practice Amex,"3,900.00","12,100.00"
+,11/15/2024,Payroll Check,,Sample Staffer Charlie,,2100 Sample Practice Amex,"3,800.00","15,900.00"
+,12/15/2024,Payroll Check,,Pat Samplefam,,2100 Sample Practice Amex,"4,000.00","19,900.00"
+,12/15/2024,Payroll Check,,Sample Staffer Alpha,,2100 Sample Practice Amex,"4,200.00","24,100.00"
+,12/15/2024,Payroll Check,,Sample Staffer Bravo,,2100 Sample Practice Amex,"3,900.00","28,000.00"
+,12/15/2024,Payroll Check,,Sample Staffer Charlie,,2100 Sample Practice Amex,"3,800.00","31,800.00"
+,01/15/2025,Payroll Check,,Pat Samplefam,,2100 Sample Practice Amex,"4,000.00","35,800.00"
+,01/15/2025,Payroll Check,,Sample Staffer Alpha,,2100 Sample Practice Amex,"4,200.00","40,000.00"
+,01/15/2025,Payroll Check,,Sample Staffer Bravo,,2100 Sample Practice Amex,"3,900.00","43,900.00"
+,01/15/2025,Payroll Check,,Sample Staffer Charlie,,2100 Sample Practice Amex,"3,800.00","47,700.00"
+,02/15/2025,Payroll Check,,Pat Samplefam,,2100 Sample Practice Amex,"4,000.00","51,700.00"
+,02/15/2025,Payroll Check,,Sample Staffer Alpha,,2100 Sample Practice Amex,"4,200.00","55,900.00"
+,02/15/2025,Payroll Check,,Sample Staffer Bravo,,2100 Sample Practice Amex,"3,900.00","59,800.00"
+,02/15/2025,Payroll Check,,Sample Staffer Charlie,,2100 Sample Practice Amex,"3,800.00","63,600.00"
+,03/15/2025,Payroll Check,,Pat Samplefam,,2100 Sample Practice Amex,"4,000.00","67,600.00"
+,03/15/2025,Payroll Check,,Sample Staffer Alpha,,2100 Sample Practice Amex,"4,200.00","71,800.00"
+,03/15/2025,Payroll Check,,Sample Staffer Bravo,,2100 Sample Practice Amex,"3,900.00","75,700.00"
+,03/15/2025,Payroll Check,,Sample Staffer Charlie,,2100 Sample Practice Amex,"3,800.00","79,500.00"
+,04/15/2025,Payroll Check,,Pat Samplefam,,2100 Sample Practice Amex,"4,000.00","83,500.00"
+,04/15/2025,Payroll Check,,Sample Staffer Alpha,,2100 Sample Practice Amex,"4,200.00","87,700.00"
+,04/15/2025,Payroll Check,,Sample Staffer Bravo,,2100 Sample Practice Amex,"3,900.00","91,600.00"
+,04/15/2025,Payroll Check,,Sample Staffer Charlie,,2100 Sample Practice Amex,"3,800.00","95,400.00"
+,05/15/2025,Payroll Check,,Pat Samplefam,,2100 Sample Practice Amex,"4,000.00","99,400.00"
+,05/15/2025,Payroll Check,,Sample Staffer Alpha,,2100 Sample Practice Amex,"4,200.00","103,600.00"
+,05/15/2025,Payroll Check,,Sample Staffer Bravo,,2100 Sample Practice Amex,"3,900.00","107,500.00"
+,05/15/2025,Payroll Check,,Sample Staffer Charlie,,2100 Sample Practice Amex,"3,800.00","111,300.00"
+,06/15/2025,Payroll Check,,Pat Samplefam,,2100 Sample Practice Amex,"4,000.00","115,300.00"
+,06/15/2025,Payroll Check,,Sample Staffer Alpha,,2100 Sample Practice Amex,"4,200.00","119,500.00"
+,06/15/2025,Payroll Check,,Sample Staffer Bravo,,2100 Sample Practice Amex,"3,900.00","123,400.00"
+,06/15/2025,Payroll Check,,Sample Staffer Charlie,,2100 Sample Practice Amex,"3,800.00","127,200.00"
+,07/15/2025,Payroll Check,,Pat Samplefam,,2100 Sample Practice Amex,"4,000.00","131,200.00"
+,07/15/2025,Payroll Check,,Sample Staffer Alpha,,2100 Sample Practice Amex,"4,200.00","135,400.00"
+,07/15/2025,Payroll Check,,Sample Staffer Bravo,,2100 Sample Practice Amex,"3,900.00","139,300.00"
+,07/15/2025,Payroll Check,,Sample Staffer Charlie,,2100 Sample Practice Amex,"3,800.00","143,100.00"
+,08/15/2025,Payroll Check,,Pat Samplefam,,2100 Sample Practice Amex,"4,000.00","147,100.00"
+,08/15/2025,Payroll Check,,Sample Staffer Alpha,,2100 Sample Practice Amex,"4,200.00","151,300.00"
+,08/15/2025,Payroll Check,,Sample Staffer Bravo,,2100 Sample Practice Amex,"3,900.00","155,200.00"
+,08/15/2025,Payroll Check,,Sample Staffer Charlie,,2100 Sample Practice Amex,"3,800.00","159,000.00"
+,09/15/2025,Payroll Check,,Pat Samplefam,,2100 Sample Practice Amex,"4,000.00","163,000.00"
+,09/15/2025,Payroll Check,,Sample Staffer Alpha,,2100 Sample Practice Amex,"4,200.00","167,200.00"
+,09/15/2025,Payroll Check,,Sample Staffer Bravo,,2100 Sample Practice Amex,"3,900.00","171,100.00"
+,09/15/2025,Payroll Check,,Sample Staffer Charlie,,2100 Sample Practice Amex,"3,800.00","174,900.00"
+,10/15/2025,Payroll Check,,Pat Samplefam,,2100 Sample Practice Amex,"4,000.00","178,900.00"
+,10/15/2025,Payroll Check,,Sample Staffer Alpha,,2100 Sample Practice Amex,"4,200.00","183,100.00"
+,10/15/2025,Payroll Check,,Sample Staffer Bravo,,2100 Sample Practice Amex,"3,900.00","187,000.00"
+,10/15/2025,Payroll Check,,Sample Staffer Charlie,,2100 Sample Practice Amex,"3,800.00","190,800.00"
+,11/15/2025,Payroll Check,,Pat Samplefam,,2100 Sample Practice Amex,"4,000.00","194,800.00"
+,11/15/2025,Payroll Check,,Sample Staffer Alpha,,2100 Sample Practice Amex,"4,200.00","199,000.00"
+,11/15/2025,Payroll Check,,Sample Staffer Bravo,,2100 Sample Practice Amex,"3,900.00","202,900.00"
+,11/15/2025,Payroll Check,,Sample Staffer Charlie,,2100 Sample Practice Amex,"3,800.00","206,700.00"
+,12/15/2025,Payroll Check,,Pat Samplefam,,2100 Sample Practice Amex,"4,000.00","210,700.00"
+,12/15/2025,Payroll Check,,Sample Staffer Alpha,,2100 Sample Practice Amex,"4,200.00","214,900.00"
+,12/15/2025,Payroll Check,,Sample Staffer Bravo,,2100 Sample Practice Amex,"3,900.00","218,800.00"
+,12/15/2025,Payroll Check,,Sample Staffer Charlie,,2100 Sample Practice Amex,"3,800.00","222,600.00"
+Total for 6140 Salaries & Wages,,,,,,,"$222,600.00",
+6160 Travel,,,,,,,,
+,04/02/2025,Expense,,,SOUTHWEST AIRLINES DALLAS TX,2100 Sample Practice Amex,389.00,389.00
+,04/03/2025,Expense,,,MARRIOTT SAMPLE CONFERENCE CTR AUSTIN TX,2100 Sample Practice Amex,612.00,"1,001.00"
+,07/12/2025,Expense,,,SAMPLE BEACH RESORT LAHAINA HI,2100 Sample Practice Amex,"4,125.00","5,126.00"
+,07/13/2025,Expense,,,SAMPLE LUAU GRILL KAILUA HI,2100 Sample Practice Amex,288.00,"5,414.00"
+,07/14/2025,Expense,,,SAMPLE SURF GRILL LAHAINA HI,2100 Sample Practice Amex,199.00,"5,613.00"
+Total for 6160 Travel,,,,,,,"$5,613.00",
+,TOTAL,,,,,,,
+,,,,,,,,
+,,,,,,,,
+"Accrual Basis Friday, January 9, 2026 04:41 PM GMTZ",,,,,,,,

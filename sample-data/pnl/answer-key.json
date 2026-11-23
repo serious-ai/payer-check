@@ -1,0 +1,45 @@
+{
+  "high": [
+    "Streaming and entertainment",
+    "Clothing and personal shopping",
+    "School, childcare and kids",
+    "Personal care, fitness and clubs",
+    "Leisure travel",
+    "6040 Charitable Contributions",
+    "Family member",
+    "Sample Steakhouse",
+    "Groceries"
+  ],
+  "medium": [
+    "Panera",
+    "6010 Auto Expense",
+    "6190 Uncategorized Expense",
+    "Person-to-person transfer",
+    "Vehicle and fuel",
+    "Air travel",
+    "Hotels"
+  ],
+  "low": [
+    "Costco"
+  ],
+  "never_flagged": [
+    "Staples",
+    "McKesson Medical-Surgical",
+    "Henry Schein",
+    "Sample County Medical Association",
+    "6130 Rent",
+    "6030 Billing Service",
+    "Target"
+  ],
+  "never_written": [
+    "Sample Patient Alpha",
+    "Sample Patient Bravo",
+    "Sample Patient Charlie",
+    "Pat Samplefam",
+    "Sample Staffer Alpha",
+    "SAMPLE SITTER",
+    "Refund of overpayment",
+    "credit balance refund",
+    "Copay"
+  ]
+}
