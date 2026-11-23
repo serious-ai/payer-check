@@ -113,7 +113,7 @@ Pick a CSV or Excel (.xlsx) export as is (title rows above the headers are fine)
 What it does, column by column:
 
 - Account, encounter, claim, member and similar numbers become random codes (164.514(c)). A code isn't made from anything about the patient, and the same number always gets the same code.
-- Every date becomes its year. When a service date and a payment date sit side by side, the days between them are worked out first and added as a column.
+- Every date becomes its year. When a service date and a payment date sit side by side, the days between them are worked out first and added as a column, and the payment date is dropped, since a payment year beside the gap could narrow down the service date.
 - Names, addresses, phone numbers, birth dates and other direct identifiers are dropped. Ages over 89 read 90+.
 - Amounts, codes, payer and provider names stay. Dates, phone numbers, emails, links and long numbers typed inside them are replaced.
 - Free-text notes and unrecognized columns are dropped by default, and the record names them so someone can keep one on purpose.
