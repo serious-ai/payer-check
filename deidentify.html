@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The browser blocks every fetch, upload and outside file. It doesn't govern navigating the tab, so the page has no links or code that do, and tests/test_deidentify.py checks it. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="A free tool that makes a HIPAA Safe Harbor copy of a billing report. It runs on your own computer, and your files are never uploaded.">
+<title>Free de-identifier | Serious AI Partners</title>
+<style>
+:root{color-scheme:light;--navy:#0D1C37;--navy-2:#1D3857;--orange:#FF5A1F;--orange-ink:#C43C08;--ink:#090519;--body:#2C2C2C;--muted:#4A5260;--on-navy:#C9D3DF;--bg:#FFFFFF;--alt:#F5F6F8;--line:#DCE1E8;--warn-bg:#FFF1D6;--warn-ink:#5A4100;--bad:#A11B1B}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--body);font:18px/1.6 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+h1,h2,h3{font-family:Montserrat,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.2}
+h1{font-size:clamp(32px,5vw,48px);margin:0 0 16px;color:#fff;letter-spacing:-.01em}
+h2{font-size:clamp(24px,3.2vw,30px);margin:0 0 12px}
+h3{font-size:20px;margin:0 0 6px}
+p{margin:0 0 14px}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+header.top{background:var(--navy);color:#fff}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0;border-bottom:1px solid var(--navy-2)}
+.bar svg{height:56px;width:219px;display:block}
+.bar .tag{color:var(--on-navy);font-size:15px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.hero{padding:36px 0 44px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,90,31,.14);border:1px solid rgba(255,90,31,.55);color:#fff;border-radius:999px;padding:6px 14px;font-size:15px;font-weight:600;margin:0 0 16px}
+.badge svg{width:18px;height:18px;flex:none}
+.hero .lede{font-size:clamp(19px,2.4vw,22px);color:#E6EAF0;max-width:40em}
+.hero .lede b{color:#fff}
+.promise{background:var(--navy-2);color:#fff;border-radius:14px;padding:26px 28px;margin:28px 0 0;border-left:6px solid var(--orange)}
+.promise h2{color:#fff;display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.promise h2 svg{flex:none;width:34px;height:34px}
+.checks{list-style:none;margin:0 0 16px;padding:0}
+.checks li{position:relative;padding-left:34px;margin:0 0 10px;font-size:clamp(18px,2.2vw,21px);font-weight:600}
+.checks li::before{content:"";position:absolute;left:4px;top:.38em;width:14px;height:8px;border-left:3px solid var(--orange);border-bottom:3px solid var(--orange);transform:rotate(-45deg)}
+.promise p{color:var(--on-navy);margin:0 0 10px}
+.promise p b{color:#fff}
+.promise details{margin-top:6px}
+.promise summary{color:#fff;font-weight:600}
+.promise details p,.promise details li{color:var(--on-navy);font-size:16px}
+.promise details ol{margin:10px 0 0;padding-left:22px}
+.promise code{color:#fff;font-size:15px}
+section{padding:40px 0;border-bottom:1px solid var(--line)}
+section.alt{background:var(--alt)}
+.eyebrow{color:var(--orange-ink);font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 8px}
+.muted{color:var(--muted)}
+small,.small{font-size:16px;color:var(--muted)}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;margin:18px 0}
+.step{display:flex;gap:16px;align-items:flex-start}
+.num{flex:none;width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:18px;margin-top:2px}
+.step > div:not(.num){flex:1;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+button,.btn{font:inherit;font-size:17px;font-weight:600;border:2px solid var(--navy);background:#fff;color:var(--navy);border-radius:8px;padding:11px 20px;cursor:pointer;min-height:48px}
+button.primary{background:var(--orange);border-color:var(--orange);color:var(--ink);font-size:19px;padding:14px 30px;text-transform:uppercase;letter-spacing:.04em}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,.btn:focus-within{outline:3px solid var(--orange);outline-offset:2px}
+input[type=file]{position:absolute;width:1px;height:1px;opacity:0}
+label.pick{display:inline-flex;align-items:center}
+input[type=number]{font:inherit;width:8em;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.grid label{display:flex;flex-direction:column;gap:6px;font-size:16px}
+.status{color:var(--muted);font-size:16px}
+.banner{background:var(--warn-bg);color:var(--warn-ink);border-radius:8px;padding:10px 14px;font-weight:600;margin:0 0 14px;font-size:16px}
+.err{color:var(--bad);font-weight:600}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:16px}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;color:var(--muted);vertical-align:bottom;white-space:normal;font-size:15px}
+.ex td.bar-cell{width:45%}
+.ex .meter{height:14px;border-radius:7px;background:var(--orange);min-width:4px}
+.ex .meter.low{background:#9FB0C4}
+details summary{cursor:pointer;color:var(--navy);font-weight:600}
+.phone-note{display:none;background:var(--alt);border-radius:10px;padding:14px 16px;margin:0 0 16px;font-size:17px}
+@media (max-width:700px),(pointer:coarse) and (max-width:1024px){.phone-note{display:block}}
+@media (max-width:560px){body{font-size:17px}.hero{padding:24px 0 32px}.bar svg{height:44px;width:172px}.wrap{padding:0 16px}.bar .tag{display:none}.promise{padding:22px 18px}.card{padding:18px 16px}.step{gap:12px}.num{width:32px;height:32px;font-size:16px}.ex td.bar-cell{width:30%}th,td{padding:8px 6px}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+footer{padding:32px 0 48px;color:var(--muted);font-size:16px}
+footer b{color:var(--ink)}
+select{font:inherit;font-size:16px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);min-height:40px}
+#columns td{white-space:normal;text-align:left;vertical-align:top}
+#columns th{text-align:left}
+#columns td:nth-child(2){color:var(--muted);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;word-break:break-all}
+pre{white-space:pre-wrap;font-size:14px;background:var(--alt);border-radius:8px;padding:14px;margin:10px 0 0}
+ul.plain{padding-left:22px}
+ul.plain li{margin:0 0 10px}
+</style>
+</head>
+<body>
+<header class="top">
+<div class="wrap">
+<div class="bar">
+<svg viewBox="0 0 344 88" role="img" aria-label="Serious AI Partners. We stake the result."><path d="M41.0 16.6 L72.1 69.0 L9.9 69.0 Z" fill="none" stroke="#FFFFFF" stroke-width="2.44" stroke-linejoin="miter" stroke-miterlimit="10"/><path d="M28.5 51.3 L36.7 59.8 L52.3 44.6" fill="none" stroke="#FF5A1F" stroke-width="5.18" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="10"/><text x="96" y="47" font-family="Montserrat,Arial,sans-serif" font-weight="700" font-size="34" letter-spacing="3.4" fill="#FFFFFF">SERIOUS AI</text><text x="96" y="73" font-family="Inter,Arial,sans-serif" font-weight="500" font-size="11.5" letter-spacing="6" fill="#A9B6C6">WE STAKE THE RESULT</text></svg>
+<span class="tag">Free de-identifier</span>
+</div>
+<div class="hero">
+<p class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="11" rx="2" fill="none" stroke="#FF5A1F" stroke-width="2.4"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="#FF5A1F" stroke-width="2.4"/></svg>Free, private, nothing uploaded</p>
+<h1>Make a copy of a billing report that's safe to share</h1>
+<p class="lede">Patient names, account numbers and exact dates come out, and the billing detail stays. It follows <b>HIPAA's Safe Harbor method</b> and runs entirely on your own computer.</p>
+
+<div class="promise" id="promise">
+<h2><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="11" rx="2" fill="none" stroke="#FF5A1F" stroke-width="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="#FF5A1F" stroke-width="2"/></svg>Your files never leave your computer</h2>
+<ul class="checks">
+<li>Nothing is uploaded, not to us and not to anyone else.</li>
+<li>No sign-up, no account, no email address.</li>
+<li>It works with your internet turned off.</li>
+</ul>
+<p>This page works like a calculator that lives inside your web browser. Your report is read right here on your screen, and the copies save back to your own computer. <b>Want to see for yourself?</b> Once this page has loaded, turn off your Wi-Fi and run it. It works the same.</p>
+<details><summary>For your IT team: how to verify this in a few minutes</summary>
+<ol>
+<li>Save this page, disconnect from the network, open the saved copy and run it. It works the same.</li>
+<li>Open the browser's developer tools, go to the Network panel and run it. The list stays empty.</li>
+<li>Read the page's first lines. Its Content Security Policy (<code>default-src 'none'; connect-src 'none'</code>) tells the browser to block every fetch, upload and outside file the page could ask for. The policy doesn't govern the page sending the tab elsewhere, so the page has no links and no code that opens another site.</li>
+<li>Read the source. It's one file with nothing loaded from anywhere, and the code is public with an automated test that fails the build on any network request.</li>
+</ol>
+</details>
+</div>
+</div>
+</div>
+</header>
+
+<main>
+<section>
+<div class="wrap">
+<p class="eyebrow">Three steps</p>
+<h2>Pick the report, check the columns, save the copy</h2>
+<p class="phone-note">On a phone? Everything here is readable, but this works best on the computer where the report is saved. Open this same link there.</p>
+<div class="card step">
+<div class="num">1</div>
+<div>
+<h3>Choose the report</h3>
+<p>A CSV or Excel (.xlsx) export straight from your billing system, as is. Title rows above the column headers are fine. For an Excel file, the first sheet is read.</p>
+<div class="row">
+<label class="pick btn" for="report-file">Choose the report</label><input id="report-file" type="file" accept=".csv,.xlsx,.txt,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+</div>
+<p id="file-status" class="status" style="margin:10px 0 0">Nothing chosen yet</p>
+</div>
+</div>
+
+<div class="card step">
+<div class="num">2</div>
+<div>
+<h3>Check the columns</h3>
+<p>Each column is already set the Safe Harbor way. Change one only if you're sure: a column this page didn't recognize is dropped, and you can keep it if it holds no patient details.</p>
+<div id="columns-empty" class="status">The columns show here once a report is chosen.</div>
+<div class="table-wrap" id="columns-wrap" hidden><table id="columns"><thead><tr><th>Column</th><th>First value (on this screen only)</th><th>What happens</th><th>Why</th></tr></thead><tbody></tbody></table></div>
+</div>
+</div>
+
+<div class="card step">
+<div class="num">3</div>
+<div>
+<h3>Save the copies to this computer</h3>
+<p id="summary" class="status">Waiting for a report.</p>
+<div class="row">
+<button type="button" class="primary" data-out="deidentified" disabled>Save the shareable copy</button>
+</div>
+<div class="row" style="margin-top:12px">
+<button type="button" data-out="record" disabled>Save the record of what changed</button>
+<button type="button" data-out="key" disabled>Save the code key (keep it here)</button>
+</div>
+<p class="small" style="margin-top:12px">Send only the shareable copy. The record lists what happened to every column and checks all 18 Safe Harbor identifiers. The key matches each code back to the original account or encounter number, so your team can pull a chart later. It never leaves the practice.</p>
+<details id="record-view" hidden><summary>Read the record here</summary><pre id="record-text"></pre></details>
+</div>
+</div>
+</div>
+</section>
+
+<section class="alt">
+<div class="wrap">
+<p class="eyebrow">What it does</p>
+<h2>Safe Harbor, column by column</h2>
+<ul class="plain">
+<li><b>Account, encounter, claim and member numbers</b> become random codes. A code isn't made from anything about the patient, and the same number always gets the same code, so lines from one visit stay together.</li>
+<li><b>Every date</b> becomes its year. When a report has a service date and a payment date, the days between them are worked out first and added as a column.</li>
+<li><b>Names, addresses, phone numbers and birth dates</b> are dropped. Ages over 89 show as 90+.</li>
+<li><b>Amounts, codes, payer and provider names</b> stay. Any date, phone number, email or long number typed inside them is replaced.</li>
+<li><b>Free-text notes and columns it doesn't recognize</b> are dropped, and the record names them.</li>
+</ul>
+<p>No AI runs here, only plain rules anyone can read in this page's code. One part stays with you: before sending, make sure nobody at the practice knows of a way the remaining details (a rare procedure, a very small payer) could point to a particular patient.</p>
+</div>
+</section>
+</main>
+
+<footer>
+<div class="wrap">
+<p><b>Built by Chris Duff, M.D., at Serious AI Partners.</b> Questions? Reply to the email this link came in, or ask the person who forwarded it.</p>
+<p>De-identifier v0.1. Free to use. Code under the Apache License 2.0, text under Creative Commons Attribution 4.0.</p>
+</div>
+</footer>
+
+<script>
+/* De-identifier v0.1. Line for line with deidentify.py. tests/test_deidentify.py runs both on the same files and
+   requires byte-identical output, and fails the build on any network request from this page. */
+(function () {
+  'use strict';
+  var VERSION = '0.1.0';
+
+  /* ---------- header words ---------- */
+  function W(s) { var o = {}; s.split(' ').forEach(function (w) { o[w] = 1; }); return o; }
+  function hits(t, set) { return t.filter(function (w) { return set[w]; }); }
+  var DROP = W('ssn social dob birth birthdate bday address addr street city zip zipcode postal phone tel telephone fax ' +
+    'email mail mailing mobile cell url website ip license lic vehicle vin plate device serial photo picture ' +
+    'image biometric fingerprint face');
+  var AGE = W('age');
+  var DATE = W('date dt dte dos from thru through admit admission discharge death dod expiration');
+  var PROVIDER = W('provider prov rendering referring attending ordering supervising doctor physician dr npi clinician ' +
+    'practitioner md staff user operator');
+  var ID_SUFFIX = W('id num nbr number no key identifier');
+  var ID_SUFFIX_EXCEPT = W('amt amount total balance bal charge charges units unit qty count cnt days cpt hcpcs code mod ' +
+    'modifier icd dx pos npi carc rarc');
+  var ID = W('enc encounter visit acct account claim clm mrn chart member subscriber policy group grp auth authorization ' +
+    'ticket invoice inv icn tcn dcn control trace check chk eft ref reference person case episode accession ' +
+    'specimen rx prescription batch transaction trans');
+  var ID_EXCEPT = W('status type reason desc description category source class level count cnt');
+  var AMOUNT = W('amt amount amounts charge charges chg billed allowed alwd allow approved aprv appr paid pay payment ' +
+    'payments pmt balance bal adj adjustment adjustments price fee fees copay coins coinsurance deductible ded ' +
+    'writeoff wo total units unit qty quantity resp responsibility days count cnt rvu rate expected variance');
+  var PAYER = W('payer payor insurance ins carrier plan fin financial class product network contract lob');
+  var NAME = W('name patient pt guarantor insured responsible party first last middle mi fname lname relative spouse ' +
+    'mother father employer emergency contact kin');
+  var FREETEXT = W('note notes comment comments memo message text narrative');
+  var DATEPART = W('month mo week wk day quarter qtr period');
+  var ATTR = W('cpt hcpcs code codes proc procedure mod modifier modifiers icd dx diagnosis diag pos place location loc ' +
+    'facility site clinic department dept specialty desc description descr status reason carc rarc denial ' +
+    'denied remark remarks source type category item service svc sv it tos revenue rev drg ndc method mode flag ' +
+    'level tier year');
+  var PROVIDER_REASON = 'provider details, not the patient';
+  var PREFIXES = 'VKLMNPQRST';
+  var DATE_FMTS = [/^([0-9]{1,2})[/-]([0-9]{1,2})[/-]([0-9]{4}|[0-9]{2})(?:[ T].*)?$/, /^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})(?:[ T].*)?$/];
+  var NUMBER = /^-?\$?[0-9,]*\.?[0-9]+$/;
+  var INLINE = [[/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, '[email]', 'emails'],
+    [/(?:[Hh][Tt][Tt][Pp][Ss]?:\/\/|[Ww][Ww][Ww]\.)[^ \t\r\n]+/g, '[link]', 'web links'],
+    [/\b[0-9]{3}-[0-9]{2}-[0-9]{4}\b/g, '[number]', 'social security numbers'],
+    [/(?:\([0-9]{3}\) ?|\b[0-9]{3}[-. ])[0-9]{3}[-. ][0-9]{4}\b/g, '[phone]', 'phone numbers'],
+    [/\b[0-9]{1,2}[/-][0-9]{1,2}[/-](?:[0-9]{4}|[0-9]{2})\b|\b[0-9]{4}-[0-9]{2}-[0-9]{2}\b/g, '[date]', 'dates'],
+    [/\b[0-9]{1,3}(?:\.[0-9]{1,3}){3}\b/g, '[number]', 'IP addresses'],
+    [/\b[0-9]{6,}\b/g, '[number]', 'long numbers']];
+
+  function tokens(header) {
+    return header.toLowerCase().replace(/#/g, ' num ').replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean);
+  }
+  function classify(header) {
+    var t = tokens(header), h;
+    if ((h = hits(t, DROP)).length) return ['drop', 'a direct identifier (' + uniq(h).sort().join(', ') + ')'];
+    if (hits(t, AGE).length) return ['age', 'ages over 89 become 90+'];
+    if (hits(t, DATE).length) return ['year', 'a date'];
+    if (hits(t, PROVIDER).length) return ['keep', PROVIDER_REASON];
+    if ((hits(t, ID_SUFFIX).length && !hits(t, ID_SUFFIX_EXCEPT).length) || (hits(t, ID).length && !hits(t, ID_EXCEPT).length && !hits(t, AMOUNT).length))
+      return ['code', 'an identifying number'];
+    if (hits(t, AMOUNT).length) return ['keep', 'an amount or count'];
+    if (hits(t, PAYER).length) return ['keep', 'payer or plan details'];
+    if (hits(t, NAME).length) return ['drop', 'a name or person field'];
+    if (hits(t, FREETEXT).length) return ['drop', 'free text, which can hold names'];
+    if (hits(t, DATEPART).length) return ['drop', 'a date part finer than the year'];
+    if (hits(t, ATTR).length) return ['keep', 'a code or description'];
+    return ['drop', 'not recognized'];
+  }
+  function uniq(a) { var s = new Set(), out = []; a.forEach(function (x) { if (!s.has(x)) { s.add(x); out.push(x); } }); return out; }
+
+  /* ---------- dates, as whole days since 1970 ---------- */
+  function ymd(y, m, d) {
+    if (y < 1 || y > 9999 || m < 1 || m > 12 || d < 1) return null;
+    var dt = new Date(0);
+    dt.setUTCFullYear(y, m - 1, d);
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) return null;
+    return Math.round(dt.getTime() / 864e5);
+  }
+  function yearOf(day) { return new Date(day * 864e5).getUTCFullYear(); }
+  function parseDate(cell) {
+    if (cell[1] !== null) return cell[1];
+    var s = cell[0].trim(), m = DATE_FMTS[0].exec(s);
+    if (m) {
+      var y = parseInt(m[3], 10);
+      if (m[3].length === 2) y += y <= 69 ? 2000 : 1900;
+      return ymd(y, parseInt(m[1], 10), parseInt(m[2], 10));
+    }
+    m = DATE_FMTS[1].exec(s);
+    if (m) return ymd(parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10));
+    return null;
+  }
+
+  /* ---------- readers: rows of [text, day or null] ---------- */
+  function decode(u8) {
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(u8); } catch (e) {
+      var s = ''; for (var i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]); return s;
+    }
+  }
+  /* The same reading as Python's csv module (excel dialect). */
+  function readCsv(u8) {
+    var t = decode(u8), rows = [], row = [], f = '', st = 'rec', i = 0, c;
+    function endRow() { rows.push(row); row = []; st = 'rec'; if (c === '\r' && t[i + 1] === '\n') i++; }
+    for (; i < t.length; i++) {
+      c = t[i];
+      if (st === 'rec') {
+        if (c === '\r' || c === '\n') { endRow(); continue; }
+        st = 'start';
+      }
+      if (st === 'start') {
+        if (c === '"') { st = 'q'; } else if (c === ',') { row.push(''); } else if (c === '\r' || c === '\n') { row.push(''); endRow(); } else { f = c; st = 'f'; }
+      } else if (st === 'f') {
+        if (c === ',') { row.push(f); f = ''; st = 'start'; } else if (c === '\r' || c === '\n') { row.push(f); f = ''; endRow(); } else f += c;
+      } else if (st === 'q') {
+        if (c === '"') st = 'qq'; else f += c;
+      } else {
+        if (c === '"') { f += '"'; st = 'q'; } else if (c === ',') { row.push(f); f = ''; st = 'start'; } else if (c === '\r' || c === '\n') { row.push(f); f = ''; endRow(); } else { f += c; st = 'f'; }
+      }
+    }
+    if (st !== 'rec') { row.push(f); rows.push(row); }
+    return rows.map(function (r) { return r.map(function (v) { return [v, null]; }); });
+  }
+
+  function unzip(u8) {
+    var dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength), e = u8.length - 22, files = {};
+    while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+    if (e < 0) throw new Error('the file is not a readable Excel (.xlsx) file');
+    var n = dv.getUint16(e + 10, true), p = dv.getUint32(e + 16, true);
+    for (var k = 0; k < n; k++) {
+      if (dv.getUint32(p, true) !== 0x02014b50) throw new Error('the Excel file looks damaged');
+      var nlen = dv.getUint16(p + 28, true), name = new TextDecoder().decode(u8.subarray(p + 46, p + 46 + nlen));
+      files[name] = { method: dv.getUint16(p + 10, true), size: dv.getUint32(p + 20, true), at: dv.getUint32(p + 42, true) };
+      p += 46 + nlen + dv.getUint16(p + 30, true) + dv.getUint16(p + 32, true);
+    }
+    return {
+      has: function (name) { return !!files[name]; },
+      read: function (name) {
+        var f = files[name];
+        if (!f) return Promise.reject(new Error('the Excel file is missing ' + name));
+        var start = f.at + 30 + dv.getUint16(f.at + 26, true) + dv.getUint16(f.at + 28, true), data = u8.slice(start, start + f.size);
+        if (f.method === 0) return Promise.resolve(new TextDecoder().decode(data));
+        if (f.method !== 8) return Promise.reject(new Error('the Excel file uses a compression this page can\'t read'));
+        var stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+        return new Response(stream).arrayBuffer().then(function (b) { return new TextDecoder().decode(new Uint8Array(b)); });
+      }
+    };
+  }
+  function xml(text) { return new DOMParser().parseFromString(text, 'application/xml'); }
+  function all(node, name) { return [].slice.call(node.getElementsByTagNameNS('*', name)); }
+  function kids(node, name) { return [].filter.call(node.children, function (c) { return c.localName === name; }); }
+  function richText(el) {
+    var out = '';
+    [].forEach.call(el.children, function (ch) {
+      if (ch.localName === 't') out += ch.textContent;
+      else if (ch.localName === 'r') kids(ch, 't').forEach(function (t) { out += t.textContent; });
+    });
+    return out;
+  }
+  var BUILTIN_DATE_FMTS = {};
+  [[14, 23], [27, 37], [45, 48], [50, 59]].forEach(function (r) { for (var i = r[0]; i < r[1]; i++) BUILTIN_DATE_FMTS[i] = 1; });
+  function isDateFormat(code) { return /[dy]/i.test(code.replace(/"[^"]*"|\[[^\]]*\]|\\./g, '')); }
+  function colIndex(ref) { var n = 0, m = /^[A-Z]*/.exec(ref)[0]; for (var i = 0; i < m.length; i++) n = n * 26 + m.charCodeAt(i) - 64; return n - 1; }
+
+  function readXlsx(u8) {
+    var z = unzip(u8), get = function (n) { return z.has(n) ? z.read(n) : Promise.resolve(null); };
+    return Promise.all([z.read('xl/workbook.xml'), z.read('xl/_rels/workbook.xml.rels'), get('xl/sharedStrings.xml'), get('xl/styles.xml')]).then(function (parts) {
+      var wb = xml(parts[0]), epoch = Math.round(Date.UTC(1899, 11, 30) / 864e5);
+      all(wb, 'workbookPr').forEach(function (el) { var v = el.getAttribute('date1904'); if (v === '1' || v === 'true') epoch = Math.round(Date.UTC(1904, 0, 1) / 864e5); });
+      var sheet = all(wb, 'sheet')[0], rid = [].filter.call(sheet.attributes, function (a) { return a.localName === 'id'; })[0].value;
+      var target = all(xml(parts[1]), 'Relationship').filter(function (r) { return r.getAttribute('Id') === rid; })[0].getAttribute('Target');
+      var path = target.charAt(0) === '/' ? target.replace(/^\/+/, '') : 'xl/' + target;
+      var strings = parts[2] ? [].filter.call(xml(parts[2]).documentElement.children, function () { return true; }).map(richText) : [];
+      var dateStyles = [];
+      if (parts[3]) {
+        var st = xml(parts[3]), custom = {};
+        all(st, 'numFmt').forEach(function (el) { custom[el.getAttribute('numFmtId')] = el.getAttribute('formatCode') || ''; });
+        kids(st.documentElement, 'cellXfs').forEach(function (el) {
+          kids(el, 'xf').forEach(function (xf) {
+            var fid = xf.getAttribute('numFmtId') || '0';
+            dateStyles.push(Object.prototype.hasOwnProperty.call(custom, fid) ? isDateFormat(custom[fid]) : !!BUILTIN_DATE_FMTS[parseInt(fid, 10)]);
+          });
+        });
+      }
+      return z.read(path).then(function (sheetXml) {
+        var rows = all(xml(sheetXml), 'row').map(function (row) {
+          var out = [], nxt = 0;
+          kids(row, 'c').forEach(function (c) {
+            var r = c.getAttribute('r'), i = r ? colIndex(r) : nxt, t = c.getAttribute('t'), s = parseInt(c.getAttribute('s') || '0', 10), val;
+            nxt = i + 1;
+            var vEl = kids(c, 'v')[0], v = vEl ? vEl.textContent : '';
+            if (t === 's') val = [v !== '' ? strings[parseInt(v, 10)] : '', null];
+            else if (t === 'inlineStr') { var is = kids(c, 'is')[0]; val = [is ? richText(is) : '', null]; }
+            else if ((t === null || t === 'n') && v !== '' && s < dateStyles.length && dateStyles[s]) val = [v, epoch + Math.floor(parseFloat(v))];
+            else if (t === 'b') val = [v === '1' ? 'TRUE' : 'FALSE', null];
+            else val = [v, null];
+            while (out.length < i) out.push(['', null]);
+            out.push(val);
+          });
+          return out;
+        });
+        return { rows: rows, sheet: sheet.getAttribute('name') || 'Sheet1' };
+      });
+    });
+  }
+
+  /* ---------- random codes ---------- */
+  function mulberry32(seed) {
+    var a = seed >>> 0;
+    return function (n) {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return Math.floor(((t ^ (t >>> 14)) >>> 0) / 4294967296 * n);
+    };
+  }
+  function cryptoBelow(n) {
+    var lim = Math.floor(4294967296 / n) * n, b = new Uint32Array(1);
+    do { crypto.getRandomValues(b); } while (b[0] >= lim);
+    return b[0] % n;
+  }
+  function shuffled(n, rand) {
+    var a = []; for (var i = 0; i < n; i++) a.push(i);
+    for (i = n - 1; i > 0; i--) { var j = rand(i + 1), x = a[i]; a[i] = a[j]; a[j] = x; }
+    return a;
+  }
+
+  /* ---------- the run ---------- */
+  function isBlank(c) { return c[0].trim() === '' && c[1] === null; }
+  function findHeader(rows) {
+    var counts = rows.slice(0, 200).map(function (r) { return r.filter(function (c) { return !isBlank(c); }).length; });
+    var most = Math.max.apply(null, [0].concat(counts));
+    for (var i = 0; i < Math.min(30, rows.length); i++) {
+      var filled = rows[i].filter(function (c) { return !isBlank(c); });
+      if (filled.length >= Math.max(2, Math.ceil(0.6 * most)) && filled.every(function (c) { return c[1] === null && !NUMBER.test(c[0].trim()) && parseDate(c) === null; })) return i;
+    }
+    return 0;
+  }
+  function scrub(text, counts) {
+    if (NUMBER.test(text.trim())) return text;
+    INLINE.forEach(function (p) {
+      var n = 0;
+      text = text.replace(p[0], function () { n++; return p[1]; });
+      if (n) counts[p[2]] = (counts[p[2]] || 0) + n;
+    });
+    return text;
+  }
+  function pad(n, w) { n = String(n); while (n.length < w) n = '0' + n; return n; }
+  function fmt(n) { return n.toLocaleString('en-US'); }
+  function len(s) { return Array.from(s).length; }
+
+  function run(filename, u8, overrides, seed) {
+    overrides = overrides || {};
+    var base = filename.split(/[\\/]/).pop(), stem = base.replace(/\.(csv|xlsx|txt)$/i, '');
+    var read = u8[0] === 0x50 && u8[1] === 0x4B ? readXlsx(u8) : Promise.resolve({ rows: readCsv(u8), sheet: null });
+    return read.then(function (got) {
+      var rows = got.rows, sheet = got.sheet;
+      if (!rows.length) throw new Error('the file has no rows');
+      var h = findHeader(rows), width = rows.reduce(function (m, r) { return Math.max(m, r.length); }, 0);
+      var headers = [], seen = {};
+      for (var i = 0; i < width; i++) {
+        var name = i < rows[h].length ? rows[h][i][0].trim() : '';
+        name = name || 'Column ' + (i + 1);
+        seen[name] = (seen[name] || 0) + 1;
+        headers.push(seen[name] === 1 ? name : name + ' (' + seen[name] + ')');
+      }
+      var body = rows.slice(h + 1).map(function (r) { r = r.slice(); while (r.length < width) r.push(['', null]); return r; })
+        .filter(function (r) { return !r.every(isBlank); });
+
+      var cols = headers.map(function (name, i) {
+        var cl = classify(name), action = cl[0], reason = cl[1];
+        var filled = body.map(function (r) { return r[i]; }).filter(function (c) { return !isBlank(c); });
+        var dates = filled.filter(function (c) { return parseDate(c) !== null; }).length;
+        if ((action === 'keep' || action === 'drop') && filled.length && dates >= 0.8 * filled.length && reason !== PROVIDER_REASON) {
+          if (action === 'keep' || reason === 'not recognized' || reason === 'a date part finer than the year') { action = 'year'; reason = 'holds dates'; }
+        }
+        if (action === 'keep' && filled.length >= 20) {
+          var texts = filled.map(function (c) { return c[0]; }).filter(function (v) { return !NUMBER.test(v.trim()); });
+          if (texts.length && uniq(texts).length > 0.5 * texts.length && texts.reduce(function (s, x) { return s + len(x); }, 0) / texts.length > 25) {
+            action = 'drop'; reason = 'free text, which can hold names';
+          }
+        }
+        var auto = action;
+        if (Object.prototype.hasOwnProperty.call(overrides, name)) { action = overrides[name]; reason = 'set by hand'; }
+        var first = filled.length ? filled[0] : null;
+        return { i: i, name: name, action: action, auto: auto, reason: reason, filled: filled.length, example: !first ? '' : first[1] !== null ? new Date(first[1] * 864e5).toISOString().slice(0, 10) : first[0] };
+      });
+
+      var rand = seed !== undefined && seed !== null ? mulberry32(seed) : cryptoBelow, keyRows = [], prefixAt = 0;
+      cols.forEach(function (c) {
+        if (c.action !== 'code') return;
+        var distinct = [], known = {};
+        body.forEach(function (r) { var v = r[c.i][0].trim(); if (v && !Object.prototype.hasOwnProperty.call(known, v)) { known[v] = 1; distinct.push(v); } });
+        var w = Math.max(4, String(distinct.length).length);
+        var prefix = PREFIXES[prefixAt % PREFIXES.length] + (prefixAt < PREFIXES.length ? '' : String(Math.floor(prefixAt / PREFIXES.length)));
+        prefixAt++;
+        var order = shuffled(distinct.length, rand);
+        c.map = {}; c.rank = {}; c.distinct = distinct.length;
+        order.forEach(function (k, n) { c.map[distinct[k]] = prefix + pad(n + 1, w); c.rank[distinct[k]] = n; });
+        distinct.forEach(function (v) { keyRows.push([c.name, v, c.map[v]]); });
+      });
+
+      var yearCols = cols.filter(function (c) { return c.action === 'year'; });
+      var svc = yearCols.filter(function (c) { return hits(tokens(c.name), W('dos service svc from')).length; })[0] || null;
+      var pay = yearCols.filter(function (c) { return c !== svc && hits(tokens(c.name), W('tran trans transaction paid pay payment pmt posted post deposit check remit era process processed')).length; })[0] || null;
+      var derived = svc && pay ? 'Days from ' + svc.name + ' to ' + pay.name : null;
+
+      var inline = {}, missingDays = 0, unreadable = {}, outRows = [];
+      var firstCode = cols.filter(function (c) { return c.action === 'code'; })[0] || null;
+      body.forEach(function (r, idx) {
+        var out = [];
+        cols.forEach(function (c) {
+          var cell = r[c.i], a = c.action, v = cell[0];
+          if (a === 'drop') return;
+          if (a === 'code') v = Object.prototype.hasOwnProperty.call(c.map, v.trim()) ? c.map[v.trim()] : '';
+          else if (a === 'year') {
+            var d = parseDate(cell);
+            if (d === null && !isBlank(cell)) unreadable[c.name] = (unreadable[c.name] || 0) + 1;
+            v = d !== null ? String(yearOf(d)) : '';
+          } else if (a === 'age') {
+            var m = /^\s*([0-9]+)/.exec(v);
+            v = m ? (parseInt(m[1], 10) > 89 ? '90+' : m[1]) : '';
+          } else v = scrub(v, inline);
+          out.push(v);
+        });
+        if (derived) {
+          var a = parseDate(r[svc.i]), b = parseDate(r[pay.i]);
+          if (a !== null && b !== null) out.push(String(b - a)); else { out.push(''); missingDays++; }
+        }
+        var rank = firstCode ? (Object.prototype.hasOwnProperty.call(firstCode.rank, r[firstCode.i][0].trim()) ? firstCode.rank[r[firstCode.i][0].trim()] : -1) : null;
+        outRows.push([rank, idx, out]);
+      });
+      if (firstCode) outRows.sort(function (x, y) { return x[0] - y[0] || x[1] - y[1]; });
+      else { var order = shuffled(outRows.length, rand); outRows = order.map(function (k) { return outRows[k]; }); }
+
+      var outHeaders = cols.filter(function (c) { return c.action !== 'drop'; }).map(function (c) { return c.name; }).concat(derived ? [derived] : []);
+      keyRows.sort(function (x, y) { return x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : x[2] < y[2] ? -1 : x[2] > y[2] ? 1 : 0; });
+      var files = {};
+      files[stem + '-deidentified.csv'] = toCsv([outHeaders].concat(outRows.map(function (o) { return o[2]; })));
+      files[stem + '-deid-record.txt'] = record(base, sheet, h, body, cols, derived, missingDays, inline, unreadable);
+      files[stem + '-visit-code-key.csv'] = toCsv([['column', 'original value', 'visit code']].concat(keyRows));
+      return { files: files, cols: cols, rows: body.length };
+    });
+  }
+
+  function toCsv(rows) {
+    return rows.map(function (r) {
+      if (r.length === 1 && r[0] === '') return '""';
+      return r.map(function (v) { return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(',');
+    }).join('\r\n') + (rows.length ? '\r\n' : '');
+  }
+  function plural(n, one, many) { return fmt(n) + ' ' + (n === 1 ? one : (many || one + 's')); }
+
+  function record(base, sheet, h, body, cols, derived, missingDays, inline, unreadable) {
+    var L = ['De-identification record', '',
+      'Tool: Serious AI de-identifier v' + VERSION + '. It runs on the computer it is opened on, and nothing is uploaded.',
+      'Method: HIPAA Safe Harbor, 45 CFR 164.514(b)(2).',
+      'Input: ' + base + (sheet ? ', first sheet "' + sheet + '"' : '') + '.',
+      'Rows: ' + fmt(body.length) + ', under the header row. ' + plural(h, 'row') + ' above it left out (report titles).',
+      '', 'Column by column'];
+    cols.forEach(function (c) {
+      var a = c.action, n = c.name, line;
+      if (a === 'code') line = 'replaced with random codes, ' + plural(c.distinct, 'distinct value') + '. Codes are not made from anything about the patient, and the key stays at the practice.';
+      else if (a === 'year') {
+        line = 'cut to the year, ' + plural(c.filled, 'cell');
+        if (unreadable[n]) line += ' (' + fmt(unreadable[n]) + ' not readable as a date, left blank)';
+        line += '.';
+      } else if (a === 'age') line = 'kept, with ages over 89 shown as 90+.';
+      else if (a === 'keep') line = 'kept (' + c.reason + ').';
+      else line = 'dropped (' + c.reason + ').';
+      if (c.reason === 'set by hand') line = line.replace(' (set by hand).', '.').replace(/\.+$/, '') + '. Set by hand.';
+      L.push('- ' + n + ': ' + line);
+    });
+    if (derived) L.push('- ' + derived + ': added, worked out before the dates were cut' + (missingDays ? ', left blank on ' + plural(missingDays, 'row') + ' missing a date' : '') + '.');
+    L.push('');
+    var ik = Object.keys(inline);
+    L.push(ik.length ? 'Inside kept columns, replaced: ' + ik.map(function (k) { return fmt(inline[k]) + ' ' + k; }).join(', ') + '.'
+      : 'Inside kept columns: no dates, phone numbers, emails, links or long numbers found.');
+
+    var kept = cols.filter(function (c) { return c.action !== 'drop'; });
+    function by(words) { var s = W(words); return cols.filter(function (c) { return c.action === 'drop' && hits(tokens(c.name), s).length; }).map(function (c) { return c.name; }); }
+    function note(dropped, none) { return dropped.length ? 'dropped: ' + dropped.join(', ') + '.' : none; }
+    function inText(words) { return by(words).length ? '' : '; any inside kept text are replaced.'; }
+    var coded = cols.filter(function (c) { return c.action === 'code'; }).map(function (c) { return c.name; });
+    var years = cols.filter(function (c) { return c.action === 'year'; }).map(function (c) { return c.name; });
+    var births = by('dob birth birthdate bday');
+    L.push('', 'The 18 Safe Harbor identifiers',
+      '1. Names: ' + note(cols.filter(function (c) { return c.action === 'drop' && c.reason === 'a name or person field'; }).map(function (c) { return c.name; }), 'no name column found.') + ' Kept provider and payer names are not the patient\'s.',
+      '2. Addresses, cities and ZIP codes: ' + note(by('address addr street city zip zipcode postal'), 'none found.'),
+      '3. Dates: ' + (years.length ? 'cut to the year in ' + years.join(', ') + '.' : 'no date column found.') +
+        (births.length ? ' Birth dates dropped: ' + births.join(', ') + '.' : '') +
+        (cols.some(function (c) { return c.action === 'age'; }) ? ' Ages over 89 shown as 90+.' : ''),
+      '4-5. Phone and fax numbers: ' + note(by('phone tel telephone fax mobile cell'), 'no column found') + inText('phone tel telephone fax mobile cell'),
+      '6. Email addresses: ' + note(by('email mail mailing'), 'no column found') + inText('email mail mailing'),
+      '7. Social security numbers: ' + note(by('ssn social'), 'no column found') + inText('ssn social'),
+      '8-11. Medical record, health plan, account, certificate and license numbers, and 18. any other unique number: ' +
+        (coded.length ? 'replaced with random codes in ' + coded.join(', ') + '.' : 'no such column found.') + ' Long numbers inside kept text are replaced.',
+      '12-13. Vehicle and device identifiers: ' + note(by('vehicle vin plate device serial'), 'none found.'),
+      '14-15. Web links and IP addresses: ' + note(by('url website ip'), 'no column found') + inText('url website ip'),
+      '16-17. Biometric identifiers and photos: ' + note(by('biometric fingerprint face photo picture image'), 'none in a spreadsheet export.'),
+      '', 'Columns in the de-identified copy: ' + (kept.map(function (c) { return c.name; }).join(', ') || 'none') + '.',
+      'Columns dropped: ' + (cols.filter(function (c) { return c.action === 'drop'; }).map(function (c) { return c.name; }).join(', ') || 'none') + '.',
+      '', 'Still the practice\'s call (Safe Harbor\'s second condition, 164.514(b)(2)(ii)): software can\'t know what ' +
+      'the practice knows. Before sending, confirm nobody at the practice knows of a way the remaining details ' +
+      '(a rare procedure, a very small payer) could point to a particular patient. Keep the visit-code key at ' +
+      'the practice and never send it.', '');
+    return L.join('\n');
+  }
+
+  /* ---------- the page ---------- */
+  var $ = function (id) { return document.getElementById(id); };
+  var LABELS = { code: 'Random code', year: 'Year only', age: 'Keep, 90+ for ages over 89', keep: 'Keep', drop: 'Drop' };
+  var chosen = null, overrides = {}, outputs = null;
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function short(s) { s = String(s); return s.length > 40 ? s.slice(0, 40) + '...' : s; }
+  function go() {
+    if (!chosen) return;
+    $('summary').className = 'status';
+    $('summary').textContent = 'Working on this computer...';
+    run(chosen.name, chosen.bytes, overrides).then(function (r) {
+      outputs = r.files;
+      $('columns').tBodies[0].innerHTML = r.cols.map(function (c) {
+        var opts = ['code', 'year'].concat(c.auto === 'age' ? ['age'] : []).concat(['keep', 'drop']);
+        return '<tr><td>' + esc(c.name) + '</td><td>' + esc(short(c.example)) + '</td><td><select data-col="' + esc(c.name) + '">' +
+          opts.map(function (o) { return '<option value="' + o + '"' + (o === c.action ? ' selected' : '') + '>' + LABELS[o] + '</option>'; }).join('') +
+          '</select></td><td>' + esc(c.reason) + '</td></tr>';
+      }).join('');
+      $('columns-wrap').hidden = false; $('columns-empty').hidden = true;
+      var kept = r.cols.filter(function (c) { return c.action !== 'drop'; }).length;
+      $('summary').textContent = 'Ready: ' + fmt(r.rows) + ' rows, ' + kept + ' of ' + r.cols.length + ' columns kept. Nothing has left this computer.';
+      [].forEach.call(document.querySelectorAll('[data-out]'), function (b) { b.disabled = false; });
+      $('record-text').textContent = outputs[Object.keys(outputs)[1]];
+      $('record-view').hidden = false;
+    }).catch(function (e) { $('summary').className = 'err'; $('summary').textContent = 'Stopped: ' + e.message; });
+  }
+  $('report-file').addEventListener('change', function () {
+    var f = this.files[0];
+    if (!f) return;
+    overrides = {};
+    $('file-status').textContent = f.name + ' (' + fmt(Math.ceil(f.size / 1024)) + ' KB), read on this computer';
+    f.arrayBuffer().then(function (b) { chosen = { name: f.name, bytes: new Uint8Array(b) }; go(); });
+  });
+  $('columns').addEventListener('change', function (e) {
+    var s = e.target;
+    if (!s.matches('select')) return;
+    overrides[s.getAttribute('data-col')] = s.value;
+    go();
+  });
+  [].forEach.call(document.querySelectorAll('[data-out]'), function (b) {
+    b.addEventListener('click', function () {
+      if (!outputs) return;
+      var kind = b.getAttribute('data-out'), names = Object.keys(outputs);
+      var name = names[{ deidentified: 0, record: 1, key: 2 }[kind]], type = /\.txt$/.test(name) ? 'text/plain' : 'text/csv';
+      var url = URL.createObjectURL(new Blob([outputs[name]], { type: type })), a = document.createElement('a');
+      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    });
+  });
+  window.deidentify = { version: VERSION, run: run, classify: classify };
+})();
+</script>
+</body>
+</html>

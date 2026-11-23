@@ -98,6 +98,37 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt && .venv/
 - Every planted problem in the sample is found and every decoy is left alone.
 - The 835 reader matches the pyx12 reader line for line, and the per-payer numbers match the October 28, 2026 demo's own check (`tests/reference/`).
 
+## De-identifier
+
+**[Open the de-identifier](https://check.seriousai.partners/deidentify.html)** to turn a billing export into a copy that's safe to share under HIPAA's Safe Harbor method (45 CFR 164.514(b)(2)). It runs the same way as the payer check: one file, in the browser, nothing uploaded, with the same Content Security Policy and the same no-network test (`tests/test_deidentify.py`).
+
+Pick a CSV or Excel (.xlsx) export as is (title rows above the headers are fine), check the columns, and save three files:
+
+| File | What's in it | Share it? |
+|---|---|---|
+| `<name>-deidentified.csv` | The copy | Yes |
+| `<name>-deid-record.txt` | What happened to every column, and all 18 Safe Harbor identifiers checked | Yes, alongside the copy |
+| `<name>-visit-code-key.csv` | Each code and the original number it replaced | No. It stays at the practice. |
+
+What it does, column by column:
+
+- Account, encounter, claim, member and similar numbers become random codes (164.514(c)). A code isn't made from anything about the patient, and the same number always gets the same code.
+- Every date becomes its year. When a service date and a payment date sit side by side, the days between them are worked out first and added as a column.
+- Names, addresses, phone numbers, birth dates and other direct identifiers are dropped. Ages over 89 read 90+.
+- Amounts, codes, payer and provider names stay. Dates, phone numbers, emails, links and long numbers typed inside them are replaced.
+- Free-text notes and unrecognized columns are dropped by default, and the record names them so someone can keep one on purpose.
+- Rows come out grouped by the random code, not in their original order.
+
+What software can't do is Safe Harbor's second condition: the practice confirms it has no actual knowledge that what's left could identify someone (164.514(b)(2)(ii)). The record says so.
+
+From the command line (Python 3.9+, nothing to install):
+
+```bash
+python3 deidentify.py "CPT Payment Report.xlsx" --out deidentified
+```
+
+`--keep`, `--drop`, `--code` and `--year` take a column name and override its default. The page and the script share one logic, and the tests require byte-identical files from the same input. `sample-data/deid/` holds a made-up payment report, as CSV and Excel (`tools/make_deid_sample.py`).
+
 ## License
 
 Code under the [Apache License 2.0](LICENSE). Documentation under [Creative Commons Attribution 4.0](LICENSE-docs). From Serious AI Partners.
