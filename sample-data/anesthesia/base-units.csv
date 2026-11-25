@@ -1,0 +1,11 @@
+source,code,description,base_units
+Sample data,00731,Anesthesia for upper GI endoscopy,5
+Sample data,00811,Anesthesia for lower GI endoscopy,4
+Sample data,00813,Anesthesia for upper and lower GI endoscopy together,5
+Sample data,00790,Anesthesia for upper abdominal surgery,7
+Sample data,00840,Anesthesia for lower abdominal surgery,6
+Sample data,01402,Anesthesia for knee replacement,7
+Sample data,01630,Anesthesia for shoulder surgery,5
+Sample data,00142,Anesthesia for eye lens surgery,4
+Sample data,00400,Anesthesia for skin procedures,3
+Sample data,01967,Labor epidural,5
