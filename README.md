@@ -23,7 +23,7 @@ How a practice's IT person can verify it:
 1. **Run it offline.** Download `payer-check.html`, turn off Wi-Fi (or unplug the network cable), open the file and run it. It works the same.
 2. **Watch the network.** Open the browser's developer tools, go to the Network panel, and run a check. The list stays empty.
 3. **Read the policy.** The page's first lines carry a Content Security Policy (`default-src 'none'; connect-src 'none'`) that tells the browser to block every fetch, upload and outside file the page could ask for. The policy doesn't cover the page sending the tab somewhere else, so the page has no links or code that open another site, and the test below watches for that too.
-4. **Read the code.** The page is one file, about 650 lines, with nothing loaded from anywhere. The Python script uses only the standard library.
+4. **Read the code.** The page is one file, about 770 lines, with nothing loaded from anywhere. The Python script uses only the standard library.
 5. **Check the test.** `tests/test_page.py` opens the page, runs the sample remits (the GI sample and the anesthesia sample) through it, saves every output, waits a few seconds, and records every request the browser makes and every window it opens. Any request or new window fails the build, and it runs on every push.
 
 The patient's name in the 835 (the NM1\*QC segment) is never read.
