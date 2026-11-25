@@ -129,6 +129,21 @@ python3 deidentify.py "CPT Payment Report.xlsx" --out deidentified
 
 `--keep`, `--drop`, `--code` and `--year` take a column name and override its default. The page and the script share one logic, and the tests require byte-identical files from the same input. `sample-data/deid/` holds a made-up payment report, as CSV and Excel (`tools/make_deid_sample.py`).
 
+### Hands-off scrub on a Mac (for a business associate)
+
+`deid_watch.py` runs the same de-identifier unattended for a business associate who receives raw exports on its own encrypted laptop. No AI and no network touch the raw file, and nobody has to open the page.
+
+```bash
+bash tools/install-deid-watch.sh --test     # installs a launchd agent, then proves it on the sample file
+```
+
+- Drop a raw export in `~/PHI-Work/inbox` (or point a dedicated browser profile's downloads there). launchd starts the run within a minute; a file still downloading is left alone.
+- **Armed gate.** Nothing runs until `~/PHI-Work/ARMED` exists, holding the date the client's Readiness Notice went out. Until then a raw file sits untouched and the log says so.
+- **Independent leak check.** Before anything is released, a second check written apart from the de-identifier's own rules compares the copy against the raw file: no value from a removed, coded or date column reappears anywhere, every date column is a year, no kept column looks like a list of account or member numbers, no phone, email, link, SSN, IP or date pattern in any cell, no age over 89, no name word from a dropped name column, and row counts match. The tests plant nine kinds of leak and require it to catch each one.
+- **Pass:** only `-deidentified.csv`, `-deid-record.txt` and `-leak-check.txt` go to `~/Serious-AI/deid-outbox`; the key goes to `~/PHI-Work/keys-for-practice` (mode 600) to hand back; the raw file is deleted. **Fail:** nothing is released, the raw file and outputs move to `~/PHI-Work/quarantine`, and the outbox gets a `-BLOCKED.txt` report.
+- Reports and the log hold counts and column headers only, never a cell value. Output names come from a fixed word list plus the run time, so a raw file name can't carry a patient name out.
+- `python3 deid_watch.py status` shows the gate, waiting files, keys to return and quarantined runs. `--remove` uninstalls the agent and leaves the folders.
+
 ## P&L normalizer
 
 **[Open the P&L normalizer](https://check.seriousai.partners/pnl-normalizer.html)** to see what a practice really costs to run, from its own QuickBooks exports. Same build as the payer check: one file, in the browser, nothing uploaded, the same Content Security Policy and the same no-network test (`tests/test_pnl_normalizer.py`).
