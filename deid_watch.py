@@ -299,10 +299,14 @@ def process(p, f, seed=None):
 
 def run_once(p, seed=None, settle=SETTLE_SECONDS):
     if not p['gate'].exists():
-        waiting = [f for f in p['inbox'].iterdir() if f.is_file() and not PARTIAL.search(f.name)]
-        if waiting:
+        waiting = sorted('%s|%d' % (f.name, f.stat().st_mtime) for f in p['inbox'].iterdir()
+                         if f.is_file() and not PARTIAL.search(f.name))
+        seen = p['root'] / '.not-armed-seen'
+        before = set(seen.read_text().splitlines()) if seen.exists() else set()
+        if set(waiting) - before:                       # say it once per file, not every minute
             log(p, 'NOT ARMED: %d file(s) left untouched in the inbox (no Readiness Notice on file)' % len(waiting))
             notify('Not armed: no Readiness Notice on file, so the file was left untouched.')
+        seen.write_text('\n'.join(waiting))
         return []
     done = []
     for f in sorted(p['inbox'].iterdir()):

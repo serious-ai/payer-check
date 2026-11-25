@@ -96,6 +96,8 @@ def test_nothing_runs_until_armed(box):
     assert dw.run_once(box, seed=3) == []
     assert f.exists() and not any(box['outbox'].iterdir())
     assert 'NOT ARMED' in box['log'].read_text()
+    dw.run_once(box, seed=3)                          # launchd runs every minute: no second notice for the same file
+    assert box['log'].read_text().count('NOT ARMED') == 1
 
 
 def test_a_download_in_progress_is_left_alone(box):
