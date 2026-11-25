@@ -152,3 +152,22 @@ def test_an_unreadable_file_is_blocked_without_quoting_it(box):
     assert res[0] is False
     text = next(box['outbox'].iterdir()).read_text()
     assert '4410037' not in text and 'stopped' in text
+
+
+def test_two_files_in_one_run_keep_both_keys(box):
+    box['gate'].write_text('armed\n')
+    drop(box, name='cpt payment report a.csv')
+    drop(box, name='cpt payment report b.csv')
+    done = dw.run_once(box, seed=3)
+    assert len(done) == 2 and all(ok for ok, _ in done)
+    assert len(list(box['keys'].iterdir())) == 2
+    assert len([p for p in box['outbox'].iterdir() if p.name.endswith('-deidentified.csv')]) == 2
+
+
+def test_a_day_first_file_name_does_not_stop_the_run(box):
+    box['gate'].write_text('armed\n')
+    drop(box, name='report 13-01-2026 to 31-01-2026.csv')
+    (res,) = dw.run_once(box, seed=3)
+    assert res[0] is True
+    report = next(p for p in box['outbox'].iterdir() if p.name.endswith('-leak-check.txt')).read_text()
+    assert 'Report period: unknown months' in report

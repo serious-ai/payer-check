@@ -217,7 +217,10 @@ def safe_label(stem):
 def period_months(stem):
     ds = re.findall(r'([0-9]{1,2})[-/.]([0-9]{1,2})[-/.]([0-9]{4})', stem)
     if len(ds) >= 2:
-        a, b = [datetime(int(y), int(m), int(d)) for m, d, y in ds[:2]]
+        try:
+            a, b = [datetime(int(y), int(m), int(d)) for m, d, y in ds[:2]]
+        except ValueError:                              # day-first or impossible dates: just say unknown
+            return None
         return round(((b - a).days + 1) / 30.4375, 1)
     return None
 
@@ -253,7 +256,11 @@ def process(p, f, seed=None):
     data = f.read_bytes()
     stem = re.sub(r'\.(csv|xlsx|txt)$', '', f.name, flags=re.I)
     run_id = datetime.now().strftime('%Y%m%d-%H%M%S')
-    base = 'deid-%s-%s' % (run_id, safe_label(stem))
+    base, n = 'deid-%s-%s' % (run_id, safe_label(stem)), 1
+    while any((d / (base + suffix)).exists() for d, suffix in ((p['keys'], '-visit-code-key.csv'),
+               (p['outbox'], '-deidentified.csv'), (p['outbox'], '-BLOCKED.txt'))) or (p['quarantine'] / base).exists():
+        n += 1                                          # two files in the same second never share a name
+        base = 'deid-%s-%d-%s' % (run_id, n, safe_label(stem))
     sha = hashlib.sha256(data).hexdigest()
     tool_sha = hashlib.sha256((HERE / 'deidentify.py').read_bytes()).hexdigest()
     try:
